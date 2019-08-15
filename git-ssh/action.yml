@@ -1,0 +1,16 @@
+name: 'Set up Git user and SSH key'
+
+inputs:
+  git_user:
+    description: Name of the Git user.
+  git_email:
+    description: Email of the Git user.
+  key_name:
+    description: Name of the key file.
+    default: id_rsa
+  key:
+    descriptions: Contents of the key file.
+
+runs:
+  using: node12
+  main: lib/main.js

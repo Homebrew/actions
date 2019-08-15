@@ -1,0 +1,47 @@
+name: Test `git-ssh` action.
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  setup_ssh_key:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+    steps:
+      - uses: actions/checkout@master
+      - name: check for uncommitted changes
+        run: |
+          cd git-ssh
+
+          npm install
+          npm run build
+          npm prune --production
+
+          # Ensure no changes, but ignore node_modules dir since dev/fresh ci deps installed.
+          if ! git diff --exit-code --stat -- .; then
+            echo "Found changed files after build, run 'npm run build && npm prune --production'" \
+              "and check in all changes" >&2
+            exit 1
+          fi
+      - uses: ./git-ssh
+        with:
+          git_user: username
+          git_email: username@example.org
+          key: CONTENTS
+      - run: '[ "$(git config --get user.name)" = "username" ]'
+      - run: '[ "$(git config --get user.email)" = "username@example.org" ]'
+      - run: '[ -d ~/.ssh ]'
+      - run: '[ -f ~/.ssh/id_rsa ]'
+      - run: '[ "$(cat ~/.ssh/id_rsa)" == "CONTENTS" ]'
+      - uses: ./git-ssh
+        with:
+          git_user: username
+          git_email: username@example.org
+          key_name: id_other
+          key: OTHER_CONTENTS
+      - run: '[ -d ~/.ssh ]'
+      - run: '[ -f ~/.ssh/id_other ]'
+      - run: '[ "$(cat ~/.ssh/id_other)" == "OTHER_CONTENTS" ]'
