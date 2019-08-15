@@ -30,12 +30,12 @@ jobs:
         with:
           git_user: username
           git_email: username@example.org
-          key: CONTENTS
+          key: ${{ secrets.DEMO_ED25519_KEY }}
       - run: '[ "$(git config --get user.name)" = "username" ]'
       - run: '[ "$(git config --get user.email)" = "username@example.org" ]'
       - run: '[ -d ~/.ssh ]'
-      - run: '[ -f ~/.ssh/id_rsa ]'
-      - run: '[ "$(cat ~/.ssh/id_rsa)" == "CONTENTS" ]'
+      - run: '[ -f ~/.ssh/id_ed25519 ]'
+      - run: '[ "$(cat ~/.ssh/id_ed25519)" == "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJmaoSAUsWs0fUKPpgDQE0SIWNH/bbRRyeChQHFhtRKA username@example.org" ]'
       - uses: ./git-ssh
         with:
           git_user: username

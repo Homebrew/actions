@@ -7,7 +7,7 @@ inputs:
     description: Email of the Git user.
   key_name:
     description: Name of the key file.
-    default: id_rsa
+    default: id_ed25519
   key:
     descriptions: Contents of the key file.
 
