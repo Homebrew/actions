@@ -36,7 +36,7 @@ function run() {
             yield io.mkdirP(sshDir);
             yield fs_1.promises.chmod(sshDir, '0700');
             const keyFile = path.join(sshDir, keyName);
-            yield fs_1.promises.writeFile(keyFile, key);
+            yield fs_1.promises.writeFile(keyFile, key + os.EOL);
             yield fs_1.promises.chmod(keyFile, '0600');
             yield exec.exec('git', [
                 'config', '--global', 'core.sshCommand',

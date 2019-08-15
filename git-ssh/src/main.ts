@@ -23,7 +23,7 @@ async function run() {
     await fs.chmod(sshDir, '0700')
 
     const keyFile = path.join(sshDir, keyName)
-    await fs.writeFile(keyFile, key)
+    await fs.writeFile(keyFile, key + os.EOL)
     await fs.chmod(keyFile, '0600')
 
     await exec.exec('git', [
