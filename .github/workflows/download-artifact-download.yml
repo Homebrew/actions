@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Download
-        uses: ./
+        uses: ./download-artifact/
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: upload.yml
