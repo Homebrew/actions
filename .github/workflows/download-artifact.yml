@@ -1,0 +1,32 @@
+name: Test download-artifact
+
+on: pull_request
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifact
+          path: ./download-artifact/
+  download:
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download
+        uses: ./download-artifact/
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: download-artifact.yml
+          pr: ${{github.event.pull_request.number}}
+          name: artifact
+          path: artifact
+      - name: Test
+        run: |
+          grep branding artifact/action.yml
