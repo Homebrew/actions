@@ -1,0 +1,24 @@
+name: Download
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download
+        uses: ./download-artifact/
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: download-artifact-upload.yml
+          pr: 3
+          name: artifact
+          path: artifact
+      - name: Test
+        run: |
+          grep branding artifact/action.yml
