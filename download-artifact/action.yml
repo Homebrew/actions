@@ -1,0 +1,29 @@
+name: Download workflow artifact
+description: Download and extract an artifact associated with given workflow and commit
+author: dawidd6
+branding:
+  icon: download
+  color: blue
+inputs:
+  github_token:
+    description: Github token
+    required: true
+  workflow:
+    description: Workflow name
+    required: true
+  pr:
+    description: Pull request number
+    required: false
+  commit:
+    description: Commit SHA
+    required: false
+  name:
+    description: Artifact name
+    required: true
+  path:
+    description: Where to unpack the artifact
+    required: false
+    default: './'
+runs:
+  using: node12
+  main: main.js
