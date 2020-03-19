@@ -6,7 +6,7 @@ branding:
   color: blue
 inputs:
   github_token:
-    description: Github token
+    description: GitHub token
     required: true
   workflow:
     description: Workflow name
@@ -15,7 +15,7 @@ inputs:
     description: Pull request number
     required: false
   commit:
-    description: Commit SHA
+    description: Commit SHA1
     required: false
   name:
     description: Artifact name
