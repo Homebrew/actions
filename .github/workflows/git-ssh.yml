@@ -2,7 +2,6 @@ name: Test `git-ssh` action.
 
 on:
   - push
-  - pull_request
 
 jobs:
   setup_ssh_key:
