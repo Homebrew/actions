@@ -54,14 +54,21 @@ async function main() {
         console.log("==> Commit:", commit)
 
         // https://github.com/octokit/routes/issues/665
-        const runs = await client.actions.listWorkflowRunsFixed({
+        const options = client.actions.listWorkflowRunsFixed.endpoint.merge({
             ...github.context.repo,
-            workflow_id: workflow,
+            workflow_id: workflow
         })
 
-        const run = runs.data.workflow_runs.find((run) => {
-            return run.head_sha == commit
-        })
+        let run
+        for await (const response of client.paginate.iterator(options)) {
+            const matching_run = response.data.workflow_runs.find((workflow_run) => {
+                return workflow_run.head_sha == commit
+            })
+            if (matching_run) {
+                run = matching_run
+                break
+            }
+        }
 
         console.log("==> Run:", run.id)
 
