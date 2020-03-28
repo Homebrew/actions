@@ -1,8 +1,7 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
-const ab2b = require('arraybuffer-to-buffer')
-const stream = require('stream')
-const unzip = require('unzipper');
+const exec = require('@actions/exec')
+const fs = require('fs');
 
 async function main() {
     try {
@@ -91,9 +90,9 @@ async function main() {
             archive_format: format,
         })
 
-        new stream.PassThrough()
-            .end(ab2b(zip.data))
-            .pipe(unzip.Extract({path: path}))
+        const file = `/tmp/${artifact.id}.${format}`
+        fs.writeFileSync(file, Buffer.from(zip.data))
+        await exec.exec("unzip", ["-d", path, file])
     } catch (error) {
         core.setFailed(error.message)
     }
