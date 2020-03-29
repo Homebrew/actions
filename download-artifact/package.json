@@ -4,7 +4,6 @@
   "dependencies": {
     "@actions/core": "^1.2.3",
     "@actions/github": "^2.1.1",
-    "arraybuffer-to-buffer": "0.0.7",
-    "unzipper": "^0.10.10"
+    "adm-zip": "^0.4.14"
   }
 }

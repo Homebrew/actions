@@ -1,8 +1,6 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
-const ab2b = require('arraybuffer-to-buffer')
-const stream = require('stream')
-const unzip = require('unzipper');
+const AdmZip = require('adm-zip')
 
 async function main() {
     try {
@@ -83,17 +81,18 @@ async function main() {
 
         console.log("==> Artifact:", artifact.id)
 
-        const format = "zip"
-
         const zip = await client.actions.downloadArtifact({
             ...github.context.repo,
             artifact_id: artifact.id,
-            archive_format: format,
+            archive_format: "zip",
         })
 
-        new stream.PassThrough()
-            .end(ab2b(zip.data))
-            .pipe(unzip.Extract({path: path}))
+        const adm = new AdmZip(Buffer.from(zip.data))
+        adm.getEntries().forEach((entry) => {
+            const action = entry.isDirectory ? "creating" : "inflating"
+            console.log(`  ${action}: ${path}/${entry.entryName}`)
+        })
+        adm.extractAllTo(path, true)
     } catch (error) {
         core.setFailed(error.message)
     }
