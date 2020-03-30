@@ -1,0 +1,12 @@
+name: Cancel previous runs
+
+on: pull_request
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cancel
+        uses: ./cancel-previous-runs
