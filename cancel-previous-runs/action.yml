@@ -1,0 +1,10 @@
+name: Cancel previous runs
+description: Search previous matching workflow runs and cancel them if needed
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{github.token}}
+runs:
+  using: node12
+  main: main.js
