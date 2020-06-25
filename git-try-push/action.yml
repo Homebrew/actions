@@ -1,0 +1,30 @@
+name: Git try push
+description: Try to push to remote repository specified number of times
+author: dawidd6
+branding:
+  icon: arrow-up-circle
+  color: blue
+inputs:
+  token:
+    description: GitHub token (used for push)
+    required: false
+    default: ${{github.token}}
+  remote:
+    description: Git remote
+    required: false
+    default: origin
+  branch:
+    description: Git branch
+    required: false
+    default: master
+  tries:
+    description: How many times to try pushing
+    required: false
+    default: 20
+  directory:
+    description: Repository directory
+    required: false
+    default: ${{github.workspace}}
+runs:
+  using: node12
+  main: main.js
