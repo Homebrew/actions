@@ -19,6 +19,7 @@ jobs:
           git checkout -b test-try-push
           git push origin test-try-push
           git reset --hard HEAD~1
+          git checkout -
       - name: Push
         uses: ./git-try-push/
         with:

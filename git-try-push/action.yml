@@ -20,7 +20,7 @@ inputs:
   tries:
     description: How many times to try pushing
     required: false
-    default: 20
+    default: "20"
   directory:
     description: Repository directory
     required: false
