@@ -16,12 +16,11 @@ jobs:
           fetch-depth: 2
       - name: Prepare
         run: |
-          cp -R ./git-try-push /tmp/git-try-push
           git checkout -b test-try-push
           git push origin test-try-push
           git reset --hard HEAD~1
       - name: Push
-        uses: /tmp/git-try-push/
+        uses: ./git-try-push/
         with:
           branch: test-try-push
       - name: Clean
