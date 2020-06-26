@@ -14,12 +14,7 @@ async function main() {
         }
 
         if (token) {
-            try {
-                await exec.exec("git", ["config", "--local", "--unset-all", "http.https://github.com/.extraheader"])
-            } catch (error) {
-                // Do nothing
-            }
-            await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${token}`])
+            await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic x-access-token:${token}`])
         }
 
         if (branch) {
