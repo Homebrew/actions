@@ -1,0 +1,23 @@
+name: Configure git for a user
+description: Configure user's name and email globally for git
+author: dawidd6
+branding:
+  icon: user
+  color: green
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{github.token}}
+  username:
+    description: GitHub username
+    required: false
+    default: ${{github.actor}}
+outputs:
+  name:
+    description: Configured git user's name
+  email:
+    description: Configured git user's email
+runs:
+  using: node12
+  main: main.js
