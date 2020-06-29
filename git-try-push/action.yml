@@ -8,7 +8,9 @@ inputs:
   token:
     description: GitHub token (used for push)
     required: false
-    default: ${{github.token}}
+  directory:
+    description: Repository directory
+    required: false
   remote:
     description: Git remote
     required: false
@@ -21,10 +23,6 @@ inputs:
     description: How many times to try pushing
     required: false
     default: "20"
-  directory:
-    description: Repository directory
-    required: false
-    default: ${{github.workspace}}
 runs:
   using: node12
   main: main.js
