@@ -17,7 +17,7 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: download-artifact-upload.yml
-          pr: 3
+          pr: 15
           name: artifact
           path: artifact
       - name: Test
