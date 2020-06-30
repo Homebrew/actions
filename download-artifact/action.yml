@@ -7,10 +7,15 @@ branding:
 inputs:
   github_token:
     description: GitHub token
-    required: true
+    required: false
+    default: ${{github.token}}
   workflow:
     description: Workflow name
     required: true
+  repo:
+    description: Repository name with owner (like actions/checkout)
+    required: false
+    default: ${{github.repository}}
   pr:
     description: Pull request number
     required: false
@@ -23,7 +28,7 @@ inputs:
   path:
     description: Where to unpack the artifact
     required: false
-    default: './'
+    default: "./"
 runs:
   using: node12
   main: main.js

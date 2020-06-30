@@ -15,11 +15,9 @@ jobs:
       - name: Download
         uses: ./download-artifact/
         with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: download-artifact-upload.yml
-          pr: 14
           name: artifact
           path: artifact
       - name: Test
         run: |
-          grep branding artifact/action.yml
+          ls artifact/workflows/*.yml

@@ -12,4 +12,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: artifact
-          path: ./download-artifact/
+          path: ./.github
