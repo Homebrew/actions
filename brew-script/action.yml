@@ -1,0 +1,17 @@
+name: Ruby Homebrew script
+description: Run Ruby script in Homebrew environment
+author: dawidd6
+branding:
+  icon: code
+  color: yellow
+inputs:
+  token:
+    description: GitHub token (HOMEBREW_GITHUB_API_TOKEN)
+    required: false
+    default: ${{github.token}}
+  script:
+    description: Ruby script to execute
+    required: true
+runs:
+  using: node12
+  main: main.js

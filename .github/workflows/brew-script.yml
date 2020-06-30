@@ -1,0 +1,27 @@
+name: Script
+
+on:
+  pull_request: []
+  push:
+    branches:
+      - master
+
+jobs:
+  script:
+    runs-on: ubuntu-latest
+    env:
+      FILENAME: ".revision"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Script
+        uses: ./brew-script/
+        with:
+          script: |
+            ohai "test"
+            revision = Utils.safe_popen_read("git", "rev-parse", "HEAD")
+            file = ENV["FILENAME"]
+            File.write(file, revision)
+      - name: Test
+        run: |
+          test "$GITHUB_SHA" = "$(cat $FILENAME)"

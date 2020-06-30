@@ -1,0 +1,7 @@
+{
+  "name": "brew-script",
+  "main": "main.js",
+  "dependencies": {
+    "@actions/core": "^1.2.4"
+  }
+}
