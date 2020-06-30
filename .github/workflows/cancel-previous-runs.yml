@@ -1,6 +1,9 @@
 name: Cancel previous runs
 
-on: pull_request
+on:
+  push:
+    paths:
+      - '**cancel-previous-runs**'
 
 jobs:
   cancel:

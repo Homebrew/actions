@@ -1,10 +1,9 @@
-name: Script
+name: Brew script
 
 on:
-  pull_request: []
   push:
-    branches:
-      - master
+    paths:
+      - '**brew-script**'
 
 jobs:
   script:

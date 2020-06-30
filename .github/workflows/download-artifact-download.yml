@@ -1,10 +1,9 @@
-name: Download
+name: Download artifact
 
 on:
-  pull_request: []
   push:
-    branches:
-      - master
+    paths:
+      - '**download-artifact**'
 
 jobs:
   download:
