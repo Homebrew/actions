@@ -1,10 +1,9 @@
-name: Try push
+name: Git try push
 
 on:
-  pull_request: []
   push:
-    branches:
-      - master
+    paths:
+      - '**git-try-push**'
 
 jobs:
   try-push:

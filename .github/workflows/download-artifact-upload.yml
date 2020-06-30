@@ -1,6 +1,9 @@
-name: Upload
+name: Download artifact
 
-on: pull_request
+on:
+  push:
+    paths:
+      - '**download-artifact**'
 
 jobs:
   upload:

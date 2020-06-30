@@ -1,10 +1,9 @@
-name: User config
+name: Git user config
 
 on:
-  pull_request: []
   push:
-    branches:
-      - master
+    paths:
+      - '**git-user-config**'
 
 jobs:
   user-config:
