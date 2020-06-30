@@ -1,0 +1,25 @@
+name: User config
+
+on:
+  pull_request: []
+  push:
+    branches:
+      - master
+
+jobs:
+  user-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Config
+        id: config
+        uses: ./git-user-config/
+        with:
+          username: BrewTestBot
+      - name: Test
+        run: |
+          test "${{steps.config.outputs.name}}" = "BrewTestBot"
+          test "${{steps.config.outputs.email}}" = "1589480+BrewTestBot@users.noreply.github.com"
+          test "$(git config --global user.name)" = "BrewTestBot"
+          test "$(git config --global user.email)" = "1589480+BrewTestBot@users.noreply.github.com"
