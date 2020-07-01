@@ -1,69 +1,57 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const AdmZip = require('adm-zip')
+const filesize = require('filesize')
+const pathname = require('path')
 
 async function main() {
     try {
         const token = core.getInput("github_token", { required: true })
         const workflow = core.getInput("workflow", { required: true })
         const name = core.getInput("name", { required: true })
-        const path = core.getInput("path") || "./"
+        const [owner, repo] = core.getInput("repo", { required: true }).split("/")
+        const path = core.getInput("path", { required: true })
         const pr = core.getInput("pr")
         let commit = core.getInput("commit")
 
-        const client = new github.GitHub(token)
-
-        client.registerEndpoints({
-            actions: {
-                listWorkflowRunsFixed: {
-                    method: "GET",
-                    url: "/repos/:owner/:repo/actions/workflows/:workflow_id/runs",
-                    headers: {
-                        accept: "application/vnd.github.groot-preview+json"
-                    },
-                    params: {
-                        owner: {
-                            required: true,
-                            type: "string"
-                        },
-                        repo: {
-                            required: true,
-                            type: "string"
-                        },
-                        workflow_id: {
-                            required: true,
-                            type: "string",
-                        }
-                    }
-                }
-            }
-        })
+        const client = github.getOctokit(token)
 
         if (pr) {
             console.log("==> PR:", pr)
 
             const pull = await client.pulls.get({
-                ...github.context.repo,
+                owner: owner,
+                repo: repo,
                 pull_number: pr,
             })
             commit = pull.data.head.sha
         }
 
-        console.log("==> Commit:", commit)
-
-        // https://github.com/octokit/routes/issues/665
-        const options = client.actions.listWorkflowRunsFixed.endpoint.merge({
-            ...github.context.repo,
-            workflow_id: workflow
-        })
+        if (commit) {
+            console.log("==> Commit:", commit)
+        }
 
         let run
-        for await (const response of client.paginate.iterator(options)) {
-            const matching_run = response.data.workflow_runs.find((workflow_run) => {
-                return workflow_run.head_sha == commit
+        const endpoint = "GET /repos/:owner/:repo/actions/workflows/:id/runs"
+        const params = {
+            owner: owner,
+            repo: repo,
+            id: workflow,
+        }
+        for await (const runs of client.paginate.iterator(endpoint, params)) {
+            run = runs.data.find((run) => {
+                if (commit) {
+                    return run.head_sha == commit
+                }
+                else {
+                    // No PR or commit was specified just return the first one.
+                    // The results appear to be sorted from API, so the most recent is first.
+                    // Just check if workflow run completed.
+                    return run.status == "completed"
+                }
             })
-            if (matching_run) {
-                run = matching_run
+
+            if (run) {
                 break
             }
         }
@@ -71,7 +59,8 @@ async function main() {
         console.log("==> Run:", run.id)
 
         const artifacts = await client.actions.listWorkflowRunArtifacts({
-            ...github.context.repo,
+            owner: owner,
+            repo: repo,
             run_id: run.id,
         })
 
@@ -81,8 +70,13 @@ async function main() {
 
         console.log("==> Artifact:", artifact.id)
 
+        const size = filesize(artifact.size_in_bytes, { base: 10 })
+
+        console.log("==> Downloading:", name + ".zip", `(${size})`)
+
         const zip = await client.actions.downloadArtifact({
-            ...github.context.repo,
+            owner: owner,
+            repo: repo,
             artifact_id: artifact.id,
             archive_format: "zip",
         })
@@ -90,7 +84,8 @@ async function main() {
         const adm = new AdmZip(Buffer.from(zip.data))
         adm.getEntries().forEach((entry) => {
             const action = entry.isDirectory ? "creating" : "inflating"
-            console.log(`  ${action}: ${path}/${entry.entryName}`)
+            const filepath = pathname.join(path, entry.entryName)
+            console.log(`  ${action}: ${filepath}`)
         })
         adm.extractAllTo(path, true)
     } catch (error) {
