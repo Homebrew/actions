@@ -22,7 +22,6 @@ jobs:
       - name: Push
         uses: ./git-try-push/
         with:
-          token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
           branch: test-try-push
       - name: Clean
         if: always()
