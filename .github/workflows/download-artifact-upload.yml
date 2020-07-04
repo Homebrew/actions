@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**download-artifact**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   upload:

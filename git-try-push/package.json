@@ -1,8 +1,4 @@
 {
   "name": "git-try-push",
-  "main": "main.js",
-  "dependencies": {
-    "@actions/core": "^1.2.4",
-    "@actions/exec": "^1.0.4"
-  }
+  "main": "main.js"
 }

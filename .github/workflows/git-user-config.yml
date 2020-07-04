@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**git-user-config**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   user-config:

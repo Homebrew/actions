@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**post-comment**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   post-comment:

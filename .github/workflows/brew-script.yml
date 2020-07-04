@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**brew-script**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   script:
