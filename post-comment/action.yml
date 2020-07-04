@@ -1,0 +1,25 @@
+name: Post comment
+description: Create a new comment on given issue
+author: dawidd6
+branding:
+  icon: message-square
+  color: purple
+inputs:
+  token:
+    description: GitHub token
+    required: true
+  issue:
+    description: Pull request or issue number
+    required: true
+  body:
+    description: Comment content (user)
+    required: false
+  bot_body:
+    description: Comment content (bot)
+    required: false
+  bot:
+    description: Bot's username
+    required: false
+runs:
+  using: node12
+  main: main.js

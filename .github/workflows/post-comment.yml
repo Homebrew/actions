@@ -1,0 +1,21 @@
+name: Post comment
+
+on:
+  push:
+    paths:
+      - '**post-comment**'
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        uses: ./post-comment/
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          issue: 21
+          body: body
+          bot_body: bot body
+          bot: BrewTestBot
