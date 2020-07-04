@@ -1,0 +1,19 @@
+name: Dismiss approvals
+description: Dismiss all approved reviews on given pull request
+author: dawidd6
+branding:
+  icon: check-circle
+  color: red
+inputs:
+  token:
+    description: GitHub token
+    required: true
+  pr:
+    description: Pull request number
+    required: true
+  message:
+    description: Dismissal message
+    required: true
+runs:
+  using: node12
+  main: main.js
