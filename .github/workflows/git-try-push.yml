@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**git-try-push**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   try-push:

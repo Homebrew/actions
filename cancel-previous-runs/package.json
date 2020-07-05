@@ -1,6 +1,4 @@
 {
-  "dependencies": {
-    "@actions/core": "^1.2.3",
-    "@actions/github": "^2.1.1"
-  }
+  "name": "cancel-previous-runs",
+  "main": "main.js"
 }

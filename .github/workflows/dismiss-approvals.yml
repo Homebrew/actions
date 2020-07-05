@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - '**dismiss-approvals**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   dismiss-approvals:

@@ -1,10 +1,4 @@
 {
   "name": "download-artifact",
-  "main": "main.js",
-  "dependencies": {
-    "@actions/core": "^1.2.4",
-    "@actions/github": "^4.0.0",
-    "adm-zip": "^0.4.16",
-    "filesize": "^6.1.0"
-  }
+  "main": "main.js"
 }

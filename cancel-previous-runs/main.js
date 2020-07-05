@@ -5,7 +5,7 @@ async function main() {
     try {
         const token = core.getInput("token", { required: true })
 
-        const client = new github.GitHub(token)
+        const client = github.getOctokit(token)
 
         let githubActor = process.env.GITHUB_ACTOR
         if (!githubActor)
