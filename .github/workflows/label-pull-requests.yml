@@ -1,0 +1,31 @@
+name: Label pull requests
+
+on:
+  push:
+    paths:
+      - '**label-pull-requests**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+
+jobs:
+  label-pull-requests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        uses: ./label-pull-requests/
+        with:
+          def: |
+            [
+              {
+                "label": "wontfix",
+                "path": "deadbeef",
+                "content": "deadbeef"
+              }
+            ]
+      - name: Unlabel
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/21/labels/wontfix
