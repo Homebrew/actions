@@ -16,3 +16,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Cancel
         uses: ./cancel-previous-runs
+        with:
+          workflow: cancel-previous-runs.yml
