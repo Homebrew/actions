@@ -1,0 +1,36 @@
+name: Label pull requests
+description: Label pull requests with specified criteria
+author: dawidd6
+branding:
+  icon: tag
+  color: blue
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{github.token}}
+  def:
+    description: |
+      Definition in JSON format.
+
+      It's an array of objects containing the following fields:
+        - "label" (required): Label name, that should be added to PR
+        - "status" (optional): File status, one of: added, modified, removed
+        - "path" (optional): Changed file path, regex matching
+        - "content" (optional): Changed file content, regex matching
+
+      Example:
+        [
+          {
+            "label": "new formula",
+            "status": "added",
+            "path": "Formula/.+"
+          }, {
+            "label": "bottle unneeded",
+            "content": "bottle :unneeded"
+          }
+        ]
+    required: true
+runs:
+  using: node12
+  main: main.js
