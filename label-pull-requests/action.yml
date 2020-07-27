@@ -15,7 +15,7 @@ inputs:
 
       It's an array of objects containing the following fields:
         - "label" (required): Label name, that should be added to PR
-        - "status" (optional): File status, one of: added, modified, changed
+        - "status" (optional): File status, one of: added, modified, removed
         - "path" (optional): Changed file path, regex matching
         - "content" (optional): Changed file content, regex matching
 
