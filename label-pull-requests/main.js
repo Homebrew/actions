@@ -21,7 +21,7 @@ async function main() {
 
         const client = github.getOctokit(token)
 
-        // Fetch latest 30 open PRs
+        // Fetch latest XX open PRs
         const pulls = await client.pulls.list({
             ...github.context.repo,
             state: "open",
