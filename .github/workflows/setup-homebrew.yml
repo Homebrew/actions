@@ -1,0 +1,25 @@
+name: Setup Homebrew
+
+on:
+  push:
+    paths:
+      - '**setup-homebrew**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+
+jobs:
+  setup:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup
+        uses: ./setup-homebrew/
+      - name: Test
+        run: brew config
