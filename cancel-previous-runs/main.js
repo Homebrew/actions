@@ -40,12 +40,12 @@ async function main() {
                 continue
 
             // First run in array is the freshest one, keep it running
-            const run = runs.shift()
+            runs.shift()
 
-            core.info(`==> For branch: "${branch}", these workflow runs: [${runs.map(run => run.id)}] are duplicates of: ${run.id}`)
+            core.info(`==> Branch: "${branch}"`)
 
             for (const run of runs) {
-                core.info(`==> Cancelling workflow run: ${run.id}`)
+                core.info(`Cancelling workflow run: ${run.id}`)
 
                 await client.actions.cancelWorkflowRun({
                     ...github.context.repo,
