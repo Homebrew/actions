@@ -25,7 +25,7 @@ async function main() {
         const pulls = await client.pulls.list({
             ...github.context.repo,
             state: "open",
-            per_page: 30
+            per_page: 50
         })
 
         for (const pull of pulls.data) {
