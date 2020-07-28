@@ -14,7 +14,7 @@ async function main() {
         for (const constraint of constraints) {
             if (!constraint.label) {
                 console.log(constraint)
-                core.setFailed("missing label in constraint")
+                core.setFailed("Missing label in above constraint")
                 return
             }
         }
@@ -80,7 +80,7 @@ async function main() {
                 continue
             }
 
-            console.log(wantedLabels)
+            console.log(`Labelling PR #${pull.number} with: [${wantedLabels}]`)
 
             // Add wanted labels to PR
             await client.issues.addLabels({
