@@ -1,10 +1,13 @@
 # Cancel previous runs Github Action
 
-An action that cancels all previous uncompleted workflow runs for given branch.
+An action that cancels all previous uncompleted duplicated workflow runs for a branch.
 
 ## Usage
 
 ```yaml
 - name: Cancel previous runs
   uses: Homebrew/actions/cancel-previous-runs@master
+  with:
+    workflow: tests.yml
+    event: pull_request
 ```
