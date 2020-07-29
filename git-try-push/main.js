@@ -18,6 +18,7 @@ async function main() {
         // Command taken from actions/checkout.
         if (token) {
             const credentials = Buffer.from(`x-access-token:${token}`, 'utf8').toString('base64')
+            core.setSecret(credentials)
             await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
         }
 
