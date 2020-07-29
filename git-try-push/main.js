@@ -17,7 +17,8 @@ async function main() {
         // Set up token authentication for pushing.
         // Command taken from actions/checkout.
         if (token) {
-            await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic x-access-token:${token}`])
+            const credentials = Buffer.from(`x-access-token:${token}`, 'utf8').toString('base64')
+            await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
         }
 
         // Checkout the branch which should be pushed.
