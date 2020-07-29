@@ -1,0 +1,14 @@
+name: Setup Homebrew
+description: Set up Homebrew environment
+author: dawidd6
+branding:
+  icon: settings
+  color: yellow
+outputs:
+  gem-path:
+    description: Homebrew's Ruby gems path
+  gem-hash:
+    description: Homebrew's Ruby Gemfile.lock sha256sum
+runs:
+  using: node12
+  main: main.js
