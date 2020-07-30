@@ -18,8 +18,6 @@ async function main() {
             }
         }
 
-        core.info(`==> Fetching data...\n`)
-
         const client = github.getOctokit(token)
 
         // Fetch latest XX open PRs
