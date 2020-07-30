@@ -50,6 +50,9 @@ elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     git checkout --force -B master FETCH_HEAD
 # third-party taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+    if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
+        rm -rf "$HOMEBREW_TAP_REPOSITORY"
+    fi
     mkdir -p "$(dirname "$HOMEBREW_TAP_REPOSITORY")"
     ln -s "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
 fi
