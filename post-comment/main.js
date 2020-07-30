@@ -11,6 +11,8 @@ async function main() {
 
         const client = github.getOctokit(token)
 
+        core.info(`==> Posting comment on issue #${issue}`)
+
         await client.issues.createComment({
             ...github.context.repo,
             issue_number: issue,
