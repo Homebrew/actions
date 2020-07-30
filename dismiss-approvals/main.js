@@ -18,6 +18,8 @@ async function main() {
             if (review.state != "APPROVED")
                 continue
 
+            core.info(`==> Dismissing approvals in PR #${pr}`)
+
             client.pulls.dismissReview({
                 ...github.context.repo,
                 pull_number: pr,
