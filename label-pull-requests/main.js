@@ -83,6 +83,9 @@ async function main() {
                     if (constraint.content && (!file.content.match(constraint.content))) {
                         continue
                     }
+                    if (constraint.missing && file.content.match(constraint.missing)) {
+                        continue
+                    }
 
                     // Init map key if not found
                     if (!constraintToMatchingFiles.has(constraint)) {
