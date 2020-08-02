@@ -46,6 +46,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     rm -rf "$GITHUB_WORKSPACE"
     ln -s "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
+    git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git fetch origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
 # third-party taps
