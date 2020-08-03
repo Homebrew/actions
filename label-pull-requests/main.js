@@ -83,7 +83,7 @@ async function main() {
                     if (constraint.content && (!file.content.match(constraint.content))) {
                         continue
                     }
-                    if (constraint.missing && file.content.match(constraint.missing)) {
+                    if (constraint.missing_content && file.content.match(constraint.missing_content)) {
                         continue
                     }
 

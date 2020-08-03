@@ -18,7 +18,7 @@ inputs:
         - "status" (optional): File status, one of: added, modified, removed
         - "path" (optional): Changed file path, regex matching
         - "content" (optional): Changed file content, regex matching
-        - "missing" (optional): Missing file content, regex matching
+        - "missing_content" (optional): Missing file content, regex matching
 
       Example:
         [
@@ -31,7 +31,7 @@ inputs:
             "content": "bottle :unneeded"
           }, {
             "label": "missing license",
-            "missing": "license \"[^"]+\""
+            "missing_content": "license \"[^"]+\""
           }
         ]
     required: true

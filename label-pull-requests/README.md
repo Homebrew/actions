@@ -23,7 +23,7 @@ An action that labels latest pull requests with given criteria.
           },
           {
               "label": "missing license",
-              "missing": "license \"[^"]+\"",
+              "missing_content": "license \"[^"]+\"",
               "path": "Formula/.+"
           }
       ]
