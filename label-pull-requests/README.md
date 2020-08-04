@@ -20,6 +20,11 @@ An action that labels latest pull requests with given criteria.
               "label": "bottle unneeded",
               "content": "bottle :unneeded",
               "path": "Formula/.+"
+          },
+          {
+              "label": "missing license",
+              "missing_content": "license \"[^"]+\"",
+              "path": "Formula/.+"
           }
       ]
 ```
