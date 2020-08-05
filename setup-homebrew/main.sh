@@ -74,5 +74,5 @@ fi
 
 if [[ "$RUNNER_OS" = "Linux" ]]; then
     sudo chown -R "$(whoami)" "$HOMEBREW_PREFIX"
-    sudo chmod -R g-w,o-w "$HOMEBREW_PREFIX" "$HOMEBREW_CORE_REPOSITORY" /home/runner /opt
+    sudo chmod -R g-w,o-w /home/linuxbrew /home/runner /opt
 fi
