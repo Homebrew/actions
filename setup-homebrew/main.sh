@@ -46,7 +46,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
 # core taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd "$HOMEBREW_CORE_REPOSITORY"
-    if [[ -z "$GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED" ]]; then
+    if [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
         rm -rf "$GITHUB_WORKSPACE"
         ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
