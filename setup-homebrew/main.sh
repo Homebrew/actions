@@ -59,7 +59,9 @@ elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
 fi
 
-brew tap homebrew/test-bot
+if [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
+    brew tap homebrew/test-bot
+fi
 
 if [[ "$RUNNER_OS" = "Linux" ]]; then
     sudo chown -R "$(whoami)" "$HOMEBREW_PREFIX"
