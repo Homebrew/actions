@@ -15,20 +15,19 @@ if ! which brew &>/dev/null; then
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
-    sudo ln -sf ../Homebrew/bin/brew "$HOMEBREW_PREFIX/bin/"
+    sudo ln -vs ../Homebrew/bin/brew "$HOMEBREW_PREFIX/bin/"
     cd -
 
     export PATH="$HOMEBREW_PREFIX/bin:$PATH"
+else
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    HOMEBREW_REPOSITORY="$(brew --repo)"
+    HOMEBREW_CORE_REPOSITORY="$(brew --repo homebrew/core)"
+
+    brew update-reset "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY"
+
+    echo "::add-path::$HOMEBREW_PREFIX/bin"
 fi
-
-HOMEBREW_PREFIX="$(brew --prefix)"
-HOMEBREW_REPOSITORY="$(brew --repo)"
-HOMEBREW_CORE_REPOSITORY="$(brew --repo homebrew/core)"
-HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
-
-echo "::add-path::$HOMEBREW_PREFIX/bin"
-
-brew update-reset "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY"
 
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
@@ -39,23 +38,25 @@ echo "::set-output name=gems-hash::$GEMS_HASH"
 # brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     rm -rf "$GITHUB_WORKSPACE"
-    ln -s "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
+    ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
     git fetch --tags origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
 # core taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     rm -rf "$GITHUB_WORKSPACE"
-    ln -s "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
+    ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git fetch origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
-# third-party taps
+# other taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+
     if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
         rm -rf "$HOMEBREW_TAP_REPOSITORY"
     fi
     mkdir -p "$(dirname "$HOMEBREW_TAP_REPOSITORY")"
-    ln -s "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
+    ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
 fi
 
 if [[ "$RUNNER_OS" = "Linux" ]]; then
