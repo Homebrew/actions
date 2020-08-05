@@ -7,6 +7,23 @@ Runs on `ubuntu` and `macos`.
 ## Usage
 
 ```yaml
-- name: Setup Homebrew
+- name: Set up Homebrew
+  id: set-up-homebrew
   uses: Homebrew/actions/setup-homebrew@master
+```
+
+This also sets up the variables necessary to cache the gems installed by Homebrew developer commands (e.g. `brew style`). To use these add:
+
+```yaml
+- name: Cache Homebrew Bundler RubyGems
+  id: cache
+  uses: actions/cache@master
+  with:
+    path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+    key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+    restore-keys: ${{ runner.os }}-rubygems-
+
+- name: Install Homebrew Bundler RubyGems
+  if: steps.cache.outputs.cache-hit != 'true'
+  run: brew install-bundler-gems
 ```
