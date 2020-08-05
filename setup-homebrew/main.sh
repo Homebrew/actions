@@ -59,8 +59,11 @@ elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
 fi
 
-if [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
-    brew tap homebrew/test-bot
+HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
+if [[ -d "HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
+    git clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
+else
+    brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
 fi
 
 if [[ "$RUNNER_OS" = "Linux" ]]; then
