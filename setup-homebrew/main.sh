@@ -37,17 +37,21 @@ echo "::set-output name=gems-hash::$GEMS_HASH"
 
 # brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
+    cd "$HOMEBREW_REPOSITORY"
     rm -rf "$GITHUB_WORKSPACE"
     ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
     git fetch --tags origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
+    cd -
 # core taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
+    cd "$HOMEBREW_CORE_REPOSITORY"
     rm -rf "$GITHUB_WORKSPACE"
     ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git fetch origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
+    cd -
 # other taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
