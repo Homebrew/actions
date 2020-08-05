@@ -27,3 +27,13 @@ This also sets up the variables necessary to cache the gems installed by Homebre
   if: steps.cache.outputs.cache-hit != 'true'
   run: brew install-bundler-gems
 ```
+
+If you're using Linux, it will be quicker to use the GitHub Actions provided Ruby:
+
+```yaml
+- name: Set up Ruby
+  if: matrix.os == 'ubuntu-latest'
+  uses: actions/setup-ruby@master
+  with:
+    ruby-version: '2.6'
+```
