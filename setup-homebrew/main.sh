@@ -78,7 +78,7 @@ else
         rm -rf "$GITHUB_WORKSPACE"
         ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
         git init
-        git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
+        git remote add origin "https://github.com/$GITHUB_REPOSITORY"
         git fetch origin "$GITHUB_SHA"
         git checkout --force -B master FETCH_HEAD
         cd -
