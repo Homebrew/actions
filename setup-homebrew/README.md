@@ -17,7 +17,7 @@ This also sets up the variables necessary to cache the gems installed by Homebre
 ```yaml
 - name: Cache Homebrew Bundler RubyGems
   id: cache
-  uses: actions/cache@master
+  uses: actions/cache@main
   with:
     path: ${{ steps.set-up-homebrew.outputs.gems-path }}
     key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
