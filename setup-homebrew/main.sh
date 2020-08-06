@@ -46,8 +46,10 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
 # core taps
 elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd "$HOMEBREW_CORE_REPOSITORY"
-    if [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-        rm -rf "$GITHUB_WORKSPACE"
+    rm -rf "$GITHUB_WORKSPACE"
+    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+        mkdir -vp "$GITHUB_WORKSPACE"
+    else
         ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
@@ -61,7 +63,7 @@ elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
         rm -rf "$HOMEBREW_TAP_REPOSITORY"
     fi
-    mkdir -p "$(dirname "$HOMEBREW_TAP_REPOSITORY")"
+    mkdir -vp "$(dirname "$HOMEBREW_TAP_REPOSITORY")"
     ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
 fi
 
