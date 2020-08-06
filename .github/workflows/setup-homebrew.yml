@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+      - name: Check syntax
+        run: bash -n setup-homebrew/*.sh
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: ./setup-homebrew/
