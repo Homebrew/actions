@@ -37,6 +37,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     else
         ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
+    git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git fetch --tags origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
     cd -
@@ -65,31 +66,30 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     git checkout --force -B master FETCH_HEAD
     cd -
 else
-    brew update-reset "$HOMEBREW_CORE_REPOSITORY"
-fi
+    if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+        if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+            echo "Self-hosted runners not supported for this tap!"
+            exit 1
+        fi
 
-# Setup other taps
-if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-        echo "Self-hosted runners not supported for this tap!"
-        exit 1
-    fi
+        HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+        if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
+            cd "$HOMEBREW_TAP_REPOSITORY"
+            rm -rf "$GITHUB_WORKSPACE"
+            ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+        else
+            mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
+            cd "$HOMEBREW_TAP_REPOSITORY"
+            git init
+        fi
 
-    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
-    if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
-        cd "$HOMEBREW_TAP_REPOSITORY"
-        rm -rf "$GITHUB_WORKSPACE"
-        ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
-    else
-        mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
-        cd "$HOMEBREW_TAP_REPOSITORY"
-        git init
         git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
+        git fetch origin "$GITHUB_SHA"
+        git checkout --force -B master FETCH_HEAD
+        cd -
     fi
 
-    git fetch origin "$GITHUB_SHA"
-    git checkout --force -B master FETCH_HEAD
-    cd -
+    brew update-reset "$HOMEBREW_CORE_REPOSITORY"
 fi
 
 # Setup Homebrew/homebrew-test-bot
