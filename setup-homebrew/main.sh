@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
 if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
     HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
@@ -22,29 +23,36 @@ if ! which brew &>/dev/null; then
 else
     HOMEBREW_PREFIX="$(brew --prefix)"
     HOMEBREW_REPOSITORY="$(brew --repo)"
-    HOMEBREW_CORE_REPOSITORY="$(brew --repo homebrew/core)"
-
-    brew update-reset "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY"
-
-    echo "::add-path::$HOMEBREW_PREFIX/bin"
+    HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 fi
 
+echo "::add-path::$HOMEBREW_PREFIX/bin"
+
+# Setup Homebrew/brew
+if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
+    cd "$HOMEBREW_REPOSITORY"
+    rm -rf "$GITHUB_WORKSPACE"
+    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+        mkdir -vp "$GITHUB_WORKSPACE"
+    else
+        ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
+    fi
+    git fetch --tags origin "$GITHUB_SHA"
+    git checkout --force -B master FETCH_HEAD
+    cd -
+else
+    brew update-reset "$HOMEBREW_REPOSITORY"
+fi
+
+# Setup Homebrew Bundler RubyGems cache
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
 
 echo "::set-output name=gems-path::$GEMS_PATH"
 echo "::set-output name=gems-hash::$GEMS_HASH"
 
-# brew
-if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
-    cd "$HOMEBREW_REPOSITORY"
-    rm -rf "$GITHUB_WORKSPACE"
-    ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
-    git fetch --tags origin "$GITHUB_SHA"
-    git checkout --force -B master FETCH_HEAD
-    cd -
-# core taps
-elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
+# Setup Homebrew/(home|linux)brew-core tap
+if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd "$HOMEBREW_CORE_REPOSITORY"
     rm -rf "$GITHUB_WORKSPACE"
     if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
@@ -56,24 +64,43 @@ elif [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     git fetch origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
     cd -
-# other taps
-elif [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
-
-    if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
-        rm -rf "$HOMEBREW_TAP_REPOSITORY"
-    fi
-    mkdir -vp "$(dirname "$HOMEBREW_TAP_REPOSITORY")"
-    ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
+else
+    brew update-reset "$HOMEBREW_CORE_REPOSITORY"
 fi
 
+# Setup other taps
+if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+        echo "Self-hosted runners not supported for this tap!"
+        exit 1
+    fi
+
+    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+    if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
+        cd "$HOMEBREW_TAP_REPOSITORY"
+        rm -rf "$GITHUB_WORKSPACE"
+        ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+    else
+        mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
+        cd "$HOMEBREW_TAP_REPOSITORY"
+        git init
+        git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
+    fi
+
+    git fetch origin "$GITHUB_SHA"
+    git checkout --force -B master FETCH_HEAD
+    cd -
+fi
+
+# Setup Homebrew/homebrew-test-bot
 HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
-if [[ -d "HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
+if ! [[ -d "HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
     git clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
 elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
     brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
 fi
 
+# Setup Linux permissions
 if [[ "$RUNNER_OS" = "Linux" ]]; then
     sudo chown -R "$(whoami)" "$HOMEBREW_PREFIX"
     sudo chmod -R g-w,o-w /home/linuxbrew /home/runner /opt

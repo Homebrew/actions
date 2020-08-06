@@ -28,12 +28,4 @@ This also sets up the variables necessary to cache the gems installed by Homebre
   run: brew install-bundler-gems
 ```
 
-If you're using Linux, it will be quicker to use the GitHub Actions provided Ruby:
-
-```yaml
-- name: Set up Ruby
-  if: matrix.os == 'ubuntu-latest'
-  uses: actions/setup-ruby@master
-  with:
-    ruby-version: '2.6'
-```
+Note you do not need to use the `actions/setup-ruby` or `actions/checkout` steps because this action will install the necessary Ruby for Homebrew and checkout the repository being tested.
