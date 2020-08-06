@@ -73,16 +73,11 @@ else
         fi
 
         HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
-        if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
-            cd "$HOMEBREW_TAP_REPOSITORY"
-            rm -rf "$GITHUB_WORKSPACE"
-            ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
-        else
-            mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
-            cd "$HOMEBREW_TAP_REPOSITORY"
-            git init
-        fi
-
+        mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
+        cd "$HOMEBREW_TAP_REPOSITORY"
+        rm -rf "$GITHUB_WORKSPACE"
+        ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+        git init
         git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
         git fetch origin "$GITHUB_SHA"
         git checkout --force -B master FETCH_HEAD
