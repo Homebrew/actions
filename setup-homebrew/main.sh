@@ -103,8 +103,5 @@ fi
 # Setup Linux permissions
 if [[ "$RUNNER_OS" = "Linux" ]]; then
     sudo chown -R "$(whoami)" "$HOMEBREW_PREFIX"
-    if [ -d "/home/runner" ]; then
-        sudo chmod -R g-w,o-w /home/runner
-    fi
-    sudo chmod -R g-w,o-w /home/linuxbrew /opt
+    sudo chmod -R g-w,o-w /home/linuxbrew $HOME /opt
 fi
