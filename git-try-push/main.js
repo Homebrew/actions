@@ -22,6 +22,11 @@ async function main() {
             await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
         }
 
+        // Exit if number of tries is zero
+        if (tries == 0) {
+            return
+        }
+
         // Checkout the branch which should be pushed.
         await exec.exec("git", ["checkout", branch])
 
