@@ -14,12 +14,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Dismiss
         uses: ./dismiss-approvals/
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           pr: 21
           message: test
+
       - name: Approve
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

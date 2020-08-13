@@ -16,6 +16,7 @@ jobs:
         run: |
           mkdir artifact
           echo $GITHUB_SHA > artifact/sha
+
       - name: Upload
         uses: actions/upload-artifact@v2
         with:

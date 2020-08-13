@@ -16,17 +16,19 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
+
       - name: Prepare
         run: |
           git checkout -b test-try-push
           git push origin test-try-push
           git reset --hard HEAD~1
           git checkout -
+
       - name: Push
         uses: ./git-try-push/
         with:
           branch: test-try-push
+
       - name: Clean
         if: always()
-        run: |
-          git push --delete origin test-try-push
+        run: git push --delete origin test-try-push

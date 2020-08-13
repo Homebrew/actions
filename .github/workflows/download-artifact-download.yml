@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - Download artifact (upload)
-    types: 
+    types:
       - completed
 
 jobs:
@@ -13,11 +13,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Download
         uses: ./download-artifact/
         with:
           workflow: download-artifact-upload.yml
           name: artifact
           path: artifact
+
       - name: Test
         run: cat artifact/sha | grep $GITHUB_SHA

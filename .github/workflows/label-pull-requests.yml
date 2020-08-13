@@ -14,6 +14,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Test
         uses: ./label-pull-requests/
         with:
@@ -25,6 +26,7 @@ jobs:
                 "content": "deadbeef"
               }
             ]
+
       - name: Unlabel
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
