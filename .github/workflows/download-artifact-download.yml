@@ -1,12 +1,11 @@
-name: Download artifact
+name: Download artifact (download)
 
 on:
-  push:
-    paths:
-      - '**download-artifact**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'node_modules/**'
+  workflow_run:
+    workflows:
+      - Download artifact (upload)
+    types: 
+      - completed
 
 jobs:
   download:
@@ -21,5 +20,4 @@ jobs:
           name: artifact
           path: artifact
       - name: Test
-        run: |
-          ls artifact/workflows/*.yml
+        run: cat artifact/sha | grep $GITHUB_SHA
