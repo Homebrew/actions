@@ -12,7 +12,11 @@ if ! which brew &>/dev/null; then
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
     sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
     sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git clone --depth=1 https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    if [ ! -z "$HOMEBREW_CORE_GIT_REMOTE" ]
+    then
+        HOMEBREW_CORE_GIT_REMOTE=https://github.com/Homebrew/homebrew-core
+    fi
+    sudo git clone --depth=1 "$HOMEBREW_CORE_GIT_REMOTE" "$HOMEBREW_CORE_REPOSITORY"
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
