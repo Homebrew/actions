@@ -10,5 +10,7 @@ outputs:
   gem-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
 runs:
-  using: node12
-  main: main.js
+  using: composite
+  steps:
+    - run: $GITHUB_ACTION_PATH/main.sh
+      shell: bash
