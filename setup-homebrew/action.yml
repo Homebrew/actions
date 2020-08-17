@@ -12,5 +12,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - run: bash $GITHUB_ACTION_PATH/main.sh
-      shell: bash
+    - run: chmod +x $GITHUB_ACTION_PATH/main.sh
+      shell: sh
+    - run: $GITHUB_ACTION_PATH/main.sh
+      shell: sh
