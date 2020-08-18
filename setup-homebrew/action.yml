@@ -5,15 +5,15 @@ branding:
   icon: settings
   color: yellow
 outputs:
-  gem-path:
+  gems-path:
     description: Homebrew's Ruby gems path
-    value: ${{steps.setup.outputs.gem-path}}
-  gem-hash:
+    value: ${{steps.setup.outputs.gems-path}}
+  gems-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
-    value: ${{steps.setup.outputs.gem-hash}}
+    value: ${{steps.setup.outputs.gems-hash}}
 runs:
   using: composite
   steps:
     - run: $GITHUB_ACTION_PATH/main.sh
-      shell: sh
+      shell: bash
       id: setup
