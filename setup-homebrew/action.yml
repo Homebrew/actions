@@ -7,12 +7,13 @@ branding:
 outputs:
   gem-path:
     description: Homebrew's Ruby gems path
+    value: ${{steps.setup.outputs.gem-path}}
   gem-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
+    value: ${{steps.setup.outputs.gem-hash}}
 runs:
   using: composite
   steps:
-    - run: chmod +x $GITHUB_ACTION_PATH/main.sh
-      shell: sh
     - run: $GITHUB_ACTION_PATH/main.sh
       shell: sh
+      id: setup
