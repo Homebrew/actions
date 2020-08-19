@@ -16,9 +16,7 @@ runs:
   using: composite
   steps:
     - run: |
-        brew ruby -e - << 'EOS'
-        ${{inputs.script}}
-        EOS
+        brew ruby <(${{inputs.script}})
       shell: bash
       env:
         HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
