@@ -2,6 +2,8 @@
 
 An action that labels latest pull requests with given criteria.
 
+Will remove labels from pull requests that no longer apply.
+
 ## Usage
 
 ```yaml
