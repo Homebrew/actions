@@ -16,7 +16,7 @@ runs:
   using: composite
   steps:
     - run: |
-        brew ruby -e << 'EOS'
+        brew ruby -e - << 'EOS'
         ${{inputs.script}}
         EOS
       shell: bash
