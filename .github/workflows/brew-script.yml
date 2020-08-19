@@ -21,10 +21,11 @@ jobs:
         uses: ./brew-script/
         with:
           script: |
-            ohai "test"
+            ohai 'test'
             revision = Utils.safe_popen_read("git", "rev-parse", "HEAD")
             file = ENV["FILENAME"]
             File.write(file, revision)
+            $stderr.puts "test"
 
       - name: Test
         run: test "$GITHUB_SHA" = "$(cat $FILENAME)"
