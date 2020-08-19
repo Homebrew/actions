@@ -15,7 +15,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: brew ruby -e "${{inputs.script}}"
+    - run: brew ruby -e '${{inputs.script}}'
       shell: bash
       env:
         HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
