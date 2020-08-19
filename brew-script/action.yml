@@ -16,7 +16,10 @@ runs:
   using: composite
   steps:
     - run: |
-        brew ruby <(${{inputs.script}})
+        cat << 'EOF' > /tmp/brew-script-$GITHUB_SHA
+        ${{inputs.script}}
+        EOF
+    - run: brew ruby /tmp/brew-script-$GITHUB_SHA
       shell: bash
       env:
         HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
