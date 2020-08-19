@@ -19,6 +19,7 @@ runs:
         cat << 'EOF' > /tmp/brew-script-$GITHUB_SHA
         ${{inputs.script}}
         EOF
+      shell: bash
     - run: brew ruby /tmp/brew-script-$GITHUB_SHA
       shell: bash
       env:
