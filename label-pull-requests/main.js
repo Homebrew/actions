@@ -27,7 +27,7 @@ async function main() {
             per_page: 50
         })
 
-        // Map pull request object to its files
+        // Map pull request object to its files objects
         const pullToFiles = new Map()
 
         // Fetch data and store it in the map
@@ -38,11 +38,15 @@ async function main() {
                 pull_number: pull.number
             })
 
-            // Map pull to files
+            // Map pull object to files object
             pullToFiles.set(pull, files.data)
 
-            // Enhance every file object with its content
+            // Extend every file object with its content
             for (const file of files.data) {
+                // File object could have this field set as 'null'
+                if (!file.sha)
+                    continue
+
                 // Fetch file content
                 const blob = await client.git.getBlob({
                     ...github.context.repo,
@@ -69,22 +73,39 @@ async function main() {
             // Match files with given constraints
             for (const file of pullFiles) {
                 for (const constraint of constraints) {
-                    // Do nothing if PR already has the label
+                    let constraintApplies = false
+                    let labelExists = false
+
+                    // Possible unwanted label
                     if (pullLabels.includes(constraint.label)) {
+                        labelExists = true
+                    }
+
+                    // Check constraints
+                    if (
+                        (!constraint.status || file.status == constraint.status) &&
+                        (!constraint.path || file.filename.match(constraint.path)) &&
+                        (!constraint.content || file.content.match(constraint.content)) &&
+                        (!constraint.missing_content || !file.content.match(constraint.missing_content))
+                    ) {
+                        constraintApplies = true
+                    }
+
+                    if (labelExists && constraintApplies) {
+                        continue
+                    }
+                    if (!labelExists && !constraintApplies) {
                         continue
                     }
 
-                    if (constraint.status && (file.status != constraint.status)) {
-                        continue
+                    // Unwanted label
+                    if (labelExists && !constraintApplies) {
+                        constraint.wanted = false
                     }
-                    if (constraint.path && (!file.filename.match(constraint.path))) {
-                        continue
-                    }
-                    if (constraint.content && (!file.content.match(constraint.content))) {
-                        continue
-                    }
-                    if (constraint.missing_content && file.content.match(constraint.missing_content)) {
-                        continue
+
+                    // Wanted label
+                    if (!labelExists && constraintApplies) {
+                        constraint.wanted = true
                     }
 
                     // Init map key if not found
@@ -109,26 +130,33 @@ async function main() {
                 constraintToMatchingFiles.delete(constraint)
             }
 
-            // Get a list of distinct labels
-            const labels = Array.from(
-                new Set(
-                    Array.from(constraintToMatchingFiles.keys())
-                        .map(constraint => constraint.label)
-                )
-            )
+            const pullLabelsNew = pullLabels.slice()
+
+            // Determine which labels should be added or deleted
+            for (const constraint of constraintToMatchingFiles.keys()) {
+                if (constraint.wanted && !pullLabelsNew.includes(constraint.label)) {
+                    pullLabelsNew.push(constraint.label)
+                }
+                if (!constraint.wanted) {
+                    const index = pullLabelsNew.indexOf(constraint.label);
+                    if (index > -1) {
+                        pullLabelsNew.splice(index, 1);
+                    }
+                }
+            }
 
             // No constraints matched, continue ...
-            if (labels.length == 0) {
+            if (pullLabels.length == pullLabelsNew.length && pullLabels.every((label, i) => label == pullLabelsNew[i])) {
                 continue
             }
 
-            core.info(`==> Labelling PR #${pull.number} with [${labels}]`)
+            core.info(`==> #${pull.number}: [${pullLabels}] => [${pullLabelsNew}]`)
 
-            // Add wanted labels to PR
-            await client.issues.addLabels({
+            // Update PR labels
+            await client.issues.update({
                 ...github.context.repo,
                 issue_number: pull.number,
-                labels: labels
+                labels: pullLabelsNew
             })
         }
     } catch (error) {
