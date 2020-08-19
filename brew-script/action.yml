@@ -20,7 +20,7 @@ runs:
         ${{inputs.script}}
         EOF
       shell: bash
-    - run: brew ruby /tmp/brew-script-$GITHUB_SHA
+    - run: brew ruby -W0 /tmp/brew-script-$GITHUB_SHA
       shell: bash
       env:
         HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
