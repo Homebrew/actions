@@ -38,8 +38,9 @@ async function main() {
                 await exec.exec("git", ["checkout", "-"])
                 return
             } catch (error) {
-                // Push failed. Wait some time, pull changes with rebasing and try again.
-                const delay = Math.floor(Math.random() * (10 + i)) + 3
+                // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
+                // and try again.
+                const delay = i**2
                 await exec.exec("sleep", [delay])
                 await exec.exec("git", ["pull", "--rebase", remote, branch])
             }
