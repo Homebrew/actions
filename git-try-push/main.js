@@ -8,6 +8,7 @@ async function main() {
         const remote = core.getInput("remote", { required: true })
         const branch = core.getInput("branch", { required: true })
         const tries = core.getInput("tries", { required: true })
+        const force = core.getInput("force")
 
         // Change directory.
         if (directory) {
@@ -34,7 +35,10 @@ async function main() {
         for (let i = 0; i < tries; i++) {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
-                await exec.exec("git", ["push", remote, branch])
+                if (force)
+                    await exec.exec("git", ["push", "--force", remote, branch])
+                else
+                    await exec.exec("git", ["push", remote, branch])
                 await exec.exec("git", ["checkout", "-"])
                 return
             } catch (error) {

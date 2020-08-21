@@ -23,6 +23,9 @@ inputs:
     description: How many times to try pushing
     required: false
     default: "20"
+  force:
+    description: Whether to force the push or not
+    required: false
 runs:
   using: node12
   main: main.js
