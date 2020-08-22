@@ -4,6 +4,11 @@ author: dawidd6
 branding:
   icon: settings
   color: yellow
+inputs:
+  test-bot:
+    description: Install the `homebrew/test-bot` tap.
+    required: false
+    default: true
 outputs:
   gems-path:
     description: Homebrew's Ruby gems path
@@ -14,6 +19,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - run: $GITHUB_ACTION_PATH/main.sh
+    - run: |
+        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}'
       shell: bash
       id: setup
