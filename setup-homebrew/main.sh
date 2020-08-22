@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+TEST_BOT="${1}"
+
 # Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
 if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
@@ -25,6 +27,8 @@ else
     HOMEBREW_REPOSITORY="$(brew --repo)"
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 fi
+
+HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
 echo "::add-path::$HOMEBREW_PREFIX/bin"
 
@@ -72,6 +76,10 @@ else
             exit 1
         fi
 
+        if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask-.+$ ]]; then
+            brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
+        fi
+
         HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
         if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
             cd "$HOMEBREW_TAP_REPOSITORY"
@@ -92,12 +100,14 @@ else
     brew update-reset "$HOMEBREW_CORE_REPOSITORY"
 fi
 
-# Setup Homebrew/homebrew-test-bot
-HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
-if ! [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
-    git clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
-elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
-    brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
+if [[ "${TEST_BOT}" == 'true' ]]; then
+    # Setup Homebrew/homebrew-test-bot
+    HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
+    if ! [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
+        git clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
+    elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
+        brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
+    fi
 fi
 
 # Setup Linux permissions
