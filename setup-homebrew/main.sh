@@ -4,6 +4,9 @@ set -euo pipefail
 
 TEST_BOT="${1}"
 
+export HOMEBREW_COLOR=1
+echo "::set-env name=HOMEBREW_COLOR::1"
+
 # Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
 if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
