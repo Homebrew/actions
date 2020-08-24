@@ -24,7 +24,7 @@ inputs:
     required: false
     default: "20"
   force:
-    description: Whether to force the push or not
+    description: Whether to force-with-lease push or not
     required: false
 runs:
   using: node12

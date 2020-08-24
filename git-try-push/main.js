@@ -36,7 +36,7 @@ async function main() {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
                 if (force)
-                    await exec.exec("git", ["push", "--force", remote, branch])
+                    await exec.exec("git", ["push", "--force-with-lease", remote, branch])
                 else
                     await exec.exec("git", ["push", remote, branch])
                 await exec.exec("git", ["checkout", "-"])
