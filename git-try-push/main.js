@@ -46,7 +46,7 @@ async function main() {
                 // and try again.
                 const delay = i**2
                 await exec.exec("sleep", [delay])
-                await exec.exec("git", ["pull", "--rebase", remote, branch])
+                await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
             }
         }
 
