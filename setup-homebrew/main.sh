@@ -80,7 +80,11 @@ else
         fi
 
         if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask-.+$ ]]; then
-            brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
+            if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
+                brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
+            else
+                brew tap homebrew/cask
+            fi
         fi
 
         HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
