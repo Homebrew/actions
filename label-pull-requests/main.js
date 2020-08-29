@@ -44,8 +44,10 @@ async function main() {
             // Extend every file object with its content
             for (const file of files.data) {
                 // File object could have this field set as 'null'
-                if (!file.sha)
+                if (!file.sha) {
+                    file.content = ""
                     continue
+                }
 
                 // Fetch file content
                 const blob = await client.git.getBlob({
