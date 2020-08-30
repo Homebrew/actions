@@ -1,5 +1,5 @@
 name: Label pull requests
-description: Label pull requests with specified criteria
+description: Label the pull request with specified criteria
 author: dawidd6
 branding:
   icon: tag
