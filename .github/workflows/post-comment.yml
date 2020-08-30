@@ -18,7 +18,6 @@ jobs:
       - name: Test
         uses: ./post-comment/
         with:
-          token: ${{secrets.GITHUB_TOKEN}}
           issue: 21
           body: body
           bot_body: bot body
