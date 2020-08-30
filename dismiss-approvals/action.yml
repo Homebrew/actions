@@ -6,7 +6,7 @@ branding:
   color: red
 inputs:
   token:
-    description: GitHub token
+    description: GitHub token 123
     required: false
     default: ${{github.token}}
   pr:
