@@ -1,7 +1,7 @@
 name: Post comment
 
 on:
-  push:
+  pull_request:
     paths:
       - '**post-comment**'
       - 'package.json'
@@ -18,7 +18,7 @@ jobs:
       - name: Test
         uses: ./post-comment/
         with:
-          issue: 21
+          issue: ${{github.event.pull_request.number}}
           body: body
           bot_body: bot body
           bot: BrewTestBot

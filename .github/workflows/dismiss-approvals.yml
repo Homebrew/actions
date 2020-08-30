@@ -1,7 +1,7 @@
 name: Dismiss approvals
 
 on:
-  push:
+  pull_request:
     paths:
       - '**dismiss-approvals**'
       - 'package.json'
@@ -15,13 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Approve
+        env:
+          GITHUB_TOKEN: ${{github.token}}
+        run: gh pr review --approve 21
+
       - name: Dismiss
         uses: ./dismiss-approvals/
         with:
-          pr: 21
+          pr: ${{github.event.pull_request.number}}
           message: test
-
-      - name: Approve
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh pr review --approve 21
