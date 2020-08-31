@@ -1,7 +1,7 @@
 name: Label pull requests
 
 on:
-  push:
+  pull_request:
     paths:
       - '**label-pull-requests**'
       - 'package.json'
@@ -22,12 +22,12 @@ jobs:
             [
               {
                 "label": "wontfix",
-                "path": "deadbeef",
-                "content": "deadbeef"
+                "path": ".+"
               }
             ]
 
       - name: Unlabel
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/21/labels/wontfix
+          PR: ${{github.event.pull_request.number}}
+        run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/$PR/labels/wontfix

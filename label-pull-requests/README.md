@@ -1,13 +1,13 @@
 # Label pull requests GitHub Action
 
-An action that labels latest pull requests with given criteria.
+An action that labels the pull request with given criteria.
 
-Will remove labels from pull requests that no longer apply.
+Will remove labels from a pull request that no longer apply.
 
 ## Usage
 
 ```yaml
-- name: Label PRs
+- name: Label PR
   uses: Homebrew/actions/label-pull-requests@master
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
