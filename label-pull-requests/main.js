@@ -140,7 +140,7 @@ async function main() {
             return
         }
 
-        core.info(`==> #${pull.number}: [${existingLabels}] => [${updatedLabels}]`)
+        console.log(`#${pull.number}: [${existingLabels}] => [${updatedLabels}]`)
 
         // Update PR labels
         await client.issues.update({
