@@ -1,0 +1,19 @@
+name: Automatically review a Homebrew Cask pull request
+description: Review version bump pull requests.
+author: reitermarkus
+branding:
+  icon: git-pull-request
+  color: yellow
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{ github.token }}
+outputs:
+  event:
+    description: Review event
+  message:
+    description: Review message
+runs:
+  using: docker
+  image: Dockerfile
