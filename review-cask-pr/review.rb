@@ -58,7 +58,7 @@ def review_pull_request(pr)
     if diff.version_decreased?
       return {
         event: :COMMENT,
-        message: "Version decreased from #{diff.old_version.inspect} to #{diff.new_version.inspect}."
+        message: "Version decreased from `#{diff.old_version}` to `#{diff.new_version}`."
       }
     end
 
@@ -80,7 +80,7 @@ def review_pull_request(pr)
 
     return {
       event: :APPROVE,
-      message: "Simple version bump from #{diff.old_version.inspect} to #{diff.new_version.inspect}."
+      message: "Simple version bump from `#{diff.old_version}` to `#{diff.new_version}`."
     }
   end
 
