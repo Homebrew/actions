@@ -12,9 +12,6 @@ event_name, event_path, = ARGV
 
 event = JSON.parse(File.read(event_path))
 
-puts "EVENT:"
-puts JSON.pretty_generate(event)
-
 def diff_for_pull_request(pr)
   diff_url = pr.fetch("diff_url")
 
