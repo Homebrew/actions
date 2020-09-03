@@ -1,0 +1,24 @@
+name: Post pull request review
+
+on:
+  push:
+    paths:
+      - '**post-review**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test
+        uses: ./post-review/
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull_request: 75
+          event: COMMENT
+          body: This is a comment.

@@ -1,0 +1,24 @@
+name: Create pull request review
+description: Create a new review on given pull request
+author: reitermarkus
+branding:
+  icon: message-square
+  color: purple
+inputs:
+  token:
+    description: GitHub token
+    required: true
+    default: ${{ github.token }}
+  pull_request:
+    description: Pull request number
+    required: true
+    default: ${{ github.event.pull_request.number }}
+  event:
+    description: Review event
+    required: true
+  body:
+    description: Review content
+    required: false
+runs:
+  using: node12
+  main: main.js
