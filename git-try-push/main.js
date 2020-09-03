@@ -35,7 +35,8 @@ async function main() {
         for (let i = 0; i < tries; i++) {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
-                if (force)
+                // Don't try to force push the first time in case it's not necessary.
+                if (force && i>0)
                     await exec.exec("git", ["push", "--force-with-lease", remote, branch])
                 else
                     await exec.exec("git", ["push", remote, branch])
@@ -44,7 +45,7 @@ async function main() {
             } catch (error) {
                 // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
                 // and try again.
-                const delay = i**2
+                const delay = (i+1)**2
                 await exec.exec("sleep", [delay])
                 await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
             }
