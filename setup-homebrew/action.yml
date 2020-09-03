@@ -9,6 +9,10 @@ inputs:
     description: Install the `homebrew/test-bot` tap.
     required: false
     default: true
+  debug:
+    description: Show debugging output
+    required: false
+    default: false
 outputs:
   gems-path:
     description: Homebrew's Ruby gems path
@@ -20,6 +24,6 @@ runs:
   using: composite
   steps:
     - run: |
-        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}'
+        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}' '${{ inputs.debug }}'
       shell: bash
       id: setup
