@@ -76,15 +76,27 @@ else
             exit 1
         fi
 
-        if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask-.+$ ]]; then
-            if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
+        HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+
+        if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask.+$ ]]; then
+            # Tap or update homebrew/cask for other cask repos.
+            if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
                 brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
             else
                 brew tap homebrew/cask
             fi
+
+            for cask_repo in \
+                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-drivers" \
+                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts" \
+                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
+            do
+                if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" ]]; then
+                    brew update-reset "${cask_repo}"
+                fi
+            done
         fi
 
-        HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
         if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
             cd "$HOMEBREW_TAP_REPOSITORY"
             git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
