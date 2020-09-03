@@ -78,7 +78,7 @@ else
 
         HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
 
-        if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask.+$ ]]; then
+        if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask(-.+)*$ ]]; then
             # Tap or update homebrew/cask for other cask repos.
             if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
                 brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
