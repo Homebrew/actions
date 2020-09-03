@@ -3,6 +3,11 @@
 set -euo pipefail
 
 TEST_BOT="${1}"
+DEBUG="${2}"
+
+if [[ "${DEBUG}" == 'true' ]]; then
+  set -x
+fi
 
 # Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
 if ! which brew &>/dev/null; then
