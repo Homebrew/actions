@@ -33,13 +33,9 @@ def review_pull_request(pr)
     return
   end
 
-  if pr.fetch("labels").any?
-    puts "Pull request #{pr_name} has labels."
-    return
-  end
-
   reviews = GitHub.open_api("#{pr.fetch("url")}/reviews")
-  if reviews.any?
+  non_dismissed_reviews = reviews.select { |r| r.fetch("state") == "DISMISSED" }
+  if non_dismissed_reviews.any?
     puts "Pull request #{pr_name} has reviews."
     return
   end
