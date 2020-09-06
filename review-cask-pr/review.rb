@@ -61,7 +61,7 @@ def review_pull_request(pr)
 
     tap.install(full_clone: true) unless tap.installed?
 
-    out, _ = system_command! 'git', args: ['-C', tap.path, 'log', '--pretty=format:', '-G', '\s+version\s+\'', '--follow', '--patch', '--', diff.cask_path]
+    out, _ = system_command! 'git', args: ['-C', tap.path, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path]
 
     version_diff = GitDiff.from_string(out)
     previous_versions = version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
