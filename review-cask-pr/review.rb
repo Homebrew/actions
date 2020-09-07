@@ -8,10 +8,6 @@ using GitDiffExtension
 
 require "utils/github"
 
-event_name, event_path, = ARGV
-
-event = JSON.parse(File.read(event_path))
-
 def diff_for_pull_request(pr)
   diff_url = pr.fetch("diff_url")
 
@@ -84,8 +80,12 @@ def review_pull_request(pr)
 end
 
 begin
+  event_name, event_path, = ARGV
+
   case event_name
   when "pull_request", "pull_request_target"
+    event = JSON.parse(File.read(event_path))
+
     # Reload the pull request data in case it changed since the event was triggered.
     pr = GitHub.open_api(event.fetch("pull_request").fetch("url"))
 
@@ -96,6 +96,14 @@ begin
       puts "::set-output name=event::#{output.fetch(:event)}"
       puts "::set-output name=message::#{GitHub::Actions.escape(message)}"
     end
+  when %r{^https://github.com/([^\/]+)/([^\/]+)/pull/(\d+)}
+    owner = Regexp.last_match[1]
+    repo = Regexp.last_match[2]
+    number = Integer(Regexp.last_match[3])
+
+    pr = GitHub.open_api("https://api.github.com/repos/#{owner}/#{repo}/pulls/#{number}")
+
+    JSON.pretty_generate(review_pull_request(pr))
   else
     raise "Unsupported GitHub Actions event: #{event_name.inspect}"
   end

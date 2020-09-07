@@ -14,3 +14,12 @@ An action that reviews a cask pull request for “auto-mergability”.
     echo 'REVIEW_EVENT: ${{ steps.review.outputs.event }}'
     echo 'REVIEW_MESSAGE: ${{ steps.review.outputs.message }}'
 ```
+
+
+## Debugging
+
+To run the action locally, you can pass a URL like this:
+
+```
+brew ruby review.rb <url>
+```
