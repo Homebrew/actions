@@ -103,7 +103,11 @@ begin
 
     pr = GitHub.open_api("https://api.github.com/repos/#{owner}/#{repo}/pulls/#{number}")
 
-    JSON.pretty_generate(review_pull_request(pr))
+    review = review_pull_request(pr)
+    return unless review
+
+    puts review[:event]
+    puts review[:message]
   else
     raise "Unsupported GitHub Actions event: #{event_name.inspect}"
   end

@@ -35,22 +35,27 @@ module GitDiffExtension
     def version_decreased?
       return false unless version_changed?
 
-      new_parts = new_version.split(/[,\-:_]/)
-      old_parts = old_version.split(/[,\-:_]/)
+      new_parts = new_version.split(/[,:]/)
+      old_parts = old_version.split(/[,:]/)
 
-      # Most of the time, the first part is the actual version, so return early
-      # if this increased and ignore other parts used to build the URL.
+      # Most of the time, the first (`before_comma`) part is the actual version, so
+      # return early if this increased and ignore other parts used to build the URL.
       return false if Version.new(new_parts.first) > Version.new(old_parts.first)
 
       new_parts.zip(old_parts)
         .any? { |v_new, v_old|
-          # Don't treat hex IDs as versions.
-          r = /([a-f]+\d+){2,}/
-          if v_new =~ r && v_old =~ r && v_new.to_s.length == v_old.to_s.length
-            next false
-          end
+          if Version.new(v_new) < Version.new(v_old)
+            # Don't treat hex IDs as versions. This will not match normal versions since
+            # they usually contain dots and we only remove hyphens and underscores here.
+            new_id = v_new.gsub(/[-_]/, '')
+            old_id = v_old.gsub(/-_/, '')
+            r = /\A[\da-f]+\Z/
+            next false if new_id.match?(r) && old_id.match?(r) && v_new.length == v_old.length
 
-          Version.new(v_new) < Version.new(v_old)
+            true
+          else
+            false
+          end
         }
     end
 
