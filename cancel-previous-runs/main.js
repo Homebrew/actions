@@ -20,6 +20,9 @@ async function main() {
 
         // Map branch to workflow runs
         for (const run of allRuns.data.workflow_runs) {
+            if (run.status == "completed")
+              continue
+
             // Make branch be in format "user:branch"
             const branch = run.head_repository.owner.login + ":" + run.head_branch
 
