@@ -1,4 +1,7 @@
 require "json"
+require "tmpdir"
+require "open3"
+require "English"
 
 Homebrew.install_gem! "git_diff"
 require "git_diff"
@@ -21,8 +24,7 @@ def review_pull_request(pr)
   number = pr.fetch("number")
   sha    = pr.fetch("head").fetch("sha")
 
-  tap = Tap.fetch(repo)
-  pr_name = "#{tap.name}##{number}"
+  pr_name = "#{repo}##{number}"
 
   if pr.fetch("draft")
     puts "Pull request #{pr_name} is a draft."
@@ -43,22 +45,42 @@ def review_pull_request(pr)
     return
   end
 
+  author_is_member = pr.fetch("author_association") == "MEMBER"
+
   if diff.version_changed?
-    if diff.version_decreased?
+    version_decreased = diff.version_decreased?
+    if version_decreased && !author_is_member
       return {
         event: :COMMENT,
         message: "Version decreased from `#{diff.old_version}` to `#{diff.new_version}`."
       }
     end
 
-    tap.install(full_clone: true) unless tap.installed?
+    previous_versions = Dir.mktmpdir do |repo_dir|
+      branch = pr.fetch("base").fetch("ref")
+      clone_url = pr.fetch("base").fetch("repo").fetch("clone_url")
 
-    out, _ = system_command! 'git', args: ['-C', tap.path, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path]
+      system 'git', 'clone', '-b', branch, clone_url, repo_dir
+      raise unless $CHILD_STATUS.success?
 
-    version_diff = GitDiff.from_string(out)
-    previous_versions = version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
+      out, err, status = Open3.capture3(
+        'git', '-C', repo_dir, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path,
+      )
+      raise err unless status.success?
+
+      version_diff = GitDiff.from_string(out)
+      version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
+    end
 
     if previous_versions.include?(diff.new_version)
+      if author_is_member && pr.fetch("title").start_with?("Revert ") &&
+          diff.old_version == previous_versions[0] && diff.new_version == previous_versions[1]
+        return {
+          event: :APPROVE,
+          message: "Reverted from `#{diff.old_version}` to previous version `#{diff.new_version}` by a project member."
+        }
+      end
+
       previous_version_list = previous_versions.map { |v| "  - `#{v}`" }.join("\n")
 
       return {
