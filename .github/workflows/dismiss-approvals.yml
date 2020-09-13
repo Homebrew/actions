@@ -18,7 +18,7 @@ jobs:
       - name: Approve
         env:
           GITHUB_TOKEN: ${{github.token}}
-        run: gh pr review --approve 21
+        run: gh pr review --approve ${{github.event.pull_request.number}}
 
       - name: Dismiss
         uses: ./dismiss-approvals/
