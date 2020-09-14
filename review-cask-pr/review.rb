@@ -81,6 +81,33 @@ def review_pull_request(pr)
         }
       end
 
+      if diff.old_version == previous_versions[1] && diff.new_version == previous_versions[0]
+        pr_urls =
+          GitHub.search_issues(
+            "#{diff.cask_name} #{diff.new_version}",
+            repo: pr.fetch("base").fetch("repo").fetch("full_name"),
+            state: :closed,
+            type: :pr,
+            in: :title,
+          )
+          .reject { |other_pr| other_pr.fetch("number") == pr.fetch("number") }
+          .map { |other_pr| other_pr.fetch("html_url") }
+
+        message = case pr_urls.count
+        when 0
+          "."
+        when 1
+          " in #{pr_urls.first}."
+        else
+          " in one of these pull requests:\n\n#{pr_urls.map { |url| "- #{url}" }.join("\n")}"
+        end
+
+        return {
+          event: :COMMENT,
+          message: "It looks like this version bump from `#{diff.old_version}` to `#{diff.new_version}` was already submitted#{message}"
+        }
+      end
+
       previous_version_list = previous_versions.map { |v| "  - `#{v}`" }.join("\n")
 
       return {
