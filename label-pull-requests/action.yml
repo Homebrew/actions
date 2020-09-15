@@ -17,6 +17,7 @@ inputs:
         - "label" (required): Label name, that should be added to PR
         - "status" (optional): File status, one of: added, modified, removed
         - "path" (optional): Changed file path, regex matching
+        - "except" (optional): File path(s) to exclude
         - "content" (optional): Changed file content, regex matching
         - "missing_content" (optional): Missing file content, regex matching
 
@@ -29,6 +30,13 @@ inputs:
           }, {
             "label": "bottle unneeded",
             "content": "bottle :unneeded"
+          }, {
+            "label": "legacy",
+            "path": "Formula/.+@.+",
+            "except": [
+              "Formula/python@3.8",
+              "Formula/python@3.9"
+            ]
           }, {
             "label": "missing license",
             "missing_content": "license \"[^"]+\""
