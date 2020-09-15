@@ -24,6 +24,14 @@ Will remove labels from a pull request that no longer apply.
               "path": "Formula/.+"
           },
           {
+              "label": "legacy",
+              "path": "Formula/.+@.+",
+              "except": [
+                  "Formula/python@3.8",
+                  "Formula/python@3.9"
+              ]
+          },
+          {
               "label": "missing license",
               "missing_content": "license \"[^"]+\"",
               "path": "Formula/.+"
