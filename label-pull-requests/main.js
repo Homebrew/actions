@@ -74,6 +74,7 @@ async function main() {
                 if (
                     (!constraint.status || file.status == constraint.status) &&
                     (!constraint.path || file.filename.match(constraint.path)) &&
+                    (!constraint.except || (Array.isArray(constraint.except) ? constraint.except.includes(file.filename) : file.filename == constraint.except)) &&
                     (!constraint.content || file.content.match(constraint.content)) &&
                     (!constraint.missing_content || !file.content.match(constraint.missing_content))
                 ) {
