@@ -71,14 +71,7 @@ async function main() {
                 }
 
                 // Check constraints
-                if (
-                    (!constraint.status || file.status == constraint.status) &&
-                    (!constraint.path || file.filename.match(constraint.path)) &&
-                    (!constraint.content || file.content.match(constraint.content)) &&
-                    (!constraint.missing_content || !file.content.match(constraint.missing_content))
-                ) {
-                    constraintApplies = true
-                }
+                constraintApplies = doesConstraintApply(constraint, file)
 
                 if (labelExists && constraintApplies) {
                     continue
@@ -151,6 +144,36 @@ async function main() {
     } catch (error) {
         core.setFailed(error.message)
     }
+}
+
+function doesConstraintApply(constraint, file) {
+    if (constraint.status && file.status != constraint.status) {
+        return false
+    }
+
+    if (constraint.path && !file.filename.match(constraint.path)) {
+        return false
+    }
+
+    if (constraint.except) {
+        if (Array.isArray(constraint.except)) {
+            if (constraint.except.includes(file.filename)) {
+                return false
+            }
+        } else if (file.filename == constraint.except) {
+            return false
+        }
+    }
+
+    if (constraint.content && !file.content.match(constraint.content)) {
+        return false
+    }
+
+    if (constraint.missing_content && file.content.match(constraint.missing_content)) {
+        return false
+    }
+
+    return true
 }
 
 main()
