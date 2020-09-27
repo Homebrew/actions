@@ -1,7 +1,7 @@
 name: Post pull request review
 
 on:
-  push:
+  pull_request_target:
     paths:
       - '**post-review**'
       - 'package.json'
@@ -18,7 +18,7 @@ jobs:
       - name: Test
         uses: ./post-review/
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull_request: 75
+          token: ${{github.token}}
+          pull_request: ${{github.event.pull_request.number}}
           event: COMMENT
           body: This is a comment.
