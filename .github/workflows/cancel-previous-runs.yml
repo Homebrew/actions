@@ -1,7 +1,7 @@
 name: Cancel previous runs
 
 on:
-  push:
+  pull_request_target:
     paths:
       - '**cancel-previous-runs**'
       - 'package.json'
