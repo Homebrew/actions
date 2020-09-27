@@ -1,7 +1,7 @@
 name: Download artifact (upload)
 
 on:
-  push:
+  pull_request_target:
     paths:
       - '**download-artifact**'
       - 'package.json'
