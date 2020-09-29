@@ -9,17 +9,36 @@ if [[ "${DEBUG}" == 'true' ]]; then
   set -x
 fi
 
+MAX_GIT_TRIES=5
+
+function git_retry {
+  local try=0
+
+  until "$@"; do
+    exit_code="$?"
+    try=$(($try + 1))
+
+    if [ $try -lt $MAX_GIT_RETRIES ]; then
+      sleep $((2 ** $try))
+    else
+      return $exit_code
+    fi
+  done
+
+  return 0
+}
+
 # Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
 if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
     HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
     sudo mkdir -p "$HOMEBREW_PREFIX"
-    sudo git clone --depth=1 https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
+    sudo git_retry clone --depth=1 https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
 
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
     sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
     sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git clone --depth=1 https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    sudo git_retry clone --depth=1 https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
@@ -47,7 +66,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
         ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
-    git fetch --tags origin "$GITHUB_SHA"
+    git_retry fetch --tags origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
     cd -
 else
@@ -71,7 +90,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
         ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
-    git fetch origin "$GITHUB_SHA"
+    git_retry fetch origin "$GITHUB_SHA"
     git checkout --force -B master FETCH_HEAD
     cd -
 else
@@ -113,7 +132,7 @@ else
         fi
         rm -rf "$GITHUB_WORKSPACE"
         ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
-        git fetch origin "$GITHUB_SHA"
+        git_retry fetch origin "$GITHUB_SHA"
         git checkout --force -B master FETCH_HEAD
         cd -
     fi
@@ -125,7 +144,7 @@ if [[ "${TEST_BOT}" == 'true' ]]; then
     # Setup Homebrew/homebrew-test-bot
     HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
     if ! [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
-        git clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
+        git_retry clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
     elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
         brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
     fi
