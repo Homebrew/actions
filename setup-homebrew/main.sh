@@ -108,7 +108,7 @@ else
             if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
                 git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
                 git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
-            else
+            elif ! [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
                 git_retry clone --depth=1 https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
             fi
 
