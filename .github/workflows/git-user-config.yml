@@ -1,7 +1,7 @@
 name: Git user config
 
 on:
-  pull_request_target:
+  pull_request:
     paths:
       - '**git-user-config**'
       - 'package.json'
