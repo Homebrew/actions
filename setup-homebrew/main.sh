@@ -9,12 +9,12 @@ if [[ "${DEBUG}" == 'true' ]]; then
   set -x
 fi
 
-MAX_GIT_TRIES=5
+MAX_GIT_RETRIES=5
 
 function git_retry {
   local try=0
 
-  until "$@"; do
+  until git "$@"; do
     exit_code="$?"
     try=$(($try + 1))
 
