@@ -70,7 +70,8 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     git checkout --force -B master FETCH_HEAD
     cd -
 else
-    brew update-reset "$HOMEBREW_REPOSITORY"
+    git_retry -C "$HOMEBREW_REPOSITORY" fetch --force origin
+    git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
 fi
 
 # Setup Homebrew Bundler RubyGems cache
@@ -105,9 +106,10 @@ else
         if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask(-.+)*$ ]]; then
             # Tap or update homebrew/cask for other cask repos.
             if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
-                brew update-reset "${HOMEBREW_CASK_REPOSITORY}"
+                git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
+                git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
             else
-                brew tap homebrew/cask
+                git_retry clone --depth=1 https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
             fi
 
             for cask_repo in \
@@ -116,7 +118,8 @@ else
                 "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
             do
                 if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" ]]; then
-                    brew update-reset "${cask_repo}"
+                    git_retry -C "${cask_repo}" fetch --force origin
+                    git -C "${cask_repo}" checkout --force -B master origin/HEAD
                 fi
             done
         fi
@@ -137,7 +140,8 @@ else
         cd -
     fi
 
-    brew update-reset "$HOMEBREW_CORE_REPOSITORY"
+    git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
+    git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
 fi
 
 if [[ "${TEST_BOT}" == 'true' ]]; then
@@ -146,7 +150,8 @@ if [[ "${TEST_BOT}" == 'true' ]]; then
     if ! [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
         git_retry clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
     elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
-        brew update-reset "$HOMEBREW_TEST_BOT_REPOSITORY"
+        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
+        git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B master origin/HEAD
     fi
 fi
 
