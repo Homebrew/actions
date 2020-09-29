@@ -1,7 +1,7 @@
 name: Brew script
 
 on:
-  pull_request_target:
+  pull_request:
     paths:
       - '**brew-script**'
       - 'package.json'
