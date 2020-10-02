@@ -1,11 +1,12 @@
 name: Download artifact (download)
 
 on:
-  workflow_run:
-    workflows:
-      - Download artifact (upload)
-    types:
-      - completed
+  pull_request:
+    paths:
+      - '**download-artifact**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
 
 jobs:
   download:
@@ -13,6 +14,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Wait
+        run: sleep 60s
 
       - name: Download
         uses: ./download-artifact/
