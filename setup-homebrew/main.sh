@@ -66,7 +66,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
         ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
-    git_retry fetch --tags origin "$GITHUB_SHA"
+    git_retry fetch --tags origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
@@ -92,7 +92,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
         ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
     fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
-    git_retry fetch origin "$GITHUB_SHA"
+    git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
@@ -139,7 +139,7 @@ else
         fi
         rm -rf "$GITHUB_WORKSPACE"
         ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
-        git_retry fetch origin "$GITHUB_SHA"
+        git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
         git remote set-head origin --auto
         git checkout --force -B master FETCH_HEAD
         cd -
