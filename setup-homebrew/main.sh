@@ -54,7 +54,8 @@ fi
 
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
-echo "::add-path::$HOMEBREW_PREFIX/bin"
+# Add brew to PATH
+echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
 
 # Setup Homebrew/brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
