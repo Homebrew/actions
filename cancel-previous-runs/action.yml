@@ -5,12 +5,6 @@ inputs:
     description: GitHub token
     required: false
     default: ${{github.token}}
-  workflow:
-    description: Workflow file name or ID
-    required: true
-  event:
-    description: Event that triggered the workflow run
-    required: false
 runs:
   using: node12
   main: main.js
