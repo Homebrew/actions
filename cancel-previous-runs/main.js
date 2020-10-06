@@ -1,5 +1,6 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
+const fs = require('fs')
 
 async function main() {
     try {
@@ -7,10 +8,16 @@ async function main() {
 
         const client = github.getOctokit(token)
 
+        // Parse event
+        const json = fs.readFileSync(process.env.GITHUB_EVENT_PATH, { encoding: "utf-8" })
+        const event = JSON.parse(json)
+        const pull = event.pull_request
+
         const repoWorkflowRuns = await client.actions.listWorkflowRunsForRepo({
             ...github.context.repo,
-            status: "in_progress", // OR queued (but we have some ghost workflow runs)
-            per_page: 50
+            branch: pull.head.ref,
+            event: "pull_request",
+            status: "in_progress OR queued"
         })
 
         // Map branch to workflow ID to workflow runs
