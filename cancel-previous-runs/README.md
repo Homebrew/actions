@@ -7,4 +7,6 @@ An action that cancels all previous uncompleted duplicated workflow runs for a b
 ```yaml
 - name: Cancel previous runs
   uses: Homebrew/actions/cancel-previous-runs@master
+  with:
+    token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
 ```
