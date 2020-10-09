@@ -47,7 +47,14 @@ async function main() {
                 // and try again.
                 const delay = (i+1)**2
                 await exec.exec("sleep", [delay])
-                await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
+                // `git pull` can also fail, so do the same retry procedure here.
+                for (let j = 0; j < tries; j++) {
+                    try {
+                        await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
+                    } catch (error) {
+                        await exec.exec("sleep", [delay])
+                    }
+                }
             }
         }
 
