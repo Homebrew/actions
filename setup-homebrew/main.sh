@@ -33,12 +33,12 @@ if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
     HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
     sudo mkdir -p "$HOMEBREW_PREFIX"
-    sudo git_retry clone --depth=1 https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
+    sudo git_retry clone https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
 
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
     sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
     sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git_retry clone --depth=1 https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    sudo git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
@@ -113,7 +113,7 @@ else
                 git -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
                 git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
             elif ! [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
-                git_retry clone --depth=1 https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
+                git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
             fi
 
             for cask_repo in \
@@ -155,7 +155,7 @@ if [[ "${TEST_BOT}" == 'true' ]]; then
     # Setup Homebrew/homebrew-test-bot
     HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
     if ! [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
-        git_retry clone --depth=1 https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
+        git_retry clone https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
     elif [[ "$GITHUB_REPOSITORY" != "Homebrew/homebrew-test-bot" ]]; then
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
         git -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
