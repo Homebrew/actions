@@ -51,6 +51,7 @@ async function main() {
                 for (let j = 0; j < tries; j++) {
                     try {
                         await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
+                        break
                     } catch (error) {
                         await exec.exec("sleep", [delay])
                     }
