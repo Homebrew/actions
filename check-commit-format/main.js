@@ -36,7 +36,7 @@ async function main() {
             // Autosquash doesn't support commits that modify more than one file.
             if (commit_info.data.files.length > 1) {
                 is_success = false
-                message = `${short_sha} modifies more than one file.`
+                message = `${short_sha} modifies more than one file (maintainers must merge manually).`
                 break
             }
 
