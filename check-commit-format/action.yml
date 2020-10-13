@@ -9,10 +9,10 @@ inputs:
     description: GitHub token
     required: false
     default: ${{github.token}}
-  failure_status:
-    description: Status to set on failure. Can be any of failure, success, error, pending
+  failure_label:
+    description: Label to set on failure. Default is automerge-skip
     required: false
-    default: failure
+    default: automerge-skip
 runs:
   using: node12
   main: main.js

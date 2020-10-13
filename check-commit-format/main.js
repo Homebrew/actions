@@ -5,7 +5,7 @@ const fs = require('fs')
 async function main() {
     try {
         const token = core.getInput("token", { required: true })
-        const failure_status = core.getInput("failure_status", { required: true })
+        const failure_label = core.getInput("failure_label", { required: true })
 
         const client = github.getOctokit(token)
 
@@ -66,10 +66,39 @@ async function main() {
         await client.repos.createCommitStatus({
             ...github.context.repo,
             sha: head_sha,
-            state: is_success ? "success" : failure_status,
+            state: "success",
             description: message,
             context: "Commit style",
             target_url: "https://docs.brew.sh/Formula-Cookbook#commit"
+        })
+
+        // Get existing labels on PR
+        const existingLabels = pull.labels.map(label => label.name)
+
+        // Copy labels into new Array
+        const updatedLabels = existingLabels.slice()
+
+        if (is_success && existingLabels.includes(failure_label)) {
+            // If commit style is OK or autosquashable, but we have a automerge-skip label, remove it
+            const index = updatedLabels.indexOf(failure_label);
+            if (index > -1) {
+                updatedLabels.splice(index, 1);
+            }
+        } else if (!is_success && !existingLabels.includes(failure_label)) {
+            // If commit style is not OK or not autosquashable but we don't have the automerge-skip label, add it
+            updatedLabels.push(failure_label);
+        }
+
+        // If everything is the same, we're done
+        if (existingLabels.length == updatedLabels.length && existingLabels.every((label, i) => label == updatedLabels[i])) {
+            return
+        }
+
+        // Update PR labels
+        await client.issues.update({
+            ...github.context.repo,
+            issue_number: pull.number,
+            labels: updatedLabels
         })
     } catch (error) {
         core.setFailed(error.message)
