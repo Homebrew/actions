@@ -1,0 +1,21 @@
+name: Check commit format
+
+on:
+  pull_request:
+    paths:
+      - '**check-commit-format**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+
+jobs:
+  check-commit-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test
+        uses: ./check-commit-format/
+        with:
+          failure_status: success
