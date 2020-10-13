@@ -19,3 +19,9 @@ jobs:
         uses: ./check-commit-format/
         with:
           failure_label: enhancement
+
+      - name: Unlabel
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          PR: ${{github.event.pull_request.number}}
+        run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/$PR/labels/enhancement
