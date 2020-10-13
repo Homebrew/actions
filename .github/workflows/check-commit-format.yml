@@ -18,4 +18,4 @@ jobs:
       - name: Test
         uses: ./check-commit-format/
         with:
-          failure_status: success
+          failure_label: enhancement
