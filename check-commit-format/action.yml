@@ -1,0 +1,18 @@
+name: Check commit format
+description: Checks a pull request commit against Homebrew style
+author: jonchang
+branding:
+  icon: git-commit
+  color: green
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{github.token}}
+  failure_status:
+    description: Status to set on failure. Can be any of failure, success, error, pending
+    required: false
+    default: failure
+runs:
+  using: node12
+  main: main.js
