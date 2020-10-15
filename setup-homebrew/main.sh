@@ -142,10 +142,7 @@ else
         ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
         git remote set-head origin --auto
-
-        head="$(git -C "$HOMEBREW_TAP_REPOSITORY" symbolic-ref refs/remotes/origin/HEAD)"
-        head="${head#refs/remotes/origin/}"
-        git -C "$HOMEBREW_TAP_REPOSITORY" checkout --force -B "$head" origin/HEAD
+        git checkout --force -B master FETCH_HEAD
         cd -
     fi
 
