@@ -33,10 +33,17 @@ async function main() {
 
             short_sha = commit.sha.substring(0, 10);
 
-            // Autosquash doesn't support commits that modify more than one file.
-            if (commit_info.data.files.length > 1) {
+            // Autosquash doesn't support merge commits.
+            if (commit_info.data.parents.length != 1) {
                 is_success = false
-                message = `${short_sha} modifies more than one file (maintainers must merge manually).`
+                message = `${short_sha} has ${commit_info.data.parents.length} parents (maintainers must rebase manually).`
+                break
+            }
+
+            // Autosquash doesn't support commits that modify more than one file.
+            if (commit_info.data.files.length != 1) {
+                is_success = false
+                message = `${short_sha} modifies ${commit_info.data.files.length} files (maintainers must merge manually).`
                 break
             }
 
