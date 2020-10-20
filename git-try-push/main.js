@@ -10,6 +10,8 @@ async function main() {
         const tries = core.getInput("tries", { required: true })
         const force = core.getInput("force")
 
+        const git = "/usr/bin/git"
+
         // Change directory.
         if (directory) {
             process.chdir(directory)
@@ -20,7 +22,7 @@ async function main() {
         if (token) {
             const credentials = Buffer.from(`x-access-token:${token}`, 'utf8').toString('base64')
             core.setSecret(credentials)
-            await exec.exec("git", ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
+            await exec.exec(git, ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
         }
 
         // Exit if number of tries is zero
@@ -29,7 +31,7 @@ async function main() {
         }
 
         // Checkout the branch which should be pushed.
-        await exec.exec("git", ["checkout", branch])
+        await exec.exec(git, ["checkout", branch])
 
         // Loop specified number of tries.
         for (let i = 0; i < tries; i++) {
@@ -37,10 +39,10 @@ async function main() {
                 // Try to push, if successful, then checkout previous branch and just exit.
                 // Don't try to force push the first time in case it's not necessary.
                 if (force && i>0)
-                    await exec.exec("git", ["push", "--force-with-lease", remote, branch])
+                    await exec.exec(git, ["push", "--force-with-lease", remote, branch])
                 else
-                    await exec.exec("git", ["push", remote, branch])
-                await exec.exec("git", ["checkout", "-"])
+                    await exec.exec(git, ["push", remote, branch])
+                await exec.exec(git, ["checkout", "-"])
                 return
             } catch (error) {
                 // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
@@ -50,7 +52,7 @@ async function main() {
                 // `git pull` can also fail, so do the same retry procedure here.
                 for (let j = 0; j < tries; j++) {
                     try {
-                        await exec.exec("git", ["pull", "--rebase", "--autostash", remote, branch])
+                        await exec.exec(git, ["pull", "--rebase", "--autostash", remote, branch])
                         break
                     } catch (error) {
                         await exec.exec("sleep", [delay])
