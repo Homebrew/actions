@@ -65,6 +65,12 @@ async function main() {
                 message = `${short_sha} modifies non-formulae files (maintainers must merge manually)`
                 break
             }
+
+            if (file.filename.startsWith("Formula/patchelf.rb") || file.filename.startsWith("Formula/binutils.rb")) {
+                is_success = false
+                message = `${short_sha} modifies critical formula (maintainers must merge manually)`
+                break
+            }
         }
 
         const head_sha = commits.data[commits.data.length - 1].sha
