@@ -38,7 +38,11 @@ if ! which brew &>/dev/null; then
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
     sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
     sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    if [[ $HOMEBREW_FORCE_HOMEBREW_ON_LINUX == 1 ]]; then
+      sudo git_retry clone https://github.com/Homebrew/homebrew-core "$HOMEBREW_CORE_REPOSITORY"
+    else
+      sudo git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    fi
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
