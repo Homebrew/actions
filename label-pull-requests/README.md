@@ -35,6 +35,11 @@ Will remove labels from a pull request that no longer apply.
               "label": "missing license",
               "missing_content": "license \"[^"]+\"",
               "path": "Formula/.+"
+          },
+          {
+              "label": "automerge-skip",
+              "path": "Formula/(patchelf|binutils).rb",
+              "keep_if_no_match": true
           }
       ]
 ```
