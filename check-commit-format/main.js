@@ -80,7 +80,11 @@ async function main() {
         })
 
         // Get existing labels on PR
-        const existingLabels = pull.labels.map(label => label.name)
+        let existingLabels = await client.issues.listLabelsOnIssue({
+            ...github.context.repo,
+            issue_number: pull.number
+        })
+        existingLabels = existingLabels.data.map(label => label.name)
 
         // Copy labels into new Array
         const updatedLabels = existingLabels.slice()
