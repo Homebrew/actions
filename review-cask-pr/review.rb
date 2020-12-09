@@ -48,6 +48,13 @@ def review_pull_request(pr)
   author_is_member = pr.fetch("author_association") == "MEMBER"
 
   if diff.version_changed?
+    if diff.version_format_changed?
+      return {
+        event: :COMMENT,
+        message: "Version format changed."
+      }
+    end
+
     version_decreased = diff.version_decreased?
     if version_decreased && !author_is_member
       return {
