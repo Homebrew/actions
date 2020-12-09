@@ -32,19 +32,23 @@ module GitDiffExtension
       old_version != new_version
     end
 
+    def version_format_changed?
+      old_version_parts.count != new_version_parts.count
+    end
+
     def version_decreased?
       return false unless version_changed?
 
-      new_parts = new_version.split(/[,:]/)
-      old_parts = old_version.split(/[,:]/)
-
       # Most of the time, the first (`before_comma`) part is the actual version, so
       # return early if this increased and ignore other parts used to build the URL.
-      return false if Version.new(new_parts.first) > Version.new(old_parts.first)
+      return false if Version.new(new_version_parts.first) > Version.new(old_version_parts.first)
 
-      new_parts.zip(old_parts)
+      new_version_parts.zip(old_version_parts)
         .any? { |v_new, v_old|
-          if Version.new(v_new) < Version.new(v_old)
+          if v_old.nil?
+            # If the old version did not have this part, this is not a decrease.
+            false
+          elsif Version.new(v_new) < Version.new(v_old)
             # Don't treat hex IDs as versions. This will not match normal versions since
             # they usually contain dots and we only remove hyphens and underscores here.
             new_id = v_new.gsub(/[-_]/, '')
@@ -63,9 +67,19 @@ module GitDiffExtension
       @old_version ||= deletions.find { |line| line.version? }&.version
     end
 
+    def old_version_parts
+      @old_version_parts ||= old_version.split(/[,:]/)
+    end
+    private :old_version_parts
+
     def new_version
       @new_version ||= additions.find { |line| line.version? }&.version
     end
+
+    def new_version_parts
+      @new_version_parts ||= new_version.split(/[,:]/)
+    end
+    private :new_version_parts
 
     def lines
       @lines ||= files.flat_map(&:hunks).flat_map(&:lines)
