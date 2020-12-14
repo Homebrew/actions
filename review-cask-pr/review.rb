@@ -19,7 +19,7 @@ def diff_for_pull_request(pr)
   GitDiff.from_string(output) if status.success?
 end
 
-def review_pull_request(pr)
+def review_pull_request(pr, ignore_existing_reviews: false)
   repo   = pr.fetch("base").fetch("repo").fetch("full_name")
   number = pr.fetch("number")
   sha    = pr.fetch("head").fetch("sha")
@@ -35,7 +35,7 @@ def review_pull_request(pr)
   non_dismissed_reviews = reviews.reject { |r| r.fetch("state") == "DISMISSED" }
   if non_dismissed_reviews.any?
     puts "Pull request #{pr_name} has reviews."
-    return
+    return unless ignore_existing_reviews
   end
 
   diff = diff_for_pull_request(pr)
@@ -159,7 +159,7 @@ begin
 
     pr = GitHub.open_api("https://api.github.com/repos/#{owner}/#{repo}/pulls/#{number}")
 
-    review = review_pull_request(pr)
+    review = review_pull_request(pr, ignore_existing_reviews: true)
     return unless review
 
     puts review[:event]
