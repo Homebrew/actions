@@ -56,72 +56,77 @@ def review_pull_request(pr, ignore_existing_reviews: false)
     end
 
     version_decreased = diff.version_decreased?
-    if version_decreased && !author_is_member
-      return {
+    version_decreased_comment = if version_decreased
+      {
         event: :COMMENT,
         message: "Version decreased from `#{diff.old_version}` to `#{diff.new_version}`."
       }
     end
+    return version_decreased_comment if version_decreased && !author_is_member
 
-    previous_versions = Dir.mktmpdir do |repo_dir|
-      branch = pr.fetch("base").fetch("ref")
-      clone_url = pr.fetch("base").fetch("repo").fetch("clone_url")
+    if !version_decreased ||
+      previous_versions = Dir.mktmpdir do |repo_dir|
+        branch = pr.fetch("base").fetch("ref")
+        clone_url = pr.fetch("base").fetch("repo").fetch("clone_url")
 
-      system 'git', 'clone', '-b', branch, clone_url, repo_dir
-      raise unless $CHILD_STATUS.success?
+        system 'git', 'clone', '-b', branch, clone_url, repo_dir
+        raise unless $CHILD_STATUS.success?
 
-      out, err, status = Open3.capture3(
-        'git', '-C', repo_dir, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path,
-      )
-      raise err unless status.success?
+        out, err, status = Open3.capture3(
+          'git', '-C', repo_dir, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path,
+        )
+        raise err unless status.success?
 
-      version_diff = GitDiff.from_string(out)
-      version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
-    end
-
-    if previous_versions.include?(diff.new_version)
-      if author_is_member && pr.fetch("title").start_with?("Revert ") &&
-          diff.old_version == previous_versions[0] && diff.new_version == previous_versions[1]
-        return {
-          event: :APPROVE,
-          message: "Reverted from `#{diff.old_version}` to previous version `#{diff.new_version}` by a project member."
-        }
+        version_diff = GitDiff.from_string(out)
+        version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
       end
 
-      if diff.old_version == previous_versions[1] && diff.new_version == previous_versions[0]
-        pr_urls =
-          GitHub.search_issues(
-            "#{diff.cask_name} #{diff.new_version}",
-            repo: pr.fetch("base").fetch("repo").fetch("full_name"),
-            state: :closed,
-            type: :pr,
-            in: :title,
-          )
-          .reject { |other_pr| other_pr.fetch("number") == pr.fetch("number") }
-          .map { |other_pr| other_pr.fetch("html_url") }
-
-        message = case pr_urls.count
-        when 0
-          "."
-        when 1
-          " in #{pr_urls.first}."
-        else
-          " in one of these pull requests:\n\n#{pr_urls.map { |url| "- #{url}" }.join("\n")}"
+      if previous_versions.include?(diff.new_version)
+        if author_is_member && pr.fetch("title").start_with?("Revert ") &&
+            diff.old_version == previous_versions[0] && diff.new_version == previous_versions[1]
+          return {
+            event: :APPROVE,
+            message: "Reverted from `#{diff.old_version}` to previous version `#{diff.new_version}` by a project member."
+          }
         end
+
+        if diff.old_version == previous_versions[1] && diff.new_version == previous_versions[0]
+          pr_urls =
+            GitHub.search_issues(
+              "#{diff.cask_name} #{diff.new_version}",
+              repo: pr.fetch("base").fetch("repo").fetch("full_name"),
+              state: :closed,
+              type: :pr,
+              in: :title,
+            )
+            .reject { |other_pr| other_pr.fetch("number") == pr.fetch("number") }
+            .map { |other_pr| other_pr.fetch("html_url") }
+
+          message = case pr_urls.count
+          when 0
+            "."
+          when 1
+            " in #{pr_urls.first}."
+          else
+            " in one of these pull requests:\n\n#{pr_urls.map { |url| "- #{url}" }.join("\n")}"
+          end
+
+          return {
+            event: :COMMENT,
+            message: "It looks like this version bump from `#{diff.old_version}` to `#{diff.new_version}` was already submitted#{message}"
+          }
+        end
+
+        previous_version_list = previous_versions.map { |v| "  - `#{v}`" }.join("\n")
 
         return {
           event: :COMMENT,
-          message: "It looks like this version bump from `#{diff.old_version}` to `#{diff.new_version}` was already submitted#{message}"
+          message: "Version changed to a previous version. Previous versions were:\n#{previous_version_list}",
         }
       end
-
-      previous_version_list = previous_versions.map { |v| "  - `#{v}`" }.join("\n")
-
-      return {
-        event: :COMMENT,
-        message: "Version changed to a previous version. Previous versions were:\n#{previous_version_list}",
-      }
     end
+
+    return version_decreased_comment if version_decreased
 
     return {
       event: :APPROVE,
