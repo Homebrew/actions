@@ -1,0 +1,20 @@
+name: Remove disabled formulae
+description: Delete formulae that have a disable date of more than one year ago
+author: Rylan12
+branding:
+  icon: trash-2
+  color: red
+outputs:
+  formulae-removed:
+    description: Whether any formulae were removed or not
+    value: ${{steps.remove-formulae.outputs.formulae-removed}}
+runs:
+  using: composite
+  steps:
+    - run: brew ruby "$GITHUB_ACTION_PATH/main.rb"
+      id: remove-formulae
+      shell: bash
+      env:
+        HOMEBREW_NO_ENV_FILTERING: 1
+        HOMEBREW_NO_AUTO_UPDATE: 1
+        HOMEBREW_COLOR: 1
