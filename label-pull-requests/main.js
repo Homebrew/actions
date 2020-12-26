@@ -77,7 +77,6 @@ async function main() {
                 // Continue if the label exists and we aren't going to remove
                 // it regardless of whether it applies or not
                 if (labelExists && constraint.keep_if_no_match) {
-                    constraint.wanted = true
                     continue
                 }
 
