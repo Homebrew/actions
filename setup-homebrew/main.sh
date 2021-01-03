@@ -77,7 +77,7 @@ else
 fi
 
 # Setup Homebrew Bundler RubyGems cache
-GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
+GEMS_PATH="$(brew ruby -e "puts File.realpath('$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/')")"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
 
 echo "::set-output name=gems-path::$GEMS_PATH"
