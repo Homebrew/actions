@@ -74,13 +74,6 @@ async function main() {
                     labelExists = true
                 }
 
-                // Continue if the label exists and we aren't going to remove
-                // it regardless of whether it applies or not
-                if (labelExists && constraint.keep_if_no_match) {
-                    constraint.wanted = true
-                    continue
-                }
-
                 // Check constraints
                 constraintApplies = doesConstraintApply(constraint, file)
 
@@ -131,7 +124,7 @@ async function main() {
             if (constraint.wanted && !updatedLabels.includes(constraint.label)) {
                 updatedLabels.push(constraint.label)
             }
-            if (!constraint.wanted) {
+            if (!constraint.wanted && !constraint.keep_if_no_match) {
                 const index = updatedLabels.indexOf(constraint.label);
                 if (index > -1) {
                     updatedLabels.splice(index, 1);
