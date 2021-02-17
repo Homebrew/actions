@@ -31,7 +31,7 @@ def review_pull_request(pr, ignore_existing_reviews: false)
     return
   end
 
-  reviews = GitHub.open_api("#{pr.fetch("url")}/reviews")
+  reviews = GitHub::API.open_rest("#{pr.fetch("url")}/reviews")
   non_dismissed_reviews = reviews.reject { |r| r.fetch("state") == "DISMISSED" }
   if non_dismissed_reviews.any?
     puts "Pull request #{pr_name} has reviews."
@@ -146,7 +146,7 @@ begin
     event = JSON.parse(File.read(event_path))
 
     # Reload the pull request data in case it changed since the event was triggered.
-    pr = GitHub.open_api(event.fetch("pull_request").fetch("url"))
+    pr = GitHub::API.open_rest(event.fetch("pull_request").fetch("url"))
 
     if output = review_pull_request(pr)
       message = output.fetch(:message)
@@ -160,7 +160,7 @@ begin
     repo = Regexp.last_match[2]
     number = Integer(Regexp.last_match[3])
 
-    pr = GitHub.open_api("https://api.github.com/repos/#{owner}/#{repo}/pulls/#{number}")
+    pr = GitHub::API.open_rest("https://api.github.com/repos/#{owner}/#{repo}/pulls/#{number}")
 
     review = review_pull_request(pr, ignore_existing_reviews: true)
     return unless review
