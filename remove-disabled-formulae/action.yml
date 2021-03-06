@@ -15,6 +15,4 @@ runs:
       id: remove-formulae
       shell: bash
       env:
-        HOMEBREW_NO_ENV_FILTERING: 1
         HOMEBREW_NO_AUTO_UPDATE: 1
-        HOMEBREW_COLOR: 1
