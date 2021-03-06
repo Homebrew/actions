@@ -17,6 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Update brew
+        run: brew update-reset "$(brew --repo)"
+
       - name: Script
         uses: ./brew-script/
         with:
