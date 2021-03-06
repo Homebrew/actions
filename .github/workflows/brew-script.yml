@@ -12,7 +12,7 @@ jobs:
   script:
     runs-on: ubuntu-latest
     env:
-      FILENAME: ".revision"
+      HOMEBREW_FILENAME: ".revision"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,9 +23,9 @@ jobs:
           script: |
             ohai 'test'
             revision = Utils.safe_popen_read("git", "rev-parse", "HEAD")
-            file = ENV["FILENAME"]
+            file = ENV["HOMEBREW_FILENAME"]
             File.write(file, revision)
             $stderr.puts "test"
 
       - name: Test
-        run: test "$GITHUB_SHA" = "$(cat $FILENAME)"
+        run: test "$GITHUB_SHA" = "$(cat $HOMEBREW_FILENAME)"
