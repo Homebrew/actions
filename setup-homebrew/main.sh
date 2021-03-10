@@ -33,12 +33,12 @@ if ! which brew &>/dev/null; then
     HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
     HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
     sudo mkdir -p "$HOMEBREW_PREFIX"
-    sudo git_retry clone https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
+    git_retry clone https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
 
     HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
     sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
     sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
+    git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
 
     cd "$HOMEBREW_PREFIX"
     sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
