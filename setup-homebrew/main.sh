@@ -28,6 +28,12 @@ function git_retry {
   return 0
 }
 
+# Check brew's existence
+if ! which brew &>/dev/null; then
+    echo "Could not find 'brew' command in PATH."
+    exit 1
+fi
+
 # Set basic variables
 HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
