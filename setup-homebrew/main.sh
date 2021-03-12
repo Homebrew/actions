@@ -28,30 +28,16 @@ function git_retry {
   return 0
 }
 
-# Clone Homebrew/brew and Homebrew/linuxbrew-core if necessary.
+# Check brew's existence
 if ! which brew &>/dev/null; then
-    HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
-    HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX/Homebrew"
-    sudo mkdir -p "$HOMEBREW_PREFIX"
-    sudo git_retry clone https://github.com/Homebrew/brew "$HOMEBREW_REPOSITORY"
-
-    HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
-    sudo mkdir -p "$HOMEBREW_CORE_REPOSITORY"
-    sudo rm -rf "$HOMEBREW_CORE_REPOSITORY"
-    sudo git_retry clone https://github.com/Homebrew/linuxbrew-core "$HOMEBREW_CORE_REPOSITORY"
-
-    cd "$HOMEBREW_PREFIX"
-    sudo mkdir -p bin etc include lib opt sbin share var/homebrew/linked Cellar
-    sudo ln -vs ../Homebrew/bin/brew "$HOMEBREW_PREFIX/bin/"
-    cd -
-
-    export PATH="$HOMEBREW_PREFIX/bin:$PATH"
-else
-    HOMEBREW_PREFIX="$(brew --prefix)"
-    HOMEBREW_REPOSITORY="$(brew --repo)"
-    HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
+    echo "Could not find 'brew' command in PATH."
+    exit 1
 fi
 
+# Set basic variables
+HOMEBREW_PREFIX="$(brew --prefix)"
+HOMEBREW_REPOSITORY="$(brew --repo)"
+HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
 # Add brew to PATH
