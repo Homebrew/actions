@@ -9,6 +9,7 @@ async function main() {
         const branch = core.getInput("branch", { required: true })
         const tries = core.getInput("tries", { required: true })
         const force = core.getInput("force")
+        const origin_branch = core.getInput("origin_branch") || branch
 
         const git = "/usr/bin/git"
 
@@ -52,7 +53,7 @@ async function main() {
                 // `git pull` can also fail, so do the same retry procedure here.
                 for (let j = 0; j < tries; j++) {
                     try {
-                        await exec.exec(git, ["pull", "--rebase", "--autostash", remote, branch])
+                        await exec.exec(git, ["pull", "--rebase", "--autostash", remote, origin_branch])
                         break
                     } catch (error) {
                         await exec.exec("sleep", [delay])
