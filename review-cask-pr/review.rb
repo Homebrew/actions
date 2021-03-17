@@ -55,6 +55,13 @@ def review_pull_request(pr, ignore_existing_reviews: false)
       }
     end
 
+    if diff.new_version.include?("\#{")
+      return {
+        event: :COMMENT,
+        message: "Version must not contain interpolation."
+      }
+    end
+
     version_decreased = diff.version_decreased?
     version_decreased_comment = if version_decreased
       {
