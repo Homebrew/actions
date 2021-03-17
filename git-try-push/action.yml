@@ -24,7 +24,10 @@ inputs:
     required: false
     default: "20"
   force:
-    description: Whether to force-with-lease push or not
+    description: Whether to force-with-lease push (rebasing on origin_branch if needed)
+    required: false
+  origin_branch:
+    description: Branch to rebase on, defaults to branch
     required: false
 runs:
   using: node12
