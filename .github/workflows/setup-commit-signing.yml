@@ -1,0 +1,49 @@
+name: Setup GPG commit signing
+
+on:
+  push:
+    paths:
+      - '**setup-commit-signing**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+
+jobs:
+  commit-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Configure git user
+        uses: ./git-user-config/
+        with:
+          username: BrewTestBot
+
+      - name: Set up commit signing
+        id: set-up-commit-signing
+        uses: ./setup-commit-signing/
+        with:
+          signing_key: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY }}
+
+      - name: Make changes and commit them
+        run: |
+          git checkout -b test-setup-commit-signing
+
+          touch test.txt
+          echo "Hello, Homebrew!" >> test.txt
+
+          git add test.txt
+          git commit -m "test.txt: create and add content."
+        env:
+          GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
+
+      - name: Test
+        run: |
+          git log --show-signature -1 | grep "gpg: Good"
+
+      - name: Push commits
+        uses: ./git-try-push/
+        with:
+          token: ${{ github.token }}
+          branch: test-setup-commit-signing
