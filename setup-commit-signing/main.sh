@@ -16,7 +16,7 @@ echo "$GPG_EXEC"' --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --batc
 chmod +x $GPG_WITH_PASSPHRASE
 git config --global gpg.program $GPG_WITH_PASSPHRASE
 
-echo "$GPG_SIGNING_KEY" | base64 --decode --ignore-garbage | gpg --batch --no-tty --quiet --yes --import
+echo "$GPG_SIGNING_KEY" | base64 --decode | gpg --batch --no-tty --quiet --yes --import
 GPG_KEY_ID=$(gpg --list-keys --with-colons | sed -ne "/^sub:/ p;" | cut -d: -f5)
 
 git config --global user.signingkey $GPG_KEY_ID
