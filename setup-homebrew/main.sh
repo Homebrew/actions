@@ -40,8 +40,14 @@ HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
-# Add brew to PATH
-echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
+# Do in container or on the runner
+if grep -q actions_job /proc/1/cgroup; then
+    # Fix permissions to give normal user access
+    sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
+else
+    # Add brew to PATH
+    echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
+fi
 
 # Setup Homebrew/brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
