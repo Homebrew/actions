@@ -1,0 +1,17 @@
+name: setup-commit-signing
+description: Set up GPG commit signing
+author: nandahkrishna
+branding:
+  icon: user-check
+  color: green
+inputs:
+  signing_key:
+    description: Secret key to use for signing commits
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: |
+        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.signing_key }}'
+      shell: bash
+      id: setup
