@@ -7,6 +7,8 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'node_modules/**'
+    branches-ignore:
+      - master
 
 jobs:
   commit-signing:
