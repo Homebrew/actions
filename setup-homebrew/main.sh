@@ -43,7 +43,7 @@ HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-ca
 # Do in container or on the runner
 if grep -q actions_job /proc/1/cgroup; then
     # Fix permissions to give normal user access
-    sudo chown -R "$(whoami)" "$HOME" "$GITHUB_WORKSPACE/.."
+    sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
 else
     # Add brew to PATH
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
