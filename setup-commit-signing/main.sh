@@ -12,7 +12,7 @@ GPG_EXEC=$(command -v gpg)
 
 # Wrapper script to use passphrase non-interactively with git
 GPG_WITH_PASSPHRASE=$(mktemp)
-echo "$GPG_EXEC"' --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --batch --no-tty "$@"' > $GPG_WITH_PASSPHRASE
+echo "$GPG_EXEC"' --pinentry-mode loopback --passphrase "$HOMEBREW_GPG_PASSPHRASE" --batch --no-tty "$@"' > $GPG_WITH_PASSPHRASE
 chmod +x $GPG_WITH_PASSPHRASE
 git config --global gpg.program $GPG_WITH_PASSPHRASE
 

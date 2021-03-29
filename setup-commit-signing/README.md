@@ -12,7 +12,7 @@ An action that sets up GPG commit signing.
     signing_key: ${{ secrets.GPG_SIGNING_KEY }}
 ```
 
-When committing changes, ensure that the value of the environment variable `GPG_PASSPHRASE` is set to the signing key's passphrase.
+When committing changes, ensure that the value of the environment variable `HOMEBREW_GPG_PASSPHRASE` is set to the signing key's passphrase.
 
 ```yaml
 - name: Add and commit changes
@@ -20,5 +20,5 @@ When committing changes, ensure that the value of the environment variable `GPG_
     git add file.txt
     git commit -m "Updated file.txt"
   env:
-    GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    HOMEBREW_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 ```
