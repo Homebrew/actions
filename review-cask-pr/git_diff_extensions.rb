@@ -1,6 +1,30 @@
 require "git_diff"
 
 module GitDiffExtension
+  def self.version_to_regex(version)
+    current = version
+    regex_parts = []
+
+    loop do
+      head, sep, tail = current.partition(/\W/)
+
+      break if head.empty?
+
+      regex_parts.push case head
+      when /\A\d+\Z/
+        '\d+'
+      when /\A[0-9a-f]+\Z/
+        "[0-9a-f]{#{head.length}}"
+      else
+        Regexp.escape(head)
+      end
+      regex_parts.push Regexp.escape(sep)
+      current = tail
+    end
+
+    Regexp.new("\\A#{regex_parts.join}\\Z")
+  end
+
   refine GitDiff::Diff do
     def cask_name
       File.basename(files.first.b_path, '.rb') if single_cask?
@@ -33,7 +57,8 @@ module GitDiffExtension
     end
 
     def version_format_changed?
-      old_version_parts.count != new_version_parts.count
+      old_version_regex = GitDiffExtension.version_to_regex(old_version)
+      !old_version_regex.match?(new_version)
     end
 
     def version_decreased?
