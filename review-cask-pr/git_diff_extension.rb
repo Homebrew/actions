@@ -16,7 +16,7 @@ module GitDiffExtension
       when /\A[0-9a-f]+\Z/
         "[0-9a-f]{#{head.length}}"
       else
-        Regexp.escape(head)
+        Regexp.escape(head).gsub(/\d+/, "\\d+")
       end
       regex_parts.push Regexp.escape(sep)
       current = tail
