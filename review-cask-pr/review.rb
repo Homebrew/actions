@@ -6,7 +6,7 @@ require "English"
 Homebrew.install_gem! "git_diff"
 require "git_diff"
 
-require_relative "git_diff_extensions"
+require_relative "git_diff_extension"
 using GitDiffExtension
 
 require "utils/github"
@@ -27,25 +27,53 @@ def review_pull_request(pr, ignore_existing_reviews: false)
   pr_name = "#{repo}##{number}"
 
   if pr.fetch("draft")
-    puts "Pull request #{pr_name} is a draft."
-    return
+    return {
+      event: nil,
+      message: "Pull request #{pr_name} is a draft."
+    }
   end
 
   reviews = GitHub::API.open_rest("#{pr.fetch("url")}/reviews")
   non_dismissed_reviews = reviews.reject { |r| r.fetch("state") == "DISMISSED" }
   if non_dismissed_reviews.any?
-    puts "Pull request #{pr_name} has reviews."
-    return unless ignore_existing_reviews
+    unless ignore_existing_reviews
+      return {
+        event: nil,
+        message: "Pull request #{pr_name} has reviews.",
+      }
+    end
   end
 
+  review_diff(pr, author_is_member: pr.fetch("author_association") == "MEMBER")
+end
+
+def fetch_previous_versions(pr, path)
+  Dir.mktmpdir do |repo_dir|
+    branch = pr.fetch("base").fetch("ref")
+    clone_url = pr.fetch("base").fetch("repo").fetch("clone_url")
+
+    system 'git', 'clone', '-b', branch, clone_url, repo_dir
+    raise unless $CHILD_STATUS.success?
+
+    out, err, status = Open3.capture3(
+      'git', '-C', repo_dir, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', path,
+    )
+    raise err unless status.success?
+
+    version_diff = GitDiff.from_string(out)
+    version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
+  end
+end
+
+def review_diff(pr, author_is_member: false)
   diff = diff_for_pull_request(pr)
 
   unless diff.simple?
-    puts "Pull request #{pr_name} is not a “simple” version bump."
-    return
+    return {
+      event: nil,
+      message: "Not a “simple” version bump.",
+    }
   end
-
-  author_is_member = pr.fetch("author_association") == "MEMBER"
 
   if diff.version_changed?
     if diff.version_format_changed?
@@ -71,21 +99,7 @@ def review_pull_request(pr, ignore_existing_reviews: false)
     end
     return version_decreased_comment if version_decreased && !author_is_member
 
-    previous_versions = Dir.mktmpdir do |repo_dir|
-      branch = pr.fetch("base").fetch("ref")
-      clone_url = pr.fetch("base").fetch("repo").fetch("clone_url")
-
-      system 'git', 'clone', '-b', branch, clone_url, repo_dir
-      raise unless $CHILD_STATUS.success?
-
-      out, err, status = Open3.capture3(
-        'git', '-C', repo_dir, 'log', '--pretty=format:', '-G', '\s+version\s+(\'|")', '--follow', '--patch', '--', diff.cask_path,
-      )
-      raise err unless status.success?
-
-      version_diff = GitDiff.from_string(out)
-      version_diff.additions.select { |l| l.version? }.map { |l| l.version }.uniq
-    end
+    previous_versions = fetch_previous_versions(pr, diff.cask_path)
 
     if previous_versions.include?(diff.new_version)
       if author_is_member && pr.fetch("title").start_with?("Revert ") &&
@@ -145,6 +159,8 @@ def review_pull_request(pr, ignore_existing_reviews: false)
   }
 end
 
+return unless __FILE__ == $0
+
 begin
   event_name, event_path, = ARGV
 
@@ -156,10 +172,12 @@ begin
     pr = GitHub::API.open_rest(event.fetch("pull_request").fetch("url"))
 
     if output = review_pull_request(pr)
+      event = output.fetch(:event)
       message = output.fetch(:message)
 
       puts message
-      puts "::set-output name=event::#{output.fetch(:event)}"
+
+      puts "::set-output name=event::#{event}"
       puts "::set-output name=message::#{GitHub::Actions.escape(message)}"
     end
   when %r{^https://github.com/([^\/]+)/([^\/]+)/pull/(\d+)}
@@ -172,8 +190,8 @@ begin
     review = review_pull_request(pr, ignore_existing_reviews: true)
     return unless review
 
-    puts review[:event]
-    puts review[:message]
+    puts review.fetch(:event)
+    puts review.fetch(:message)
   else
     raise "Unsupported GitHub Actions event: #{event_name.inspect}"
   end

@@ -1,0 +1,26 @@
+name: Review Cask PR Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - '**review-cask-pr**'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+
+      - name: Run RSpec
+        run: |
+          gem install git_diff
+          gem install rspec
+
+          rspec
+        working-directory: review-cask-pr
