@@ -21,6 +21,7 @@ jobs:
           failure_label: enhancement
 
       - name: Unlabel
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           PR: ${{github.event.pull_request.number}}
