@@ -23,6 +23,7 @@ async function main() {
         let is_success = true
         let message = "Commit format is correct."
         let files_touched = []
+        let target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
 
         // For each commit...
         for (const commit of commits.data) {
@@ -59,10 +60,22 @@ async function main() {
                     message = "Pull request will be autosquashed."
                 }
                 files_touched.push(file.filename)
+            } else if (file.filename.startsWith("Casks/")) {
+                message = "Commit modifies cask."
+                target_url = "https://github.com/Homebrew/homebrew-cask/blob/HEAD/CONTRIBUTING.md#style-guide"
+
+                if(!files_touched.includes(file.filename)) {
+                    files_touched.push(file.filename)
+                }
+
+                if (files_touched.length > 1) {
+                    is_success = false
+                    message = "A pull request must not modify multiple casks."
+                }
             } else {
-                // Autosquash isn't great at modifying commits that don't modify formulae.
+                // Autosquash isn't great at modifying commits that don't modify formulae or casks.
                 is_success = false
-                message = `${short_sha} modifies non-formulae files (maintainers must merge manually)`
+                message = `${short_sha} modifies non-formulae or non-cask files (maintainers must merge manually)`
                 break
             }
         }
@@ -76,7 +89,7 @@ async function main() {
             state: "success",
             description: message,
             context: "Commit style",
-            target_url: "https://docs.brew.sh/Formula-Cookbook#commit"
+            target_url: target_url
         })
 
         // Get existing labels on PR
