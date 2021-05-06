@@ -1,0 +1,42 @@
+name: Create a self-hosted Linux runner
+description: Create a self-hosted Linux runner using Google Cloud
+author: iMichka
+branding:
+  icon: settings
+  color: purple
+inputs:
+  runner_name:
+     description: Name of the self-hosted runner
+     required: true
+     default: false
+  gcp_project_id:
+    description: Google Cloud Platform project ID
+    required: true
+    default: false
+  gcp_service_account:
+    description: Google Cloud service account login
+    required: true
+    default: false
+  gcp_sa_key:
+    description: Google Cloud service account login
+    required: true
+    default: false
+  github_token:
+    description: GitHub token (with public repo scope)
+    required: true
+    default: false
+  repository_name:
+    description: Full name of the repository
+    required: false
+    default: ${{github.repository}}
+runs:
+  using: composite
+  steps:
+    - run: bash "$GITHUB_ACTION_PATH/create-gcloud-instance.sh"
+      env:
+        RUNNER_NAME: ${{ inputs.runner_name }}
+        GCP_PROJECT_ID: ${{ inputs.gcp_project_id }}
+        GCP_SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        GCP_SA_KEY: ${{ inputs.gcp_sa_key }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        REPOSITORY_NAME: ${{ inputs.repository_name }}
