@@ -1,0 +1,23 @@
+name: Test create gcloud install
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths: 
+      - 'wait-for-idle-runner/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm install @octokit/action
+      - name: Check scripts
+        run: |
+          node --check wait-for-idle-runner/main.js

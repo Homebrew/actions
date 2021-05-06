@@ -1,0 +1,26 @@
+name: Wait for idle runner
+description: Wait until a self-hosted runner is idle
+author: iMichka
+branding:
+  icon: message-square
+  color: purple
+inputs:
+  github_token:
+    description: GitHub token
+    required: true
+  runner_name:
+    description: Name of the self-hosted runner
+    required: true
+  repository_name:
+    description: Full name of the repository
+    required: true
+    default: ${{ github.event.repository.full_name }}
+outputs:
+  runner-found:
+    description: Runner exists (true/false)
+  runner-idle:
+    description: Runner is idle (true/false)
+runs:
+  using: node12
+  main: main.js
+  id: killable
