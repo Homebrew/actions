@@ -32,6 +32,12 @@ async function main() {
             pull_number: pull.number
         })
 
+        // Fetch PR body
+        const { data: { body: body } } = await client.pulls.get({
+            ...github.context.repo,
+            pull_number: pull.number
+        })
+
         // Extend every file object with its content
         for (const file of files.data) {
             // File object could have this field set as 'null'
@@ -66,6 +72,11 @@ async function main() {
         // Match files with given constraints
         for (const file of files.data) {
             for (const constraint of constraints) {
+                // Constraints that check the PR body are checked separately
+                if (constraint.pr_body_content) {
+                    continue
+                }
+
                 let constraintApplies = false
                 let labelExists = false
 
@@ -120,6 +131,45 @@ async function main() {
             }
 
             constraintToMatchingFiles.delete(constraint)
+        }
+
+        for (const constraint of constraints) {
+            // Only check constraints that check the PR body here
+            if (!constraint.pr_body_content) {
+                continue
+            }
+
+            let constraintApplies = false
+            let labelExists = false
+
+            // Possible unwanted label
+            if (existingLabels.includes(constraint.label)) {
+                labelExists = true
+            }
+
+            constraintApplies = body.match(constraint.pr_body_content)
+
+            if (labelExists && constraintApplies) {
+                continue
+            }
+            if (!labelExists && !constraintApplies) {
+                continue
+            }
+
+            // Unwanted label
+            if (labelExists && !constraintApplies) {
+                constraint.wanted = false
+            }
+
+            // Wanted label
+            if (!labelExists && constraintApplies) {
+                constraint.wanted = true
+            }
+
+            // Init map key if not found
+            if (!constraintToMatchingFiles.has(constraint)) {
+                constraintToMatchingFiles.set(constraint, [])
+            }
         }
 
         // Copy labels into new Array
