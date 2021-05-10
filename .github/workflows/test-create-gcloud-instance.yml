@@ -1,0 +1,24 @@
+name: Test create gcloud install
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths: 
+      - 'create-gcloud-instance/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'node_modules/**'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install shellcheck
+        run: brew install shellcheck
+      - name: Check scripts
+        run: |
+          shellcheck --enable=all create-gcloud-instance/*.sh
