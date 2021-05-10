@@ -20,6 +20,7 @@ inputs:
         - "except" (optional): File path(s) to exclude
         - "content" (optional): Changed file content, regex matching
         - "missing_content" (optional): Missing file content, regex matching
+        - "pr_body_content" (optional): Regex to check against the PR body
 
       Example:
         [
@@ -40,6 +41,9 @@ inputs:
           }, {
             "label": "missing license",
             "missing_content": "license \"[^"]+\""
+          }, {
+            "label": "bump-formula-pr",
+            "pr_body_content": "Created with `brew bump-formula-pr`"
           }
         ]
     required: true

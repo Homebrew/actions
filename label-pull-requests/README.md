@@ -40,6 +40,10 @@ Will remove labels from a pull request that no longer apply.
               "label": "automerge-skip",
               "path": "Formula/(patchelf|binutils).rb",
               "keep_if_no_match": true
+          },
+          {
+              "label": "bump-formula-pr",
+              "pr_body_content": "Created with `brew bump-formula-pr`"
           }
       ]
 ```
