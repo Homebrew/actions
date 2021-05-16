@@ -23,4 +23,3 @@ outputs:
 runs:
   using: node12
   main: main.js
-  id: killable
