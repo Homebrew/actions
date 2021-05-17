@@ -1,0 +1,21 @@
+name: Wait for idle runner
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - "**wait-for-idle-runner**"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check scripts
+        run: node --check wait-for-idle-runner/main.js
