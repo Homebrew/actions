@@ -17,9 +17,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
+
       - name: Install shellcheck
         run: brew install shellcheck
+
       - name: Check scripts
         run: shellcheck --enable=all create-gcloud-instance/*.sh
