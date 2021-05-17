@@ -13,5 +13,5 @@ If the runner was found, the `runner-idle` output is set to `true` or `false` ba
   with:
     github_token: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
     runner_name: linux-self-hosted-1
-    repo_name: ${{ github.event.repository.full_name }}
+    repository_name: ${{ github.repository }}
 ```

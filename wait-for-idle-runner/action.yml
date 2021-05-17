@@ -14,7 +14,7 @@ inputs:
   repository_name:
     description: Full name of the repository
     required: true
-    default: ${{ github.event.repository.full_name }}
+    default: ${{github.repository}}
 outputs:
   runner-found:
     description: Runner exists (true/false)
