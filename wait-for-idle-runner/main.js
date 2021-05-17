@@ -1,35 +1,44 @@
-const { Octokit } = require("@octokit/action");
+const core = require('@actions/core')
+const github = require('@actions/github')
 
-const octokit = new Octokit();
-
-const NUMBER_OF_ATTEMPTS = 3000;
-const TIME_BETWEEN_ATTEMPTS_SECONDS = 5000;
+const NUMBER_OF_ATTEMPTS = 3000
+const TIME_BETWEEN_ATTEMPTS_SECONDS = 5000
 
 async function main() {
-  for (var i=0; i < NUMBER_OF_ATTEMPTS; i++) {
-    const result = await octokit.request(`GET /repos/${process.env.REPOSITORY_NAME}/actions/runners`)
+  try {
+    const token = core.getInput("github_token", { required: true })
+    const runnerName = core.getInput("runner_name", { required: true })
+    const repositoryName = core.getInput("repository_name", { required: true })
 
-    // Select the runner based on its name
-    runner = result.data["runners"].filter(function(runner) {
-      return runner.name == process.env.RUNNER_NAME;
-    })[0]
+    const client = github.getOctokit(token)
 
-    if (typeof runner == "undefined") {
-      console.log("::set-output name=runner-found::false");
-      return;
+    for (var i = 0; i < NUMBER_OF_ATTEMPTS; i++) {
+      const result = await client.request(`GET /repos/${repositoryName}/actions/runners`)
+
+      // Select the runner based on its name
+      const runner = result.data["runners"].find(runner => runner.name == runnerName)
+
+      if (!runner) {
+        core.setOutput("runner-found", false)
+        return
+      }
+
+      if (!runner.busy) {
+        core.setOutput("runner-found", true)
+        core.setOutput("runner-idle", true)
+        return
+      }
+
+      core.info("Runner is busy, waiting...")
+      await new Promise(resolve => setTimeout(resolve, TIME_BETWEEN_ATTEMPTS_SECONDS))
     }
 
-    if (runner.busy == false) {
-      console.log("::set-output name=runner-found::true");
-      console.log("::set-output name=runner-idle::true");
-      return;
-    }
+    core.setOutput("runner-found", true)
+    core.setOutput("runner-idle", false)
 
-    await new Promise(resolve => setTimeout(resolve, TIME_BETWEEN_ATTEMPTS_SECONDS));
+  } catch (error) {
+    core.setFailed(error.message)
   }
-
-  console.log("::set-output name=runner-found::true");
-  console.log("::set-output name=runner-idle::false");
 }
 
 main()
