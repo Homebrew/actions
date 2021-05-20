@@ -15,4 +15,5 @@ The GITHUB_TOKEN has to have "public repo" access.
     gcp_service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
     gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
     github_token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
+    repository_name: Homebrew/homebrew-core
 ```
