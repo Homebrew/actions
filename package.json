@@ -1,7 +1,7 @@
 {
   "name": "homebrew-actions",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.4.0",
     "@actions/exec": "^1.0.4",
     "@actions/github": "^4.0.0",
     "adm-zip": "^0.5.4",
