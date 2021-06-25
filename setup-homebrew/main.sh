@@ -49,9 +49,6 @@ else
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
 fi
 
-# TODO: can be removed when GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED is no longer used in Homebrew/homebrew-core.
-[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ] && GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED=1
-
 # Setup Homebrew/brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     cd "$HOMEBREW_REPOSITORY"
