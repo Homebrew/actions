@@ -49,11 +49,14 @@ else
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
 fi
 
+# TODO: can be removed when GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED is no longer used in Homebrew/homebrew-core.
+[ -n "${GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED-}" ] && GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED=1
+
 # Setup Homebrew/brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     cd "$HOMEBREW_REPOSITORY"
     rm -rf "$GITHUB_WORKSPACE"
-    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED-}" ]]; then
         mkdir -vp "$GITHUB_WORKSPACE"
     else
         ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
@@ -79,7 +82,7 @@ echo "::set-output name=gems-hash::$GEMS_HASH"
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd "$HOMEBREW_CORE_REPOSITORY"
     rm -rf "$GITHUB_WORKSPACE"
-    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED-}" ]]; then
         mkdir -vp "$GITHUB_WORKSPACE"
     else
         ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
@@ -89,10 +92,11 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     git remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
+# Setup all other taps
 else
     if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-        if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-            echo "Self-hosted runners not supported for this tap!"
+        if [[ -n "${GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED-}" ]]; then
+            echo "macOS self-hosted runners not supported for this tap!"
             exit 1
         fi
 
