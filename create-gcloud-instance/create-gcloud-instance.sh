@@ -5,7 +5,7 @@ set -eo pipefail
 VM_TOKEN=$(curl --silent -X POST -H "authorization: token ${GITHUB_TOKEN}" "https://api.github.com/repos/${REPOSITORY_NAME}/actions/runners/registration-token" | jq -r .token)
 
 GCLOUD_SCOPES="https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
-GCLOUD_IMAGE="ubuntu-2004-focal-v20210510"
+GCLOUD_IMAGE="ubuntu-2004-lts"
 GCLOUD_ZONE="europe-west1-b"
 GCLOUD_MACHINE="e2-standard-2"
 GCLOUD_DISK_SIZE="30GB"
@@ -33,7 +33,7 @@ gcloud compute --project="${GCP_PROJECT_ID}" instances create "${RUNNER_NAME}" \
                --maintenance-policy=MIGRATE \
                --service-account="${GCP_SERVICE_ACCOUNT}" \
                --scopes="${GCLOUD_SCOPES}" \
-               --image="${GCLOUD_IMAGE}" \
+               --image-family="${GCLOUD_IMAGE}" \
                --image-project=ubuntu-os-cloud \
                --boot-disk-size="${GCLOUD_DISK_SIZE}" \
                --boot-disk-type=pd-ssd \
