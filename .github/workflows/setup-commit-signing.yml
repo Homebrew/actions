@@ -49,3 +49,4 @@ jobs:
         with:
           token: ${{ github.token }}
           branch: test-setup-commit-signing
+          force: true
