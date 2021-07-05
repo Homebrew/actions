@@ -41,7 +41,7 @@ HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-co
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
 # Do in container or on the runner
-if grep -q actions_job /proc/1/cgroup; then
+if [[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup; then
     # Fix permissions to give normal user access
     sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
 else
