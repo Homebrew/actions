@@ -1,8 +1,8 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 
-const NUMBER_OF_ATTEMPTS = 3000
-const TIME_BETWEEN_ATTEMPTS_SECONDS = 5000
+const NUMBER_OF_ATTEMPTS = 300
+const TIME_BETWEEN_ATTEMPTS_SECONDS = 60
 
 async function main() {
   try {
@@ -30,7 +30,7 @@ async function main() {
       }
 
       core.info("Runner is busy, waiting...")
-      await new Promise(resolve => setTimeout(resolve, TIME_BETWEEN_ATTEMPTS_SECONDS))
+      await new Promise(resolve => setTimeout(resolve, 1000*TIME_BETWEEN_ATTEMPTS_SECONDS))
     }
 
     core.setOutput("runner-found", true)
