@@ -44,6 +44,7 @@ HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-ca
 if [[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup; then
     # Fix permissions to give normal user access
     sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
+    HOMEBREW_IN_CONTAINER=1
 else
     # Add brew to PATH
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
@@ -131,8 +132,10 @@ else
             git init
             git remote add origin "https://github.com/$GITHUB_REPOSITORY"
         fi
-        rm -rf "$GITHUB_WORKSPACE"
-        ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+        if [[ -z "${HOMEBREW_IN_CONTAINER-}" ]]; then
+            rm -rf "$GITHUB_WORKSPACE"
+            ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+        fi
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
         git remote set-head origin --auto
         head="$(git symbolic-ref refs/remotes/origin/HEAD)"
