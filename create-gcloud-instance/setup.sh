@@ -1,5 +1,4 @@
 #!/bin/bash
-set -xeo pipefail
 
 RUNNER_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/RUNNER_NAME -H "Metadata-Flavor: Google")
 VM_TOKEN=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/VM_TOKEN -H "Metadata-Flavor: Google")
