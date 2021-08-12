@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xeo pipefail
 
 RUNNER_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/RUNNER_NAME -H "Metadata-Flavor: Google")
 VM_TOKEN=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/VM_TOKEN -H "Metadata-Flavor: Google")
@@ -33,9 +34,13 @@ if [ ! -d "/home/actions" ]; then
     # This needs to be run with the actions user:
     su -c "/home/actions/install_runner.sh" actions
 
+    # Disable pipefail as this breaks installdependencies.sh
+    # See https://github.com/actions/runner/pull/1228#issuecomment-896242967
+    set +xeo pipefail
     # This needs to be run as root:
     # shellcheck disable=SC1091
     source /home/actions/actions-runner/bin/installdependencies.sh
+    set -xeo pipefail
 
     # This needs to be run with the actions user:
     RUNNER_NAME=${RUNNER_NAME} VM_TOKEN=${VM_TOKEN} REPOSITORY_NAME=${REPOSITORY_NAME} GITHUB_TOKEN=${GITHUB_TOKEN} su -c "/home/actions/config_runner.sh" actions
