@@ -1,0 +1,22 @@
+name: Bump formulae
+
+on:
+  pull_request:
+    paths:
+      - "**bump-formulae**"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Bump
+        uses: ./bump-formulae/
+        with:
+          token: ${{github.token}}
+          formulae: hello
