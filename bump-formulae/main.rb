@@ -27,7 +27,7 @@ module Homebrew
   formulae = formulae.split(/[ ,\n]/).reject(&:blank?)
 
   # Define additional message
-  message = 'Automated bump'
+  message = 'Automated bump.'
 
   # Get livecheck info
   json = read_brew 'livecheck',
