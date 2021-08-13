@@ -1,0 +1,22 @@
+name: Bump formulae
+description: Bump (update) Homebrew outdated formulae
+author: dawidd6
+branding:
+  icon: arrow-up-circle
+  color: yellow
+inputs:
+  token:
+    description: GitHub token (not the default one)
+    required: true
+  formulae:
+    description: Formula names, one per line
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: brew ruby $GITHUB_ACTION_PATH/main.rb
+      shell: sh
+      env:
+        HOMEBREW_DEVELOPER: "1"
+        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
+        HOMEBREW_BUMP_FORMULAE: ${{inputs.formulae}}
