@@ -231,7 +231,7 @@ function doesConstraintApply(constraint, file) {
 
     if (constraint.content) {
         if (Array.isArray(constraint.content)) {
-            for (const content in constraint.content) {
+            for (const content of constraint.content) {
                 if (!file.content.match(content)) {
                     return false
                 }
@@ -243,7 +243,7 @@ function doesConstraintApply(constraint, file) {
 
     if (constraint.missing_content) {
         if (Array.isArray(constraint.missing_content)) {
-            for (const content in constraint.missing_content) {
+            for (const content of constraint.missing_content) {
                 if (file.content.match(content)) {
                     return false
                 }
