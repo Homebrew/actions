@@ -17,9 +17,9 @@ inputs:
         - "label" (required): Label name, that should be added to PR
         - "status" (optional): File status, one of: added, modified, removed
         - "path" (optional): Changed file path, regex matching
-        - "except" (optional): File path(s) to exclude
-        - "content" (optional): Changed file content, regex matching
-        - "missing_content" (optional): Missing file content, regex matching
+        - "except" (optional): File path to exclude (can be a list)
+        - "content" (optional): Changed file contents, regex matching (can be a list)
+        - "missing_content" (optional): Missing file contents, regex matching (can be a list)
         - "pr_body_content" (optional): Regex to check against the PR body
 
       Example:
