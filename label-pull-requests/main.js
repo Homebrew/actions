@@ -229,12 +229,28 @@ function doesConstraintApply(constraint, file) {
         }
     }
 
-    if (constraint.content && !file.content.match(constraint.content)) {
-        return false
+    if (constraint.content) {
+        if (Array.isArray(constraint.content)) {
+            for (const content in constraint.content) {
+                if (!file.content.match(content)) {
+                    return false
+                }
+            }
+        } else if (!file.content.match(constraint.content)) {
+            return false
+        }
     }
 
-    if (constraint.missing_content && file.content.match(constraint.missing_content)) {
-        return false
+    if (constraint.missing_content) {
+        if (Array.isArray(constraint.missing_content)) {
+            for (const content in constraint.missing_content) {
+                if (file.content.match(content)) {
+                    return false
+                }
+            }
+        } else if (file.content.match(constraint.missing_content)) {
+            return false
+        }
     }
 
     return true
