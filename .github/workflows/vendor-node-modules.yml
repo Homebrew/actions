@@ -50,5 +50,6 @@ jobs:
       - name: Push to pull request
         uses: ./git-try-push/
         with:
+          token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
           branch: ${{ steps.checkout.outputs.branch }}
           force: true
