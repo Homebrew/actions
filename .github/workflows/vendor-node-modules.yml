@@ -1,0 +1,54 @@
+name: Vendor node_modules
+
+on:
+  pull_request_target:
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number
+        required: true
+
+jobs:
+  vendor-node-modules:
+    if: >
+      startsWith(github.repository, 'Homebrew/') && (
+        github.event_name == 'workflow_dispatch' ||
+        github.event.pull_request.user.login == 'dependabot[bot]'
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Configure Git user
+        uses: ./git-user-config/
+        with:
+          username: BrewTestBot
+      - name: Set up commit signing
+        uses: ./setup-commit-signing/
+        with:
+          signing_key: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY }}
+      - name: Check out pull request
+        id: checkout
+        run: |
+          gh pr checkout '${{ github.event.pull_request.number || github.event.inputs.pull_request }}'
+
+          branch="$(git branch --show-current)"
+          echo "::set-output name=branch::${branch}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Vendor node_modules
+        env:
+          HOMEBREW_GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
+        run: |
+          npm install
+
+          git add node_modules
+          git commit -m "node_modules: update"
+      - name: Push to pull request
+        uses: ./git-try-push/
+        with:
+          branch: ${{ steps.checkout.outputs.branch }}
+          force: true
