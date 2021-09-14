@@ -40,14 +40,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
+        id: vendor
         env:
           HOMEBREW_GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
         run: |
           npm install
 
-          git add node_modules
-          git commit -m "node_modules: update"
+          if ! git diff --stat --exit-code node_modules; then
+            git add node_modules
+            git commit -m "node_modules: update"
+            echo "::set-output name=committed::true"
+          fi
       - name: Push to pull request
+        if: steps.vendor.outputs.committed == 'true'
         uses: ./git-try-push/
         with:
           token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
