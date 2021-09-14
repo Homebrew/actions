@@ -2,23 +2,30 @@ name: Vendor node_modules
 
 on:
   pull_request_target:
+    types:
+      - labeled
   workflow_dispatch:
     inputs:
       pull_request:
         description: Pull request number
         required: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   vendor-node-modules:
     if: >
       startsWith(github.repository, 'Homebrew/') && (
         github.event_name == 'workflow_dispatch' ||
-        github.event.pull_request.user.login == 'dependabot[bot]'
+        contains(github.event.pull_request.labels.*.name, 'update node_modules')
       )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        persist-credentials: false
       - uses: actions/setup-node@v2
         with:
           node-version: '12'
@@ -40,19 +47,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
-        id: vendor
+        run: npm install
+      - name: Commit changes
+        id: commit
         env:
           HOMEBREW_GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
         run: |
-          npm install
-
           if ! git diff --stat --exit-code node_modules; then
             git add node_modules
             git commit -m "node_modules: update"
             echo "::set-output name=committed::true"
           fi
       - name: Push to pull request
-        if: steps.vendor.outputs.committed == 'true'
+        if: steps.commit.outputs.committed == 'true'
         uses: ./git-try-push/
         with:
           token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
