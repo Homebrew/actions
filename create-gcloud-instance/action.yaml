@@ -35,7 +35,7 @@ runs:
     - run: "$GITHUB_ACTION_PATH/create-gcloud-instance.sh"
       shell: bash
       env:
-        RUNNER_NAME: ${{ inputs.runner_name }}
+        GCP_RUNNER_NAME: ${{ inputs.runner_name }}
         GCP_PROJECT_ID: ${{ inputs.gcp_project_id }}
         GCP_SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         GCP_SA_KEY: ${{ inputs.gcp_sa_key }}
