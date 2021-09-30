@@ -147,10 +147,8 @@ async function main() {
                 labelExists = true
             }
 
-            if (body != null) {
+            if (body) {
             	constraintApplies = body.match(constraint.pr_body_content)
-	    } else {
-		constraintApplies = true
 	    }
 
             if (labelExists && constraintApplies) {
