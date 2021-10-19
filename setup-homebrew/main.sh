@@ -144,6 +144,13 @@ else
         cd -
     fi
 
+    # Migrate linuxbrew-core to homebrew-core
+    HOMEBREW_CORE_REPOSITORY_ORIGIN="$(git -C "$HOMEBREW_CORE_REPOSITORY" remote get-url origin 2>/dev/null)"
+    if [[ "$HOMEBREW_CORE_REPOSITORY_ORIGIN" == "https://github.com/Homebrew/linuxbrew-core" ]]
+    then
+        git -C "$HOMEBREW_CORE_REPOSITORY" remote set-url origin "https://github.com/Homebrew/homebrew-core"
+    fi
+
     git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
     git -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
     git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
