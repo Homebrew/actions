@@ -43,10 +43,3 @@ jobs:
       - name: Test
         run: |
           git log --show-signature -1 | grep "gpg: Good"
-
-      - name: Push commits
-        uses: ./git-try-push/
-        with:
-          token: ${{ github.token }}
-          branch: test-setup-commit-signing
-          force: true
