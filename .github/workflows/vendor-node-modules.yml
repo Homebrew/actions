@@ -1,33 +1,22 @@
 name: Vendor node_modules
 
 on:
-  pull_request_target:
-    types:
-      - labeled
-  workflow_dispatch:
-    inputs:
-      pull_request:
-        description: Pull request number
-        required: true
-
-permissions:
-  contents: read
-  pull-requests: read
+  push:
+    branches:
+      - 'dependabot/**'
 
 jobs:
   vendor-node-modules:
-    if: >
-      startsWith(github.repository, 'Homebrew/') && (
-        github.event_name == 'workflow_dispatch' ||
-        contains(github.event.pull_request.labels.*.name, 'update node_modules')
-      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v2
+          fetch-depth: 0
+          token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
+      - name: Set up Node
+        uses: actions/setup-node@v2
         with:
           node-version: '12'
       - name: Configure Git user
@@ -38,31 +27,14 @@ jobs:
         uses: ./setup-commit-signing/
         with:
           signing_key: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY }}
-      - name: Check out pull request
-        id: checkout
-        run: |
-          gh pr checkout '${{ github.event.pull_request.number || github.event.inputs.pull_request }}'
-
-          branch="$(git branch --show-current)"
-          echo "::set-output name=branch::${branch}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
         run: npm install
-      - name: Commit changes
-        id: commit
+      - name: Commit and push changes
         env:
           HOMEBREW_GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
         run: |
           if ! git diff --stat --exit-code node_modules; then
             git add node_modules
             git commit -m "node_modules: update"
-            echo "::set-output name=committed::true"
+            git push
           fi
-      - name: Push to pull request
-        if: steps.commit.outputs.committed == 'true'
-        uses: ./git-try-push/
-        with:
-          token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
-          branch: ${{ steps.checkout.outputs.branch }}
-          force: true
