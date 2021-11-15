@@ -62,31 +62,31 @@ Will remove labels from a pull request that no longer apply.
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
     def: |
-      new formula:
+      - label: new formula
         status: added
         path: Formula/.+
 
-      bottle unneeded:
+      - label: bottle unneeded
         content: bottle :unneeded
         path: Formula/.+
 
-      legacy:
+      - label: legacy
         path: Formula/.+@.+
         except:
           - Formula/python@3.8
           - Formula/python@3.9
 
-      missing license:
+      - label: missing license
         missing_content: license "[^"]+"
         path: Formula/.+
 
-      automerge-skip:
+      - label: automerge-skip
         path: Formula/(patchelf|binutils).rb
         keep_if_no_match: true
 
-      bump-formula-pr:
+      - label: bump-formula-pr
         pr_body_content: Created with `brew bump-formula-pr`
 
-      documentation:
+      - label: documentation
         path: .*\.md
 ```

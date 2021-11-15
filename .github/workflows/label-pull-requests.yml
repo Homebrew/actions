@@ -36,7 +36,7 @@ jobs:
         uses: ./label-pull-requests/
         with:
           def: |
-            invalid:
+            - label: invalid
               path: .+
 
       - name: Unlabel

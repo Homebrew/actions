@@ -53,26 +53,26 @@ inputs:
         YAML Example:
 
           def: |
-            new formula:
+            - label: new formula
               status: added
               path: Formula/.+
 
-            bottle unneeded:
+            - label: bottle unneeded
               content: bottle :unneeded
 
-            legacy:
+            - label: legacy
               path: Formula/.+@.+
               except:
                 - Formula/python@3.8
                 - Formula/python@3.9
 
-            missing license:
+            - label: missing license
               missing_content: license "[^"]+"
 
-            bump-formula-pr:
+            - label: bump-formula-pr
               pr_body_content: Created with `brew bump-formula-pr`
 
-            documentation:
+            - label: documentation
               path: .*\.md
 
     required: true
