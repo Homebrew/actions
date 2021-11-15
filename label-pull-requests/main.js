@@ -10,10 +10,13 @@ async function main() {
 
         // Parse definition
         let constraints
-        if (core.getBooleanInput("yaml")) {
-            constraints = Object.entries(yaml.load(def)).map(([label, constraint]) => Object.assign({label}, constraint))
-        } else {
+        try {
+            constraints = yaml.load(def)
+        } catch (error) {
             constraints = JSON.parse(def)
+        }
+        if (!Array.isArray(constraints)) {
+            constraints = Object.entries(constraints).map(([label, constraint]) => Object.assign({label}, constraint))
         }
 
         // Lint constraints

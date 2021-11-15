@@ -9,13 +9,9 @@ inputs:
     description: GitHub token
     required: false
     default: ${{github.token}}
-  yaml:
-    description: Whether to load `def` as YAML
-    required: false
-    default: false
   def:
     description: |
-      Definition in JSON format (or YAML string if `yaml` is `true`).
+      Definition in either JSON or YAML format.
 
       It's an array of objects containing the following fields:
         - "label" (required): Label name, that should be added to PR

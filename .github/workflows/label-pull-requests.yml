@@ -35,7 +35,6 @@ jobs:
       - name: Test YAML
         uses: ./label-pull-requests/
         with:
-          yaml: true
           def: |
             invalid:
               path: .+

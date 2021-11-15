@@ -61,7 +61,6 @@ Will remove labels from a pull request that no longer apply.
   uses: Homebrew/actions/label-pull-requests@master
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
-    yaml: true
     def: |
       new formula:
         status: added
