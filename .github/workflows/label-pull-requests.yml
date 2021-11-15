@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Test
+      - name: Test JSON
         uses: ./label-pull-requests/
         with:
           def: |
@@ -31,3 +31,17 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           PR: ${{github.event.pull_request.number}}
         run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/$PR/labels/wontfix
+
+      - name: Test YAML
+        uses: ./label-pull-requests/
+        with:
+          yaml: true
+          def: |
+            invalid:
+              path: .+
+
+      - name: Unlabel
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          PR: ${{github.event.pull_request.number}}
+        run: gh api -X DELETE repos/$GITHUB_REPOSITORY/issues/$PR/labels/invalid

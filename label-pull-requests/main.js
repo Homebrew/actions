@@ -1,6 +1,7 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const fs = require('fs')
+const yaml = require('js-yaml')
 
 async function main() {
     try {
@@ -8,7 +9,12 @@ async function main() {
         const def = core.getInput("def", { required: true })
 
         // Parse definition
-        const constraints = JSON.parse(def)
+        let constraints
+        if (core.getBooleanInput("yaml")) {
+            constraints = Object.entries(yaml.load(def)).map(([label, constraint]) => Object.assign({label}, constraint))
+        } else {
+            constraints = JSON.parse(def)
+        }
 
         // Lint constraints
         for (const constraint of constraints) {
