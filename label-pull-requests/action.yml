@@ -11,7 +11,7 @@ inputs:
     default: ${{github.token}}
   def:
     description: |
-      Definition in JSON format.
+      Definition in either JSON or YAML format.
 
       It's an array of objects containing the following fields:
         - "label" (required): Label name, that should be added to PR
@@ -22,7 +22,7 @@ inputs:
         - "missing_content" (optional): Missing file contents, regex matching (can be a list)
         - "pr_body_content" (optional): Regex to check against the PR body
 
-      Example:
+      JSON Example:
         [
           {
             "label": "new formula",
@@ -44,8 +44,37 @@ inputs:
           }, {
             "label": "bump-formula-pr",
             "pr_body_content": "Created with `brew bump-formula-pr`"
+          }, {
+            "label": "documentation",
+            "path": ".*\\.md"
           }
         ]
+
+        YAML Example:
+
+          def: |
+            - label: new formula
+              status: added
+              path: Formula/.+
+
+            - label: bottle unneeded
+              content: bottle :unneeded
+
+            - label: legacy
+              path: Formula/.+@.+
+              except:
+                - Formula/python@3.8
+                - Formula/python@3.9
+
+            - label: missing license
+              missing_content: license "[^"]+"
+
+            - label: bump-formula-pr
+              pr_body_content: Created with `brew bump-formula-pr`
+
+            - label: documentation
+              path: .*\.md
+
     required: true
 runs:
   using: node12
