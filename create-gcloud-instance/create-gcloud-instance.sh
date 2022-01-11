@@ -5,7 +5,7 @@ set -eo pipefail
 VM_TOKEN=$(curl --silent -X POST -H "authorization: token ${GITHUB_TOKEN}" "https://api.github.com/repos/${REPOSITORY_NAME}/actions/runners/registration-token" | jq -r .token)
 
 GCLOUD_SCOPES="https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
-GCLOUD_IMAGE="ubuntu-2004-lts"
+GCLOUD_IMAGE="ubuntu-2104"
 GCLOUD_ZONE="europe-west1-b"
 GCLOUD_MACHINE="e2-standard-8"
 GCLOUD_DISK_SIZE="50GB"
