@@ -14,9 +14,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: brew ruby $GITHUB_ACTION_PATH/main.rb
+    - run: brew bump ${{inputs.formulae}}
       shell: sh
       env:
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
-        HOMEBREW_BUMP_FORMULAE: ${{inputs.formulae}}
