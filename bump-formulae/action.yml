@@ -14,7 +14,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: brew bump ${{inputs.formulae}}
+    - run: brew bump --open-pr ${{inputs.formulae}}
       shell: sh
       env:
         HOMEBREW_DEVELOPER: "1"
