@@ -8,7 +8,7 @@ GCLOUD_SCOPES="https://www.googleapis.com/auth/devstorage.read_only,https://www.
 GCLOUD_IMAGE_FAMILY="ubuntu-2004-lts"
 GCLOUD_ZONE="europe-west1-b"
 GCLOUD_MACHINE="e2-standard-8"
-GCLOUD_DISK_SIZE="50GB"
+GCLOUD_DISK_SIZE="100GB"
 # shellcheck disable=SC2154
 STARTUP_SCRIPT="${GITHUB_ACTION_PATH}/setup.sh"
 
