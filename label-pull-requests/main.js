@@ -219,8 +219,21 @@ function doesConstraintApply(constraint, file) {
         return false
     }
 
-    if (constraint.path && !file.filename.match(constraint.path)) {
-        return false
+    if (constraint.path) {
+        if (Array.isArray(constraint.path)) {
+            var matchingPath = false
+            for (const path of constraint.path) {
+                if (file.filename.match(path)) {
+                    matchingPath = true
+                    break
+                }
+            }
+            if (!matchingPath) {
+                return false
+            }
+        } else if (!file.filename.match(constraint.path)) {
+            return false
+        }
     }
 
     if (constraint.except) {
