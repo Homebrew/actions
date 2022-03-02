@@ -4,7 +4,9 @@ set -euo pipefail
 
 GPG_SIGNING_KEY="${1}"
 
-export GNUPGHOME="$HOME/.gnupg/"
+if [ -z "${GNUPGHOME:-}" ]; then
+  export GNUPGHOME="$HOME/.gnupg/"
+fi
 mkdir -p "$GNUPGHOME"
 chmod 0700 "$GNUPGHOME"
 
