@@ -19,5 +19,5 @@ outputs:
   email:
     description: Configured git user's email
 runs:
-  using: node12
+  using: node16
   main: main.js
