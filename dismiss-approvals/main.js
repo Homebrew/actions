@@ -9,7 +9,7 @@ async function main() {
 
         const client = github.getOctokit(token)
 
-        const reviews = await client.pulls.listReviews({
+        const reviews = await client.rest.pulls.listReviews({
             ...github.context.repo,
             pull_number: pr
         })
@@ -20,7 +20,7 @@ async function main() {
 
             core.info(`==> Dismissing approvals in PR #${pr}`)
 
-            client.pulls.dismissReview({
+            client.rest.pulls.dismissReview({
                 ...github.context.repo,
                 pull_number: pr,
                 review_id: review.id,

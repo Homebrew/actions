@@ -13,7 +13,7 @@ async function main() {
 
         core.info(`==> Posting comment on issue #${issue}`)
 
-        await client.issues.createComment({
+        await client.rest.issues.createComment({
             ...github.context.repo,
             issue_number: issue,
             body: github.context.actor == bot ? bot_body : body
