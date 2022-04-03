@@ -19,7 +19,7 @@ async function main() {
         if (pr) {
             console.log("==> PR:", pr)
 
-            const pull = await client.pulls.get({
+            const pull = await client.rest.pulls.get({
                 owner: owner,
                 repo: repo,
                 pull_number: pr,
@@ -32,11 +32,11 @@ async function main() {
         }
 
         let run
-        const endpoint = "GET /repos/:owner/:repo/actions/workflows/:id/runs"
+        const endpoint = client.rest.actions.listWorkflowRuns
         const params = {
             owner: owner,
             repo: repo,
-            id: workflow,
+            workflow_id: workflow,
         }
         for await (const runs of client.paginate.iterator(endpoint, params)) {
             run = runs.data.find((run) => {
@@ -58,7 +58,7 @@ async function main() {
 
         console.log("==> Run:", run.id)
 
-        const artifacts = await client.actions.listWorkflowRunArtifacts({
+        const artifacts = await client.rest.actions.listWorkflowRunArtifacts({
             owner: owner,
             repo: repo,
             run_id: run.id,
@@ -74,7 +74,7 @@ async function main() {
 
         console.log("==> Downloading:", name + ".zip", `(${size})`)
 
-        const zip = await client.actions.downloadArtifact({
+        const zip = await client.rest.actions.downloadArtifact({
             owner: owner,
             repo: repo,
             artifact_id: artifact.id,

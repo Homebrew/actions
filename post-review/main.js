@@ -16,7 +16,7 @@ async function main() {
 
     core.info(`==> Creating review for pull request #${pullRequest}`)
 
-    await client.pulls.createReview({
+    await client.rest.pulls.createReview({
       ...github.context.repo,
       pull_number: pullRequest,
       event: event,

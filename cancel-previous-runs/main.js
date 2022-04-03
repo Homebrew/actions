@@ -13,7 +13,7 @@ async function main() {
         const event = JSON.parse(json)
         const pull = event.pull_request
 
-        const repoWorkflowRuns = await client.actions.listWorkflowRunsForRepo({
+        const repoWorkflowRuns = await client.rest.actions.listWorkflowRunsForRepo({
             ...github.context.repo,
             branch: pull.head.ref,
             event: "pull_request",
@@ -65,7 +65,7 @@ async function main() {
                 for (const workflowRun of workflowRuns) {
                     core.info(`Cancelling workflow run #${workflowRun.id} for "${branch}" branch`)
 
-                    await client.actions.cancelWorkflowRun({
+                    await client.rest.actions.cancelWorkflowRun({
                         ...github.context.repo,
                         run_id: workflowRun.id
                     })

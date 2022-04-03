@@ -33,13 +33,13 @@ async function main() {
         const pull = event.pull_request
 
         // Fetch PR files
-        const files = await client.pulls.listFiles({
+        const files = await client.rest.pulls.listFiles({
             ...github.context.repo,
             pull_number: pull.number
         })
 
         // Fetch PR body
-        const { data: { body: body } } = await client.pulls.get({
+        const { data: { body: body } } = await client.rest.pulls.get({
             ...github.context.repo,
             pull_number: pull.number
         })
@@ -53,7 +53,7 @@ async function main() {
             }
 
             // Fetch file content
-            const blob = await client.git.getBlob({
+            const blob = await client.rest.git.getBlob({
                 ...github.context.repo,
                 file_sha: file.sha
             })
@@ -66,7 +66,7 @@ async function main() {
         }
 
         // Get existing labels on PR
-        let existingLabels = await client.issues.listLabelsOnIssue({
+        let existingLabels = await client.rest.issues.listLabelsOnIssue({
             ...github.context.repo,
             issue_number: pull.number
         })
@@ -204,7 +204,7 @@ async function main() {
         console.log(`#${pull.number}: [${existingLabels}] => [${updatedLabels}]`)
 
         // Update PR labels
-        await client.issues.update({
+        await client.rest.issues.update({
             ...github.context.repo,
             issue_number: pull.number,
             labels: updatedLabels

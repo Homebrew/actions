@@ -9,7 +9,7 @@ async function main() {
 
         const client = github.getOctokit(token)
 
-        const user = await client.users.getByUsername({
+        const user = await client.rest.users.getByUsername({
             username: username
         })
         const name = (user.data.name || user.data.login)

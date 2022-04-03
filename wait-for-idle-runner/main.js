@@ -8,15 +8,18 @@ async function main() {
   try {
     const token = core.getInput("github_token", { required: true })
     const runnerName = core.getInput("runner_name", { required: true })
-    const repositoryName = core.getInput("repository_name", { required: true })
+    const [owner, repo] = core.getInput("repository_name", { required: true }).split("/")
 
     const client = github.getOctokit(token)
 
     for (var i = 0; i < NUMBER_OF_ATTEMPTS; i++) {
-      const result = await client.request(`GET /repos/${repositoryName}/actions/runners`)
+      const result = await client.rest.actions.listSelfHostedRunnersForRepo({
+        owner: owner,
+        repo: repo,
+      })
 
       // Select the runner based on its name
-      const runner = result.data["runners"].find(runner => runner.name == runnerName)
+      const runner = result.data.runners.find(runner => runner.name == runnerName)
 
       if (!runner) {
         core.setOutput("runner-found", false)

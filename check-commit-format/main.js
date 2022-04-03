@@ -15,7 +15,7 @@ async function main() {
         const pull = event.pull_request
 
         // Fetch pull request commits
-        const commits = await client.pulls.listCommits({
+        const commits = await client.rest.pulls.listCommits({
             ...github.context.repo,
             pull_number: pull.number
         })
@@ -27,7 +27,7 @@ async function main() {
 
         // For each commit...
         for (const commit of commits.data) {
-            const commit_info = await client.repos.getCommit({
+            const commit_info = await client.rest.repos.getCommit({
                 ...github.context.repo,
                 ref: commit.sha
             })
@@ -83,7 +83,7 @@ async function main() {
         const head_sha = commits.data[commits.data.length - 1].sha
         core.debug(`Writing to sha ${head_sha}`)
 
-        await client.repos.createCommitStatus({
+        await client.rest.repos.createCommitStatus({
             ...github.context.repo,
             sha: head_sha,
             state: "success",
@@ -93,7 +93,7 @@ async function main() {
         })
 
         // Get existing labels on PR
-        let existingLabels = await client.issues.listLabelsOnIssue({
+        let existingLabels = await client.rest.issues.listLabelsOnIssue({
             ...github.context.repo,
             issue_number: pull.number
         })
@@ -119,7 +119,7 @@ async function main() {
         }
 
         // Update PR labels
-        await client.issues.update({
+        await client.rest.issues.update({
             ...github.context.repo,
             issue_number: pull.number,
             labels: updatedLabels
