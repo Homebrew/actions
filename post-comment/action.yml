@@ -22,5 +22,5 @@ inputs:
     description: Bot's username
     required: false
 runs:
-  using: node12
+  using: node16
   main: main.js
