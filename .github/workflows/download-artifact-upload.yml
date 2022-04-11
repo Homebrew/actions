@@ -18,7 +18,7 @@ jobs:
           echo $GITHUB_SHA > artifact/sha
 
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: artifact
           path: artifact
