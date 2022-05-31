@@ -98,11 +98,6 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
 # Setup all other taps
 else
     if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-        if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-            echo "Homebrew self-hosted runners not supported for this tap!"
-            exit 1
-        fi
-
         HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
 
         if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask(-.+)*$ ]]; then
@@ -139,7 +134,11 @@ else
         fi
         if [[ -z "${HOMEBREW_IN_CONTAINER-}" ]]; then
             rm -rf "$GITHUB_WORKSPACE"
-            ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+            if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+                mkdir -vp "$GITHUB_WORKSPACE"
+            else
+                ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
+            fi
         fi
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
         git remote set-head origin --auto
