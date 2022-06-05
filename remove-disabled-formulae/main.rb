@@ -8,7 +8,7 @@ end
 puts 'Finding disabled formulae...'
 
 one_year_ago = Date.today << 12
-formulae_to_remove = Formula.to_a.select do |formula|
+formulae_to_remove = Formula.all.select do |formula|
   next false unless formula.disabled?
   next false if formula.disable_date.nil?
 
