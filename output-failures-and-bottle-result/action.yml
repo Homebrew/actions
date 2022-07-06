@@ -1,5 +1,5 @@
-name: 'Failures summary and output brew bottle result'
-description: 'Failures summary and output brew bottle result'
+name: 'Output failures summary and brew bottle result'
+description: 'Output the logs of failures summary and brew bottle result'
 
 runs:
   using: "composite"

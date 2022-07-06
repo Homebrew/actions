@@ -5,7 +5,7 @@ An action that groups `cat bottles/steps_output.txt` and `cat bottles/bottle_out
 ## Usage
 
 ```yaml
-- name: Failures summary and output brew bottle result
+- name: Output failures summary and brew bottle result
   if: always()
-  uses: Homebrew/actions/bottles-failure-and-output@master
+  uses: Homebrew/actions/output-failures-and-bottle-result@master
 ```
