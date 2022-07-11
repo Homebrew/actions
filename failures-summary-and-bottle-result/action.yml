@@ -1,8 +1,8 @@
-name: 'Output failures summary and brew bottle result'
-description: 'Output the logs of failures summary and brew bottle result'
+name: Failures summary and bottle result
+description: Output the logs of failures summary and brew bottle result
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - run: |
         touch bottles/steps_output.txt
