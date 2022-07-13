@@ -1,5 +1,5 @@
 name: Failures summary and bottle result
-description: Output the logs of failures summary and brew bottle result
+description: Output the logs of the bottle generation and a summary of all step failures
 
 runs:
   using: composite
