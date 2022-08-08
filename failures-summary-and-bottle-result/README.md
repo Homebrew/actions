@@ -8,4 +8,6 @@ An action that groups `cat bottles/steps_output.txt` and `cat bottles/bottle_out
 - name: Failures Summary and Bottle Result
   if: always()
   uses: Homebrew/actions/failures-summary-and-bottle-result@master
+  with:
+    workdir: ${{ github.workspace }}
 ```
