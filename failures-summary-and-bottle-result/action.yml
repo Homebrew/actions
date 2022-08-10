@@ -1,7 +1,7 @@
 name: Failures summary and bottle result
 description: Output the logs of the bottle generation and a summary of all step failures
 inputs:
-  workdir: 
+  workdir:
     description: Working directory of the result
     required: true
     default: ${{ github.workspace }}
