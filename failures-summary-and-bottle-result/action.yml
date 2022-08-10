@@ -1,17 +1,21 @@
 name: Failures summary and bottle result
 description: Output the logs of the bottle generation and a summary of all step failures
+inputs:
+  workdir:
+    description: Working directory of the result
+    required: true
+    default: ${{ github.workspace }}
 
 runs:
   using: composite
   steps:
     - run: |
-        touch bottles/steps_output.txt
-        cat bottles/steps_output.txt
-        rm bottles/steps_output.txt
+        touch ${{ inputs.workdir }}/bottles/steps_output.txt
+        cat ${{ inputs.workdir }}/bottles/steps_output.txt
+        rm ${{ inputs.workdir }}/bottles/steps_output.txt
       shell: bash
 
     - run: |
-        cat bottles/bottle_output.txt
-        rm bottles/bottle_output.txt
+        cat ${{ inputs.workdir }}/bottles/bottle_output.txt
+        rm ${{ inputs.workdir }}/bottles/bottle_output.txt
       shell: bash
-
