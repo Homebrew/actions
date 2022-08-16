@@ -8,11 +8,11 @@ inputs:
   test-bot:
     description: Install the `homebrew/test-bot` tap.
     required: false
-    default: true
+    default: "true"
   debug:
     description: Show debugging output
     required: false
-    default: false
+    default: "false"
 outputs:
   gems-path:
     description: Homebrew's Ruby gems path
