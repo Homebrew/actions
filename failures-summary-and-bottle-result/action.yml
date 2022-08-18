@@ -23,12 +23,14 @@ runs:
           sudo chown "$(whoami)" "$GITHUB_STEP_SUMMARY"
         fi
 
-        touch ${{ inputs.workdir }}/${{ inputs.result_path }}
+        full_result_path="${{ inputs.workdir }}/${{ inputs.result_path }}"
 
-        echo "### ${{ inputs.step_name }}" >> "$GITHUB_STEP_SUMMARY"
+        touch "$path"
+
+        echo '### ${{ inputs.step_name }}' >> "$GITHUB_STEP_SUMMARY"
         printf '```\n' >> "$GITHUB_STEP_SUMMARY"
-        tee -a "$GITHUB_STEP_SUMMARY" <"${{ inputs.workdir }}/${{ inputs.result_path }}"
+        tee -a "$GITHUB_STEP_SUMMARY" <"$full_result_path"
         printf '\n```' >> "$GITHUB_STEP_SUMMARY"
 
-        rm ${{ inputs.workdir }}/${{ inputs.result_path }}
+        rm "$full_result_path"
       shell: bash
