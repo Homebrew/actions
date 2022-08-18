@@ -9,13 +9,26 @@ inputs:
     description: Path to the result (relative to workdir)
     required: false
     default: bottles/steps_output.txt
-
+  step_name:
+    description: Heading to use in GitHub step summary
+    required: false
+    default: '`brew test-bot` output'
 
 runs:
   using: composite
   steps:
     - run: |
+        if [[ -f "$GITHUB_STEP_SUMMARY" ]] &&
+           [[ ! -w "$GITHUB_STEP_SUMMARY" ]]
+          sudo chown "$(whoami)" "$GITHUB_STEP_SUMMARY"
+        fi
+
         touch ${{ inputs.workdir }}/${{ inputs.result_path }}
-        cat ${{ inputs.workdir }}/${{ inputs.result_path }}
+
+        echo "### ${{ inputs.step_name }}" >> "$GITHUB_STEP_SUMMARY"
+        printf '```\n' >> "$GITHUB_STEP_SUMMARY"
+        tee -a "$GITHUB_STEP_SUMMARY" <"${{ inputs.workdir }}/${{ inputs.result_path }}"
+        printf '\n```' >> "$GITHUB_STEP_SUMMARY"
+
         rm ${{ inputs.workdir }}/${{ inputs.result_path }}
       shell: bash
