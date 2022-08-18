@@ -20,6 +20,7 @@ runs:
     - run: |
         if [[ -f "$GITHUB_STEP_SUMMARY" ]] &&
            [[ ! -w "$GITHUB_STEP_SUMMARY" ]]
+        then
           sudo chown "$(whoami)" "$GITHUB_STEP_SUMMARY"
         fi
 
