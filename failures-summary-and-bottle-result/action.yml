@@ -1,21 +1,36 @@
-name: Failures summary and bottle result
-description: Output the logs of the bottle generation and a summary of all step failures
+name: '`brew test-bot` result summary'
+description: Output the logs stored at the specified path
 inputs:
   workdir:
     description: Working directory of the result
     required: true
     default: ${{ github.workspace }}
+  result_path:
+    description: Path to the result (relative to workdir)
+    required: false
+    default: bottles/steps_output.txt
+  step_name:
+    description: Heading to use in GitHub step summary
+    required: false
+    default: '`brew test-bot` output'
 
 runs:
   using: composite
   steps:
     - run: |
-        touch ${{ inputs.workdir }}/bottles/steps_output.txt
-        cat ${{ inputs.workdir }}/bottles/steps_output.txt
-        rm ${{ inputs.workdir }}/bottles/steps_output.txt
-      shell: bash
+        if [[ -f "$GITHUB_STEP_SUMMARY" ]] &&
+           [[ ! -w "$GITHUB_STEP_SUMMARY" ]]
+          sudo chown "$(whoami)" "$GITHUB_STEP_SUMMARY"
+        fi
 
-    - run: |
-        cat ${{ inputs.workdir }}/bottles/bottle_output.txt
-        rm ${{ inputs.workdir }}/bottles/bottle_output.txt
+        full_result_path="${{ inputs.workdir }}/${{ inputs.result_path }}"
+
+        touch "$path"
+
+        echo '### ${{ inputs.step_name }}' >> "$GITHUB_STEP_SUMMARY"
+        printf '```\n' >> "$GITHUB_STEP_SUMMARY"
+        tee -a "$GITHUB_STEP_SUMMARY" <"$full_result_path"
+        printf '\n```' >> "$GITHUB_STEP_SUMMARY"
+
+        rm "$full_result_path"
       shell: bash
