@@ -26,7 +26,7 @@ runs:
 
         full_result_path="${{ inputs.workdir }}/${{ inputs.result_path }}"
 
-        touch "$full_result_path"
+        [[ -s "$full_result_path" ]] || exit 0
 
         echo '### ${{ inputs.step_name }}' >> "$GITHUB_STEP_SUMMARY"
         printf '```\n' >> "$GITHUB_STEP_SUMMARY"
