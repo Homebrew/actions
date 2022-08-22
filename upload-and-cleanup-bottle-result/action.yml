@@ -1,0 +1,86 @@
+name: Upload and Cleanup Bottle Result
+description: Upload and Cleanup Bottle logs and result
+inputs:
+  workdir:
+    description: Working directory of the result
+    required: true
+    default: ${{ github.workspace }}
+
+runs:
+  using: composite
+  steps:
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@main
+      with:
+        name: logs-${{ matrix.runner }}
+        path: ${{ inputs.workdir }}/bottles/logs
+
+    - name: Delete logs and home
+      if: always()
+      run: |
+        # Delete logs and home
+        rm -rvf bottles/logs
+        rm -rvf bottles/home
+      shell: bash
+
+    - name: ls bottles and see all
+      if: always()
+      run: |
+        ls -alh ${{ inputs.workdir }}/bottles
+      shell: bash
+
+    - name: ls bottles/failed and see all
+      if: always()
+      run: |
+        ls -alh ${{ inputs.workdir }}/bottles/failed || true
+      shell: bash
+
+    - name: Count bottles
+      id: bottles
+      if: always()
+      run: |
+        # Count bottles
+        cd ${{ inputs.workdir }}/bottles
+        count=$(ls *.json | wc -l | xargs echo -n)
+        echo "$count bottles"
+        echo "::set-output name=count::$count"
+        failures=$(ls failed/*.json | wc -l | xargs echo -n)
+        echo "$failures failed bottles"
+        echo "::set-output name=failures::$failures"
+      shell: /bin/bash -e {0}
+
+    - name: Upload failed bottles
+      if: always() && steps.bottles.outputs.failures > 0
+      uses: actions/upload-artifact@main
+      with:
+        name: bottles-${{ matrix.runner }}
+        path: ${{ inputs.workdir }}/bottles/failed
+
+    # Must be run before the `Upload bottles` step so that failed
+    # bottles are not included in the `bottles` artifact.
+    - name: Delete failed bottles
+      if: always()
+      run: |
+        # Delete failed bottles
+        rm -rvf ${{ inputs.workdir }}/bottles/failed
+      shell: bash
+
+    - name: Upload bottles
+      if: always() && steps.bottles.outputs.count > 0
+      uses: actions/upload-artifact@main
+      with:
+        name: bottles
+        path: ${{ inputs.workdir }}/bottles
+
+    - name: Post cleanup
+      if: always()
+      run: |
+        # Post cleanup
+        if [ "$RUNNER_OS" = 'Linux' ]; then
+          docker rm -f ${{github.sha}}
+        else
+          brew test-bot --only-cleanup-after
+        fi
+        rm -rvf ${{ inputs.workdir }}/bottles
+      shell: bash
