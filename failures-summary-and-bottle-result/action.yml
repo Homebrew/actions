@@ -7,12 +7,16 @@ inputs:
     default: ${{ github.workspace }}
   result_path:
     description: Path to the result (relative to workdir)
-    required: false
+    required: true
     default: bottles/steps_output.txt
   step_name:
     description: Heading to use in GitHub step summary
-    required: false
+    required: true
     default: '`brew test-bot` output'
+  collapse:
+    description: Whether to collapse the output
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -28,10 +32,12 @@ runs:
 
         [[ -s "$full_result_path" ]] || exit 0
 
-        echo '### ${{ inputs.step_name }}' >> "$GITHUB_STEP_SUMMARY"
+        printf '### ${{ inputs.step_name }}\n' >> "$GITHUB_STEP_SUMMARY"
+        "${{ inputs.collapse }}" && printf '\n<details><summary>Details</summary>\n<p>\n\n' >> "$GITHUB_STEP_SUMMARY"
         printf '```\n' >> "$GITHUB_STEP_SUMMARY"
         tee -a "$GITHUB_STEP_SUMMARY" <"$full_result_path"
-        printf '\n```' >> "$GITHUB_STEP_SUMMARY"
+        printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
+        "${{ inputs.collapse }}" && printf '\n</p>\n<\details>\n' >> "$GITHUB_STEP_SUMMARY"
 
         rm "$full_result_path"
       shell: bash
