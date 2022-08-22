@@ -1,0 +1,119 @@
+name: Setup Gems Cache
+description: Setup Gems Caching for workflow
+inputs:
+  ci_test_mode: 
+    description: Determine the composite action behavior on normal and ci test mode
+    required: false
+    default: '0'
+  relink: 
+    description: Enable relink specific behavior on the composite action
+    required: false
+    default: '0'
+  gems-path:
+    description: Path to be used as input to cache action
+    required: true
+  gems-hash:
+    description: Hash string to be used as input to cache action
+    required: true
+outputs:
+  gems-outcome:
+    description: "Brew Install Bundler Gems steps outcome"
+    value: ${{ steps.gems.outputs.outcome }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check out Pull Request
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+      if: inputs.ci_test_mode == '1'
+      
+    - name: Clean up CI machine
+      run: |
+        # Clean up CI machine
+        if ! brew list --cask visual-studio &>/dev/null; then
+          if ! rm -r '/Applications/Visual Studio.app'; then
+            echo '::warning::Removing Visual Studio is no longer necessary.'
+          fi
+        fi
+        
+        if ! brew uninstall --cask julia && ! rm -r /Applications/Julia-*.app; then
+          echo '::warning::Removing Julia is no longer necessary.'
+        fi
+
+        if ! rm /usr/local/share/man/man1/al.1 || \
+            ! sudo rm /etc/paths.d/mono-commands || \
+            ! sudo rm -r /Library/Frameworks/Mono.framework || \
+            ! sudo pkgutil --forget com.xamarin.mono-MDK.pkg; then
+          echo '::warning::Uninstalling Mono is no longer necessary.'
+        fi
+
+        if ! rm /usr/local/bin/dotnet; then
+          echo '::warning::Removing `dotnet` symlink is no longer necessary.'
+        fi
+
+        if ! rm /usr/local/bin/pod; then
+          echo '::warning::Removing `cocoapods` symlink is no longer necessary.'
+        fi
+
+        if ! rm /usr/local/bin/conda; then
+          echo '::warning::Removing `conda` symlink is no longer necessary.'
+        fi
+
+        brew unlink python && brew link --overwrite python
+      if: runner.os == 'macOS' && inputs.ci_test_mode == '1'
+      shell: bash
+
+    # Workaround until the `cache` action uses the changes from
+    # https://github.com/actions/toolkit/pull/580.
+    - name: Unlink workspace
+      run: |
+        # Unlink workspace
+        if [[ ${{ inputs.relink }} == "1" ]]
+        then
+          mv "${GITHUB_WORKSPACE}" "${GITHUB_WORKSPACE}-link"
+        else
+          rm "${GITHUB_WORKSPACE}"
+        fi
+        mkdir "${GITHUB_WORKSPACE}"
+      shell: bash
+
+    - name: Cache Homebrew Gems
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ inputs.gems-path }}
+        key: ${{ runner.os }}-rubygems-${{ inputs.gems-hash }}
+        restore-keys: ${{ runner.os }}-rubygems-
+        
+    # Workaround until the `cache` action uses the changes from
+    # https://github.com/actions/toolkit/pull/580.
+    - name: Re-link workspace
+      run: |
+        # Re-link workspace
+        rmdir "${GITHUB_WORKSPACE}"
+        mv "${GITHUB_WORKSPACE}-link" "${GITHUB_WORKSPACE}"
+      if: inputs.relink == '1'
+      shell: bash
+
+    - name: echo cache outputs
+      shell: /bin/bash -e {0}
+      run: |
+        # cache outputs
+        echo ${{ steps.cache.outputs.cache-hit }}
+
+    - name: Install Homebrew Gems
+      id: gems
+      run: |
+        # Install Homebrew Gems
+        brew install-bundler-gems
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+
+    - name: Echo gems outputs outcome
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: /bin/bash -e {0}
+      run: |
+        echo ${{ steps.gems.outcome }}
