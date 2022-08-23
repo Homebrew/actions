@@ -18,7 +18,7 @@ inputs:
 outputs:
   gems-outcome:
     description: "Brew Install Bundler Gems steps outcome"
-    value: ${{ steps.gems.outputs.outcome }}
+    value: ${{ steps.gems.outcome }}
 
 runs:
   using: composite
@@ -109,11 +109,5 @@ runs:
       run: |
         # Install Homebrew Gems
         brew install-bundler-gems
-      if: steps.cache.outputs.cache-hit == 'true'
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-
-    - name: Echo gems outputs outcome
-      if: steps.cache.outputs.cache-hit == 'true'
-      shell: /bin/bash -e {0}
-      run: |
-        echo ${{ steps.gems.outcome }}
