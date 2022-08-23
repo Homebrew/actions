@@ -4,6 +4,7 @@ set -euo pipefail
 
 TEST_BOT="${1}"
 DEBUG="${2}"
+TOKEN="${3}"
 
 if [[ "${DEBUG}" == 'true' ]]; then
   set -x
@@ -39,6 +40,11 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
+
+# Use an access token to checkout (private repositories)
+if [[ -n "${TOKEN}" ]]; then
+    git config --global url."https://api:${TOKEN}@github.com/".insteadOf "https://github.com/"
+fi
 
 # Do in container or on the runner
 if [[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup; then

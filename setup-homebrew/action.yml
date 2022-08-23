@@ -13,6 +13,10 @@ inputs:
     description: Show debugging output
     required: false
     default: false
+  token:
+    description: Token to be used for GitHub authentication (if using private repositories)
+    required: false
+    default: ''
 outputs:
   gems-path:
     description: Homebrew's Ruby gems path
@@ -24,6 +28,6 @@ runs:
   using: composite
   steps:
     - run: |
-        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}' '${{ inputs.debug }}'
+        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}' '${{ inputs.debug }}' '${{ inputs.token }}'
       shell: bash
       id: setup
