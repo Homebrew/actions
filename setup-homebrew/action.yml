@@ -14,7 +14,7 @@ inputs:
     required: false
     default: false
   token:
-    description: Token to be used for authenticating to Github (if using private repositories)
+    description: Token to be used for GitHub authentication (if using private repositories)
     required: false
     default: ''
 outputs:

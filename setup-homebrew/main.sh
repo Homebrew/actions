@@ -42,7 +42,7 @@ HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-co
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
 # Use an access token to checkout (private repositories)
-if [[ ! -z "${TOKEN}" ]]; then
+if [[ -n "${TOKEN}" ]]; then
     git config --global url."https://api:${TOKEN}@github.com/".insteadOf "https://github.com/"
 fi
 
