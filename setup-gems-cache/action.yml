@@ -5,6 +5,10 @@ inputs:
     description: Determine the composite action behavior on normal and ci test mode
     required: false
     default: '0'
+  unlink: 
+    description: Enable unlink specific behavior on the composite action
+    required: false
+    default: '0'
   relink: 
     description: Enable relink specific behavior on the composite action
     required: false
@@ -78,6 +82,7 @@ runs:
           rm "${GITHUB_WORKSPACE}"
         fi
         mkdir "${GITHUB_WORKSPACE}"
+      if: inputs.unlink == '1'
       shell: bash
 
     - name: Cache Homebrew Gems
@@ -97,12 +102,6 @@ runs:
         mv "${GITHUB_WORKSPACE}-link" "${GITHUB_WORKSPACE}"
       if: inputs.relink == '1'
       shell: bash
-
-    - name: echo cache outputs
-      shell: /bin/bash -e {0}
-      run: |
-        # cache outputs
-        echo ${{ steps.cache.outputs.cache-hit }}
 
     - name: Install Homebrew Gems
       id: gems
