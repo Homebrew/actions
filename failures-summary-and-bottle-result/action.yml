@@ -37,7 +37,7 @@ runs:
         printf '```\n' >> "$GITHUB_STEP_SUMMARY"
         tee -a "$GITHUB_STEP_SUMMARY" <"$full_result_path"
         printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
-        "${{ inputs.collapse }}" && printf '\n</p>\n<\details>\n' >> "$GITHUB_STEP_SUMMARY"
+        "${{ inputs.collapse }}" && printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
 
         rm "$full_result_path"
       shell: bash
