@@ -5,6 +5,14 @@ inputs:
     description: Working directory of the result
     required: true
     default: ${{ github.workspace }}
+  remove-linuxbrew-image:
+    description: Cleanup linuxbrew docker container
+    required: false
+    default: "0"
+  include-failed-bottles:
+    description: Upload failed bottles artifact
+    required: false
+    default: "0"
 
 runs:
   using: composite
@@ -19,21 +27,9 @@ runs:
     - name: Delete logs and home
       if: always()
       run: |
-        # Delete logs and home
-        rm -rvf bottles/logs
-        rm -rvf bottles/home
-      shell: bash
-
-    - name: ls bottles and see all
-      if: always()
-      run: |
-        ls -alh ${{ inputs.workdir }}/bottles
-      shell: bash
-
-    - name: ls bottles/failed and see all
-      if: always()
-      run: |
-        ls -alh ${{ inputs.workdir }}/bottles/failed || true
+        # Delete bottles logs and home
+        rm -rvf ${{ inputs.workdir }}/bottles/logs
+        rm -rvf ${{ inputs.workdir }}/bottles/home
       shell: bash
 
     - name: Count bottles
@@ -45,13 +41,16 @@ runs:
         count=$(ls *.json | wc -l | xargs echo -n)
         echo "$count bottles"
         echo "::set-output name=count::$count"
-        failures=$(ls failed/*.json | wc -l | xargs echo -n)
-        echo "$failures failed bottles"
-        echo "::set-output name=failures::$failures"
+        if [[ ${{ inputs.include-failed-bottles }} == "1" ]]
+        then
+          failures=$(ls failed/*.json | wc -l | xargs echo -n)
+          echo "$failures failed bottles"
+          echo "::set-output name=failures::$failures"
+        fi
       shell: /bin/bash -e {0}
 
     - name: Upload failed bottles
-      if: always() && steps.bottles.outputs.failures > 0
+      if: always() && steps.bottles.outputs.failures > 0 && inputs.include-failed-bottles == 1
       uses: actions/upload-artifact@main
       with:
         name: bottles-${{ matrix.runner }}
@@ -77,7 +76,7 @@ runs:
       if: always()
       run: |
         # Post cleanup
-        if [ "$RUNNER_OS" = 'Linux' ]; then
+        if [ "${{ inputs.remove-linuxbrew-image }}" = "1" ] && [ "$RUNNER_OS" = "Linux" ]; then
           docker rm -f ${{github.sha}}
         else
           brew test-bot --only-cleanup-after
