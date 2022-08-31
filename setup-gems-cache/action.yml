@@ -1,19 +1,11 @@
 name: Setup Gems Cache
 description: Setup Gems Caching for workflow
 inputs:
-  unlink: 
-    description: Unlink workspace cache directory symlink 
-    required: false
-    default: '0'
-  relink: 
-    description: Relink workspace cache direcotry symlink
-    required: false
-    default: '0'
   gems-path:
-    description: Path to be used as input to cache action
+    description: Homebrew's Ruby gems path
     required: true
   gems-hash:
-    description: Hash string to be used as input to cache action
+    description: Homebrew's Ruby Gemfile.lock sha256sum
     required: true
 outputs:
   gems-outcome:
@@ -23,21 +15,6 @@ outputs:
 runs:
   using: composite
   steps:
-    # Workaround until the `cache` action uses the changes from
-    # https://github.com/actions/toolkit/pull/580.
-    - name: Unlink workspace
-      run: |
-        # Unlink workspace
-        if [[ ${{ inputs.relink }} == "1" ]]
-        then
-          mv "${GITHUB_WORKSPACE}" "${GITHUB_WORKSPACE}-link"
-        else
-          rm "${GITHUB_WORKSPACE}"
-        fi
-        mkdir "${GITHUB_WORKSPACE}"
-      if: inputs.unlink == '1'
-      shell: bash
-
     - name: Cache Homebrew Gems
       id: cache
       uses: actions/cache@v3
@@ -45,16 +22,6 @@ runs:
         path: ${{ inputs.gems-path }}
         key: ${{ runner.os }}-rubygems-${{ inputs.gems-hash }}
         restore-keys: ${{ runner.os }}-rubygems-
-        
-    # Workaround until the `cache` action uses the changes from
-    # https://github.com/actions/toolkit/pull/580.
-    - name: Re-link workspace
-      run: |
-        # Re-link workspace
-        rmdir "${GITHUB_WORKSPACE}"
-        mv "${GITHUB_WORKSPACE}-link" "${GITHUB_WORKSPACE}"
-      if: inputs.relink == '1'
-      shell: bash
 
     - name: Install Homebrew Gems
       id: gems
