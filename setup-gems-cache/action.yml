@@ -8,8 +8,8 @@ inputs:
     description: Homebrew's Ruby Gemfile.lock sha256sum
     required: true
 outputs:
-  gems-outcome:
-    description: "Brew Install Bundler Gems steps outcome"
+  outcome:
+    description: Brew Install Bundler Gems steps outcome
     value: ${{ steps.gems.outcome }}
 
 runs:
@@ -25,8 +25,6 @@ runs:
 
     - name: Install Homebrew Gems
       id: gems
-      run: |
-        # Install Homebrew Gems
-        brew install-bundler-gems
+      run: brew install-bundler-gems
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
