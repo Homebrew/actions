@@ -9,7 +9,7 @@ inputs:
     required: true
 outputs:
   outcome:
-    description: Brew Install Bundler Gems steps outcome
+    description: Install Bundler Gems step outcome
     value: ${{ steps.gems.outcome }}
 
 runs:
