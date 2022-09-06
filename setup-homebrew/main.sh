@@ -47,18 +47,13 @@ if [[ -n "${TOKEN}" ]]; then
 fi
 
 # Do in container or on the runner
-if [[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup; then
+if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup); then
     # Fix permissions to give normal user access
     sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
     HOMEBREW_IN_CONTAINER=1
 else
     # Add brew to PATH
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
-fi
-
-# TODO: remove me after a few days
-if [[ -n "${GITHUB_ACTIONS_HOMEBREW_MACOS_SELF_HOSTED-}" ]]; then
-    GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED=1
 fi
 
 # Setup Homebrew/brew
