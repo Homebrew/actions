@@ -31,13 +31,7 @@ function git_retry {
 
 # Check brew's existence
 if ! which brew &>/dev/null; then
-    if [[ -f "/usr/local/bin/brew" ]]; then 
-        eval "$(/usr/local/bin/brew shellenv)"
-    elif [[ -f "/opt/homebrew/bin/brew" ]]; then 
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    fi
+    PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
     if ! which brew &>/dev/null; then
         echo "Could not find 'brew' command in PATH or standard locations."
