@@ -31,8 +31,12 @@ function git_retry {
 
 # Check brew's existence
 if ! which brew &>/dev/null; then
-    echo "Could not find 'brew' command in PATH."
-    exit 1
+    PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+    if ! which brew &>/dev/null; then
+        echo "Could not find 'brew' command in PATH or standard locations."
+        exit 1
+    fi
 fi
 
 # Set basic variables
