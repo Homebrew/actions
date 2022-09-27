@@ -45,3 +45,6 @@ jobs:
       - run: brew test-bot --only-setup
 
       - run: brew test-bot --only-tap-syntax
+        # temporary disable this until brew audit is fixed here
+        # see https://github.com/Homebrew/actions/pull/308
+        if: matrix.os != 'ubuntu-latest'
