@@ -36,4 +36,7 @@ formulae_to_remove.each do |formula|
   git '-C', tap_dir.to_s, 'commit', formula.path.to_s, '--message', "#{formula.name}: remove formula", '--quiet'
 end
 
-puts '::set-output name=formulae-removed::true'
+github_output = ENV.fetch("GITHUB_OUTPUT") { raise "GITHUB_OUTPUT is not defined" }
+File.open(github_output, "a") do |f|
+  f.puts("formulae-removed=true")
+end

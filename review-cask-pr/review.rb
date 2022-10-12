@@ -177,8 +177,11 @@ begin
 
       puts message
 
-      puts "::set-output name=event::#{event}"
-      puts "::set-output name=message::#{GitHub::Actions.escape(message)}"
+      github_output = ENV.fetch("GITHUB_OUTPUT") { raise "GITHUB_OUTPUT is not defined" }
+      File.open(github_output, "a") do |f|
+        f.puts("event=#{event}")
+        f.puts("message=#{GitHub::Actions.escape(message)}")
+      end
     end
   when %r{^https://github.com/([^\/]+)/([^\/]+)/pull/(\d+)}
     owner = Regexp.last_match[1]
