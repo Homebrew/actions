@@ -83,8 +83,8 @@ fi
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
 
-echo "::set-output name=gems-path::$GEMS_PATH"
-echo "::set-output name=gems-hash::$GEMS_HASH"
+echo "gems-path=$GEMS_PATH" >> $GITHUB_OUTPUT
+echo "gems-hash=$GEMS_HASH" >> $GITHUB_OUTPUT
 
 # Setup Homebrew/(home|linux)brew-core tap
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
