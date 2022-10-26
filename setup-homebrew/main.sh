@@ -45,11 +45,6 @@ HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 
-# Use an access token to checkout (private repositories)
-if [[ -n "${TOKEN}" ]]; then
-    git config --global url."https://api:${TOKEN}@github.com/".insteadOf "https://github.com/"
-fi
-
 # Do in container or on the runner
 if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup); then
     # Fix permissions to give normal user access
@@ -58,6 +53,11 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
 else
     # Add brew to PATH
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
+fi
+
+# Use an access token to checkout (private repositories)
+if [[ -n "${TOKEN}" ]]; then
+    git config --global url."https://api:${TOKEN}@github.com/".insteadOf "https://github.com/"
 fi
 
 # Setup Homebrew/brew
