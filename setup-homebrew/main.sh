@@ -53,6 +53,7 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
 else
     # Add brew to PATH
     echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
+    echo "$HOMEBREW_PREFIX/sbin" >> $GITHUB_PATH
 fi
 
 # Use an access token to checkout (private repositories)
