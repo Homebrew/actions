@@ -8,12 +8,13 @@ GITHUB_TOKEN=$(curl http://metadata.google.internal/computeMetadata/v1/instance/
 
 # Initial setup: setup docker and github actions runner.
 # This is done only once, if the machine is stopped/started, this block of code is not executed again.
-if [ ! -d "/home/actions" ]; then
+if [[ ! -d "/home/actions" ]]; then
     # Setup docker
     apt-get -y update && apt-get install -y curl apt-transport-https ca-certificates software-properties-common jq wget
 
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    codename=$(lsb_release -cs)
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu ${codename} stable"
 
     apt-get update
 
