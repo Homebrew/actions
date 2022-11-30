@@ -15,6 +15,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Configure PATH
+        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "${GITHUB_PATH}"
+
       - name: Bump
         uses: ./bump-formulae/
         with:
