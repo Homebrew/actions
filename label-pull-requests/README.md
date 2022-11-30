@@ -48,8 +48,14 @@ Will remove labels from a pull request that no longer apply.
               "pr_body_content": "Created with `brew bump-formula-pr`"
           },
           {
-            "label": "documentation",
-            "path": ".*\\.md"
+              "label": "documentation",
+              "path": ".*\\.md"
+          },
+          {
+              "label": "long build",
+              "path": "Formula/(gcc|llvm|qt)(@[0-9]+)?.rb",
+              "keep_if_no_match": true,
+              "keep_if_any_match": true
           }
       ]
 ```
@@ -89,4 +95,9 @@ Will remove labels from a pull request that no longer apply.
 
       - label: documentation
         path: .*\.md
+
+      - label: long build
+        path: Formula/(gcc|llvm|qt)(@[0-9]+)?.rb
+        keep_if_no_match: true
+        keep_if_any_match: true
 ```

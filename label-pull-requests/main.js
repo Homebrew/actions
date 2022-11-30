@@ -135,6 +135,9 @@ async function main() {
             if (matchingFiles.length == files.data.length) {
                 continue
             }
+            if (constraint.wanted && constraint.keep_if_any_match) {
+                continue
+            }
 
             constraintToMatchingFiles.delete(constraint)
         }
@@ -154,8 +157,8 @@ async function main() {
             }
 
             if (body) {
-            	constraintApplies = body.match(constraint.pr_body_content)
-	    }
+                constraintApplies = body.match(constraint.pr_body_content)
+            }
 
             if (labelExists && constraintApplies) {
                 continue
