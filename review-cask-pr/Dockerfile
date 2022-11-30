@@ -1,4 +1,4 @@
-FROM homebrew/ubuntu16.04:master
+FROM homebrew/ubuntu22.04:master
 
 RUN brew ruby -e 'Homebrew.install_gem! "git_diff"'
 

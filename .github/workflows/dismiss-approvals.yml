@@ -8,6 +8,9 @@ on:
       - 'package-lock.json'
       - 'node_modules/**'
 
+permissions:
+  pull-requests: write
+
 jobs:
   dismiss-approvals:
     runs-on: ubuntu-latest

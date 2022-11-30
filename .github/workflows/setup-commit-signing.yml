@@ -16,7 +16,7 @@ jobs:
       matrix:
         container:
           - ''
-          - image: ghcr.io/homebrew/ubuntu16.04:master
+          - image: ghcr.io/homebrew/ubuntu22.04:master
             options: --user=root
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
