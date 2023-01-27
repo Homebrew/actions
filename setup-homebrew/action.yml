@@ -14,20 +14,17 @@ inputs:
     required: false
     default: false
   token:
-    description: Token to be used for GitHub authentication (if using private repositories)
+    description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
     default: ''
 outputs:
+  repository-path:
+    description: Path to where the repository has been checked out (if applicable)
   gems-path:
     description: Homebrew's Ruby gems path
-    value: ${{steps.setup.outputs.gems-path}}
   gems-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
-    value: ${{steps.setup.outputs.gems-hash}}
 runs:
-  using: composite
-  steps:
-    - run: |
-        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.test-bot }}' '${{ inputs.debug }}' '${{ inputs.token }}'
-      shell: bash
-      id: setup
+  using: node16
+  main: main.mjs
+  post: post.mjs

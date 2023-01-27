@@ -44,58 +44,93 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
+HOMEBREW_OTHER_CASK_REPOSITORIES=(
+    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-drivers"
+    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts"
+    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
+)
+if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+fi
 
 # Do in container or on the runner
 if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup); then
-    # Fix permissions to give normal user access
-    sudo chown -R "$(whoami)" "$HOME" "$PWD/.."
+    # Fix permissions to give container user write access.
+    # Directories mounted by the runner are owned by the host user, and can't be written by the container user.
+    if [[ -n "$(command -v setfacl)" ]]; then
+        setfacl_dirs=()
+        user=$(whoami)
+        for dir in "$HOME" "$RUNNER_WORKSPACE" "$RUNNER_TEMP" # These are mounted by the runner
+        do
+            if [[ ! -w "$dir" ]]; then
+                # Give the container user RW permissions, plus execute for directories.
+                sudo setfacl -Rm "d:u:$user:rwX,u:$user:rwX" "$dir"
+                setfacl_dirs+=("$dir")
+            fi
+        done
+        # Store what we've changed so we can revert what we did later.
+        echo "SETFACL_DIRECTORIES=$(IFS=:; echo "${setfacl_dirs[*]}")" >> $GITHUB_STATE
+        echo "Set up ACL."
+    elif [[ ! -w "$GITHUB_OUTPUT" ]]; then
+        # setfacl isn't installed on Ubuntu by default.
+        echo '::warning::Missing write permissions to GitHub directories. Install `acl` (`setfacl`).'
+    fi
+
+    # Add safe directories. This is necessary to allow containers to run as root.
+    # See similar code in `actions/checkout`.
+    # Could do this for non-containers too, but we want to take care to not write into a shared $HOME.
+    # For self-hosted without containers, consider pre-setting this instead.
+    for repo in "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY" \
+                "$HOMEBREW_CASK_REPOSITORY" "$HOMEBREW_OTHER_CASK_REPOSITORIES[@]" \
+                "${HOMEBREW_TAP_REPOSITORY-}"
+    do
+        if [[ -n "$repo" ]]; then
+            git config --global --add safe.directory "$repo"
+        fi
+    done
+
     HOMEBREW_IN_CONTAINER=1
 else
     # Add brew to PATH
-    echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
     echo "$HOMEBREW_PREFIX/sbin" >> $GITHUB_PATH
+    echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
 fi
 
 # Use an access token to checkout (private repositories)
 if [[ -n "${TOKEN}" ]]; then
-    git config --global url."https://api:${TOKEN}@github.com/".insteadOf "https://github.com/"
+    git config --global "http.${GITHUB_SERVER_URL}/.extraheader" "Authorization: basic $(echo ${TOKEN} | base64)"
+    echo "TOKEN_SET=1" >> $GITHUB_STATE
 fi
 
 # Setup Homebrew/brew
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     cd "$HOMEBREW_REPOSITORY"
-    rm -rf "$GITHUB_WORKSPACE"
-    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-        mkdir -vp "$GITHUB_WORKSPACE"
-    else
-        ln -vs "$HOMEBREW_REPOSITORY" "$GITHUB_WORKSPACE"
-    fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git_retry fetch --tags origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
+
+    echo "repository-path=$HOMEBREW_REPOSITORY" >> $GITHUB_OUTPUT
 else
     git_retry -C "$HOMEBREW_REPOSITORY" fetch --force origin
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
+
+    if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
+        echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >> $GITHUB_OUTPUT
+    fi
 fi
 
 # Setup Homebrew Bundler RubyGems cache
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
 
-echo "::set-output name=gems-path::$GEMS_PATH"
-echo "::set-output name=gems-hash::$GEMS_HASH"
+echo "gems-path=$GEMS_PATH" >> $GITHUB_OUTPUT
+echo "gems-hash=$GEMS_HASH" >> $GITHUB_OUTPUT
 
 # Setup Homebrew/(home|linux)brew-core tap
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd "$HOMEBREW_CORE_REPOSITORY"
-    rm -rf "$GITHUB_WORKSPACE"
-    if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-        mkdir -vp "$GITHUB_WORKSPACE"
-    else
-        ln -vs "$HOMEBREW_CORE_REPOSITORY" "$GITHUB_WORKSPACE"
-    fi
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git remote set-head origin --auto
@@ -103,9 +138,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     cd -
 # Setup all other taps
 else
-    if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-        HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
-
+    if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
         if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-cask(-.+)*$ ]]; then
             # Tap or update homebrew/cask for other cask repos.
             if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
@@ -116,10 +149,7 @@ else
                 git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
             fi
 
-            for cask_repo in \
-                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-drivers" \
-                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts" \
-                "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
+            for cask_repo in "${HOMEBREW_OTHER_CASK_REPOSITORIES[@]}"
             do
                 if [[ "${HOMEBREW_TAP_REPOSITORY}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" ]]; then
                     git_retry -C "${cask_repo}" fetch --force origin
@@ -138,14 +168,17 @@ else
             git init
             git remote add origin "https://github.com/$GITHUB_REPOSITORY"
         fi
-        if [[ -z "${HOMEBREW_IN_CONTAINER-}" ]]; then
-            rm -rf "$GITHUB_WORKSPACE"
-            if [[ -n "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-                mkdir -vp "$GITHUB_WORKSPACE"
-            else
-                ln -vs "$HOMEBREW_TAP_REPOSITORY" "$GITHUB_WORKSPACE"
-            fi
+
+        # Make repo available under `GITHUB_WORKSPACE` (default working directory), which some third-party taps may need.
+        # The symlink needs to be in this direction or `actions/cache` etc. will break as they rely on `GITHUB_WORKSPACE` being `PWD`.
+        if [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
+            (shopt -s dotglob; rm -rf "$GITHUB_WORKSPACE"/*; mv "$HOMEBREW_TAP_REPOSITORY"/* "$GITHUB_WORKSPACE")
+            rmdir "$HOMEBREW_TAP_REPOSITORY"
+            ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
+            cd - && cd "$GITHUB_WORKSPACE"
+            echo "TAP_SYMLINK=$HOMEBREW_TAP_REPOSITORY" >> $GITHUB_STATE
         fi
+
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
         git remote set-head origin --auto
         head="$(git symbolic-ref refs/remotes/origin/HEAD)"
@@ -179,10 +212,7 @@ if [[ "${TEST_BOT}" == 'true' ]]; then
 fi
 
 # Setup Linux permissions
-if [[ "$RUNNER_OS" = "Linux" ]]; then
-    sudo chown -R "$(whoami)" "$HOMEBREW_PREFIX"
-    sudo chmod -R g-w,o-w /home/linuxbrew $HOME
-
+if [[ "$RUNNER_OS" = "Linux" ]] && [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
     # Workaround: Remove fontconfig incompatible fonts provided by the poppler
     # installation in GitHub Actions image
     sudo rm -rf /usr/share/fonts/cmap

@@ -12,6 +12,7 @@ on:
 
 jobs:
   commit-signing:
+    if: github.repository_owner == 'Homebrew'
     strategy:
       matrix:
         container:
