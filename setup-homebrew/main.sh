@@ -98,7 +98,9 @@ fi
 
 # Use an access token to checkout (private repositories)
 if [[ -n "${TOKEN}" ]]; then
-    git config --global "http.${GITHUB_SERVER_URL}/.extraheader" "Authorization: basic $(echo ${TOKEN} | base64)"
+    base64_token=$(echo -n "x-access-token:${TOKEN}" | base64)
+    echo "::add-mask::${base64_token}"
+    git config --global "http.${GITHUB_SERVER_URL}/.extraheader" "Authorization: basic ${base64_token}"
     echo "TOKEN_SET=1" >> $GITHUB_STATE
 fi
 
