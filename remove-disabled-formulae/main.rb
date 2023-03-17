@@ -36,4 +36,4 @@ formulae_to_remove.each do |formula|
   git '-C', tap_dir.to_s, 'commit', formula.path.to_s, '--message', "#{formula.name}: remove formula", '--quiet'
 end
 
-puts '::set-output name=formulae-removed::true'
+File.open(ENV['GITHUB_OUTPUT'], 'a') { |f| f.puts('formulae-removed=true') }
