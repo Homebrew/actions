@@ -44,7 +44,7 @@ jobs:
           gh pr checkout '${{ github.event.pull_request.number || github.event.inputs.pull_request }}'
 
           branch="$(git branch --show-current)"
-          echo "::set-output name=branch::${branch}"
+          echo "branch=${branch}" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
@@ -57,7 +57,7 @@ jobs:
           if ! git diff --stat --exit-code node_modules; then
             git add node_modules
             git commit -m "node_modules: update"
-            echo "::set-output name=committed::true"
+            echo "committed=true" >> $GITHUB_OUTPUT
           fi
       - name: Push to pull request
         if: steps.commit.outputs.committed == 'true'
