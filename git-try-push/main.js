@@ -10,8 +10,16 @@ async function main() {
         const tries = core.getInput("tries", { required: true })
         const force = core.getInput("force")
         const origin_branch = core.getInput("origin_branch") || branch
+        const no_lease = core.getInput("no_lease")
 
         const git = "/usr/bin/git"
+
+		var force_flag
+		if (no_lease) {
+			force_flag = "--force"
+		} else {
+			force_flag = "--force-with-lease"
+		}
 
         // Change directory.
         if (directory) {
@@ -40,7 +48,7 @@ async function main() {
                 // Try to push, if successful, then checkout previous branch and just exit.
                 // Don't try to force push the first time in case it's not necessary.
                 if (force && i>0)
-                    await exec.exec(git, ["push", "--force-with-lease", remote, branch])
+                    await exec.exec(git, ["push", force_flag, remote, branch])
                 else
                     await exec.exec(git, ["push", remote, branch])
                 await exec.exec(git, ["checkout", "-"])
