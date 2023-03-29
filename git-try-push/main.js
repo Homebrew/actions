@@ -46,8 +46,11 @@ async function main() {
         for (let i = 0; i < tries; i++) {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
-                // Don't try to force push the first time in case it's not necessary.
-                if (force && i>0)
+				// If force pushing with lease, don't try to force push the first time
+				// in case it's not necessary.
+				// If force pushing without lease, force push the first time since we've
+				// already decided we don't care about having outdated refs.
+                if (force && ((i > 0) || no_lease))
                     await exec.exec(git, ["push", force_flag, remote, branch])
                 else
                     await exec.exec(git, ["push", remote, branch])
