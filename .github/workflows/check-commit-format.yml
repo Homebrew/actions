@@ -8,11 +8,7 @@ on:
       - 'package-lock.json'
       - 'node_modules/**'
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-  statuses: write
+permissions: write-all
 
 jobs:
   check-commit-format:
