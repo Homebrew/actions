@@ -57,7 +57,9 @@ async function main() {
 
                 // We've already modified this file, or the commit subject doesn't start with the formula name.
                 if (files_touched.includes(file.filename) || !commit_subject.startsWith(formula)) {
-                    message = "Pull request will be autosquashed."
+                    is_success = false
+                    message = "Please squash your commits according to the style guide."
+                    break
                 }
                 files_touched.push(file.filename)
             } else if (file.filename.startsWith("Casks/")) {
