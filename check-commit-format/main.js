@@ -24,6 +24,7 @@ async function main() {
         let message = "Commit format is correct."
         let files_touched = []
         let target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
+        let commit_state = "success"
 
         // For each commit...
         for (const commit of commits.data) {
@@ -37,14 +38,16 @@ async function main() {
             // Autosquash doesn't support merge commits.
             if (commit_info.data.parents.length != 1) {
                 is_success = false
-                message = `${short_sha} has ${commit_info.data.parents.length} parents (maintainers must rebase manually).`
+                commit_state = "failure"
+                message = `${short_sha} has ${commit_info.data.parents.length} parents. Please rebase against origin/master.`
                 break
             }
 
             // Autosquash doesn't support commits that modify more than one file.
             if (commit_info.data.files.length != 1) {
                 is_success = false
-                message = `${short_sha} modifies ${commit_info.data.files.length} files (maintainers must merge manually).`
+                commit_state = "failure"
+                message = `${short_sha} modifies ${commit_info.data.files.length} files. Please split this commit.`
                 break
             }
 
@@ -58,6 +61,7 @@ async function main() {
                 // We've already modified this file, or the commit subject doesn't start with the formula name.
                 if (files_touched.includes(file.filename) || !commit_subject.startsWith(formula)) {
                     is_success = false
+                    commit_state = "failure"
                     message = "Please squash your commits according to the style guide."
                     break
                 }
@@ -88,7 +92,7 @@ async function main() {
         await client.rest.repos.createCommitStatus({
             ...github.context.repo,
             sha: head_sha,
-            state: "success",
+            state: commit_state,
             description: message,
             context: "Commit style",
             target_url: target_url
