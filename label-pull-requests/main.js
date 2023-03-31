@@ -259,6 +259,11 @@ function doesConstraintApply(constraint, file) {
     }
 
     if (constraint.missing_content) {
+        // Deleted files cannot be missing content.
+        if (file.status == 'removed') {
+            return false
+        }
+
         if (Array.isArray(constraint.missing_content)) {
             for (const content of constraint.missing_content) {
                 if (file.content.match(content)) {
