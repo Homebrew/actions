@@ -8,9 +8,9 @@ async function main() {
         const remote = core.getInput("remote", { required: true })
         const branch = core.getInput("branch", { required: true })
         const tries = core.getInput("tries", { required: true })
-        const force = core.getInput("force")
+        const force = String(core.getInput("force")) == "true"
         const origin_branch = core.getInput("origin_branch") || branch
-        const no_lease = core.getInput("no_lease")
+        const no_lease = String(core.getInput("no_lease")) == "true"
 
         const git = "/usr/bin/git"
 
