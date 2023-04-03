@@ -14,12 +14,12 @@ async function main() {
 
         const git = "/usr/bin/git"
 
-		var force_flag
-		if (no_lease) {
-			force_flag = "--force"
-		} else {
-			force_flag = "--force-with-lease"
-		}
+        var force_flag
+        if (no_lease) {
+            force_flag = "--force"
+        } else {
+            force_flag = "--force-with-lease"
+        }
 
         // Change directory.
         if (directory) {
@@ -46,10 +46,10 @@ async function main() {
         for (let i = 0; i < tries; i++) {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
-				// If force pushing with lease, don't try to force push the first time
-				// in case it's not necessary.
-				// If force pushing without lease, force push the first time since we've
-				// already decided we don't care about having outdated refs.
+                // If force pushing with lease, don't try to force push the first time
+                // in case it's not necessary.
+                // If force pushing without lease, force push the first time since we've
+                // already decided we don't care about having outdated refs.
                 if (force && ((i > 0) || no_lease))
                     await exec.exec(git, ["push", force_flag, remote, branch])
                 else
