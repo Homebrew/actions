@@ -21,6 +21,16 @@ async function main() {
             force_flag = "--force-with-lease"
         }
 
+        // We can use `${branch}:${origin_branch}` as a catch-all. But we want
+        // to simplify the log output a bit because `branch` and `origin_branch`
+        // are often the same.
+        var refspec
+        if (branch == origin_branch) {
+            refspec = branch
+        } else {
+            refspec = `${branch}:${origin_branch}`
+        }
+
         // Change directory.
         if (directory) {
             process.chdir(directory)
@@ -45,10 +55,6 @@ async function main() {
         // Loop specified number of tries.
         for (let i = 0; i < tries; i++) {
             try {
-                // We can use `${branch}:${origin_branch}` as a catch-all. But
-                // we want to simplify the log output a bit because `branch` and
-                // `origin_branch` are often the same.
-                const refspec = (branch == origin_branch) ? branch : `${branch}:${origin_branch}`
                 // Try to push, if successful, then checkout previous branch and just exit.
                 // If force pushing with lease, don't try to force push the first time
                 // in case it's not necessary.
