@@ -34,4 +34,4 @@ jobs:
             $stderr.puts "test"
 
       - name: Test
-        run: test "$GITHUB_SHA" = "$(cat $HOMEBREW_FILENAME)"
+        run: test "$GITHUB_SHA" = "$(cat "$HOMEBREW_FILENAME")"
