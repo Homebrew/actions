@@ -78,3 +78,7 @@ jobs:
       - run: brew test-bot --only-setup
 
       - run: brew info hello
+
+      - run: brew install shellcheck
+
+      - run: shellcheck ./setup-homebrew/*.sh

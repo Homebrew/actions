@@ -17,10 +17,10 @@ function git_retry {
 
   until git "$@"; do
     exit_code="$?"
-    try=$(($try + 1))
+    try=$((try + 1))
 
     if [ $try -lt $MAX_GIT_RETRIES ]; then
-      sleep $((2 ** $try))
+      sleep $((2 ** try))
     else
       return $exit_code
     fi
@@ -69,10 +69,12 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
             fi
         done
         # Store what we've changed so we can revert what we did later.
-        echo "SETFACL_DIRECTORIES=$(IFS=:; echo "${setfacl_dirs[*]}")" >> $GITHUB_STATE
+        echo "SETFACL_DIRECTORIES=$(IFS=:; echo "${setfacl_dirs[*]}")" >> "$GITHUB_STATE"
         echo "Set up ACL."
     elif [[ ! -w "$GITHUB_OUTPUT" ]]; then
         # setfacl isn't installed on Ubuntu by default.
+        # Silence error about backtick usage inside single quotes.
+        # shellcheck disable=SC2016
         echo '::warning::Missing write permissions to GitHub directories. Install `acl` (`setfacl`).'
     fi
 
@@ -81,7 +83,7 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
     # Could do this for non-containers too, but we want to take care to not write into a shared $HOME.
     # For self-hosted without containers, consider pre-setting this instead.
     for repo in "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY" \
-                "$HOMEBREW_CASK_REPOSITORY" "$HOMEBREW_OTHER_CASK_REPOSITORIES[@]" \
+                "$HOMEBREW_CASK_REPOSITORY" "${HOMEBREW_OTHER_CASK_REPOSITORIES[@]}" \
                 "${HOMEBREW_TAP_REPOSITORY-}"
     do
         if [[ -n "$repo" ]]; then
@@ -92,8 +94,8 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
     HOMEBREW_IN_CONTAINER=1
 else
     # Add brew to PATH
-    echo "$HOMEBREW_PREFIX/sbin" >> $GITHUB_PATH
-    echo "$HOMEBREW_PREFIX/bin" >> $GITHUB_PATH
+    echo "$HOMEBREW_PREFIX/sbin" >> "$GITHUB_PATH"
+    echo "$HOMEBREW_PREFIX/bin" >> "$GITHUB_PATH"
 fi
 
 # Use an access token to checkout (private repositories)
@@ -101,7 +103,7 @@ if [[ -n "${TOKEN}" ]]; then
     base64_token=$(echo -n "x-access-token:${TOKEN}" | base64)
     echo "::add-mask::${base64_token}"
     git config --global "http.${GITHUB_SERVER_URL}/.extraheader" "Authorization: basic ${base64_token}"
-    echo "TOKEN_SET=1" >> $GITHUB_STATE
+    echo "TOKEN_SET=1" >> "$GITHUB_STATE"
 fi
 
 # Setup Homebrew/brew
@@ -113,13 +115,13 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     git checkout --force -B master FETCH_HEAD
     cd -
 
-    echo "repository-path=$HOMEBREW_REPOSITORY" >> $GITHUB_OUTPUT
+    echo "repository-path=$HOMEBREW_REPOSITORY" >> "$GITHUB_OUTPUT"
 else
     git_retry -C "$HOMEBREW_REPOSITORY" fetch --force origin
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
 
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
-        echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >> $GITHUB_OUTPUT
+        echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >> "$GITHUB_OUTPUT"
     fi
 fi
 
@@ -127,8 +129,8 @@ fi
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
 GEMS_HASH="$(shasum -a 256 "$HOMEBREW_REPOSITORY/Library/Homebrew/Gemfile.lock" | cut -f1 -d' ')"
 
-echo "gems-path=$GEMS_PATH" >> $GITHUB_OUTPUT
-echo "gems-hash=$GEMS_HASH" >> $GITHUB_OUTPUT
+echo "gems-path=$GEMS_PATH" >> "$GITHUB_OUTPUT"
+echo "gems-hash=$GEMS_HASH" >> "$GITHUB_OUTPUT"
 
 # Setup Homebrew/(home|linux)brew-core tap
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
@@ -181,11 +183,11 @@ else
         # Make repo available under `GITHUB_WORKSPACE` (default working directory), which some third-party taps may need.
         # The symlink needs to be in this direction or `actions/cache` etc. will break as they rely on `GITHUB_WORKSPACE` being `PWD`.
         if [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-            (shopt -s dotglob; rm -rf "$GITHUB_WORKSPACE"/*; mv "$HOMEBREW_TAP_REPOSITORY"/* "$GITHUB_WORKSPACE")
+            (shopt -s dotglob; rm -rf "${GITHUB_WORKSPACE:?}"/*; mv "${HOMEBREW_TAP_REPOSITORY:?}"/* "$GITHUB_WORKSPACE")
             rmdir "$HOMEBREW_TAP_REPOSITORY"
             ln -vs "$GITHUB_WORKSPACE" "$HOMEBREW_TAP_REPOSITORY"
             cd - && cd "$GITHUB_WORKSPACE"
-            echo "TAP_SYMLINK=$HOMEBREW_TAP_REPOSITORY" >> $GITHUB_STATE
+            echo "TAP_SYMLINK=$HOMEBREW_TAP_REPOSITORY" >> "$GITHUB_STATE"
         fi
 
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'

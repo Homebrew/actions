@@ -25,6 +25,7 @@ fi
 
 # Restore permissions to as they were before.
 if [[ -n "${STATE_SETFACL_DIRECTORIES-}" ]]; then
-  (IFS=:; sudo setfacl -Rb ${STATE_SETFACL_DIRECTORIES})
+  IFS=':' read -ra STATE_SETFACL_DIRECTORY_ARRAY <<< "$STATE_SETFACL_DIRECTORIES"
+  sudo setfacl -Rb "${STATE_SETFACL_DIRECTORY_ARRAY[@]}"
   echo "Reset permissions."
 fi
