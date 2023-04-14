@@ -1,0 +1,43 @@
+name: actionlint
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/*.ya?ml'
+  pull_request:
+    paths:
+      - '.github/workflows/*.ya?ml'
+  merge_group:
+
+concurrency:
+  group: "actionlint-${{ github.ref }}"
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HOMEBREW_DEVELOPER: 1
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+
+jobs:
+  workflow_syntax:
+    if: github.repository_owner == 'Homebrew'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+        with:
+          test-bot: false
+
+      - uses: actions/checkout@v3
+
+      - name: Set up actionlint
+        run: |
+          brew install actionlint shellcheck
+          echo "::add-matcher::$(brew --repository)/.github/actionlint-matcher.json"
+
+      - run: |
+          # Ignore our use of a potentially null `matrix.container` in `setup-homebrew.yml`
+          actionlint \
+            -ignore 'image: string; options: string'
