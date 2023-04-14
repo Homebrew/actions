@@ -16,8 +16,8 @@ jobs:
         include:
           - os: macos-latest
             key: macos
-          - os: ubuntu-18.04
-            key: ubuntu-18
+          - os: ubuntu-20.04
+            key: ubuntu-20
           - os: ubuntu-22.04
             key: ubuntu-22
           - os: ubuntu-22.04
@@ -35,18 +35,24 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          # Allow writing under linuxbrew user
-          orig_uid=$(ls -nd $GITHUB_WORKSPACE | awk 'NR==1 {print $3}')
-          sudo chown -R $(whoami) $GITHUB_WORKSPACE $HOME
+          if [ "$RUNNER_OS" = "Linux" ]
+          then
+            # Allow writing under linuxbrew user
+            orig_uid="$(stat --printf='%u' "$GITHUB_WORKSPACE")"
+            sudo chown -R "$(whoami)" "$GITHUB_WORKSPACE" "$HOME"
+          fi
 
-          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git init
-          git remote add origin $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
-          git fetch --no-tags --depth=1 origin $GITHUB_SHA
-          git checkout --force $GITHUB_SHA
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch --no-tags --depth=1 origin "$GITHUB_SHA"
+          git checkout --force "$GITHUB_SHA"
 
-          # Reset ownership so we test if the equivalent in setup-homebrew works.
-          sudo chown -R $orig_uid $GITHUB_WORKSPACE $HOME
+          if [ "$RUNNER_OS" = "Linux" ]
+          then
+            # Reset ownership so we test if the equivalent in setup-homebrew works.
+            sudo chown -R "$orig_uid" "$GITHUB_WORKSPACE" "$HOME"
+          fi
 
       - name: Check syntax
         run: bash -n setup-homebrew/*.sh

@@ -15,7 +15,7 @@ jobs:
       - name: Dump
         run: |
           mkdir artifact
-          echo $GITHUB_SHA > artifact/sha
+          echo "$GITHUB_SHA" > artifact/sha
 
       - name: Upload
         uses: actions/upload-artifact@v3

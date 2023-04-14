@@ -26,4 +26,4 @@ jobs:
           path: artifact
 
       - name: Test
-        run: cat artifact/sha | grep $GITHUB_SHA
+        run: grep "$GITHUB_SHA" artifact/sha
