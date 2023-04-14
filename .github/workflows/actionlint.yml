@@ -37,4 +37,7 @@ jobs:
           brew install actionlint shellcheck
           echo "::add-matcher::$(brew --repository)/.github/actionlint-matcher.json"
 
-      - run: actionlint
+      - run: |
+          # Ignore our use of a potentially null `matrix.container` in `setup-homebrew.yml`
+          actionlint \
+            -ignore 'image: string; options: string'
