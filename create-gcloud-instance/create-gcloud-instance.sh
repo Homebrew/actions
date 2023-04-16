@@ -6,7 +6,7 @@ VM_TOKEN=$(curl --silent -X POST -H "authorization: token ${GITHUB_TOKEN}" "http
 
 GCLOUD_SCOPES="https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
 GCLOUD_IMAGE_FAMILY="ubuntu-2204-lts"
-GCLOUD_ZONE="europe-west1-b"
+GCLOUD_ZONE="europe-west1-d"
 GCLOUD_MACHINE="e2-standard-8"
 GCLOUD_DISK_SIZE="100GB"
 # shellcheck disable=SC2154
