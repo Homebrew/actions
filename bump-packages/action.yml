@@ -1,0 +1,33 @@
+name: Bump packages
+description: Bump (update) Homebrew outdated packages
+author: SMillerDev
+branding:
+  icon: arrow-up-circle
+  color: yellow
+inputs:
+  token:
+    description: GitHub token (not the default one)
+    required: true
+  formulae:
+    description: Formula names, one per line
+    required: false
+    default: ''
+  casks:
+    description: Cask names, one per line
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - run: brew bump --open-pr --formulae ${{ inputs.formulae }}
+      if: inputs.formulae != ''
+      shell: sh
+      env:
+        HOMEBREW_DEVELOPER: "1"
+        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
+    - run: brew bump --open-pr --casks ${{ inputs.casks }}
+      if: inputs.casks != ''
+      shell: sh
+      env:
+        HOMEBREW_DEVELOPER: "1"
+        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
