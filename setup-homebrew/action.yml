@@ -12,7 +12,7 @@ inputs:
   debug:
     description: Show debugging output
     required: false
-    default: false
+    default: ${{ runner.debug == '1' }}
   token:
     description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
