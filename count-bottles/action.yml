@@ -1,0 +1,27 @@
+name: Count bottles
+description: Count the bottles built by `brew test-bot`
+inputs:
+  working-directory:
+    description: Working directory
+    required: false
+    default: ${{ github.workspace }}
+  debug:
+    description: Show debugging output
+    required: false
+    default: ${{ runner.debug == '1' }}
+outputs:
+  count:
+    description: Number of bottles built
+    value: ${{ steps.count.outputs.count }}
+  failures:
+    description: Number of failed bottles built
+    value: ${{ steps.count.outputs.failures }}
+  skipped:
+    description: Number of lists of skipped or failed formulae generated
+    value: ${{ steps.count.outputs.skipped }}
+runs:
+  using: "composite"
+  steps:
+    - run: count.sh '${{ inputs.working-directory }}' '${{ inputs.debug }}'
+      shell: bash
+      id: count
