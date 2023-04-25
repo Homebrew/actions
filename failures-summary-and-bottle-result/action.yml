@@ -4,7 +4,7 @@ inputs:
   workdir:
     description: Working directory of the result
     required: true
-    default: ${{ github.workspace }}
+    default: ${{ env.BOTTLES_DIR }}
   result_path:
     description: Path to the result (relative to workdir)
     required: true
