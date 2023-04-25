@@ -22,6 +22,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - run: count.sh '${{ inputs.working-directory }}' '${{ inputs.debug }}'
+    - run: |
+        "$GITHUB_ACTION_PATH/count.sh" '${{ inputs.working-directory }}' '${{ inputs.debug }}'
       shell: bash
       id: count
