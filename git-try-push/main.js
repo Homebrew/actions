@@ -8,8 +8,9 @@ async function main() {
         const remote = core.getInput("remote", { required: true })
         const branch = core.getInput("branch", { required: true })
         const tries = core.getInput("tries", { required: true })
+        const remote_branch = core.getInput("remote_branch") || branch
+        const origin_branch = core.getInput("origin_branch") || remote_branch
         const force = String(core.getInput("force")) == "true"
-        const origin_branch = core.getInput("origin_branch") || branch
         const no_lease = String(core.getInput("no_lease")) == "true"
 
         const git = "/usr/bin/git"
@@ -21,14 +22,13 @@ async function main() {
             force_flag = "--force-with-lease"
         }
 
-        // We can use `${branch}:${origin_branch}` as a catch-all. But we want
-        // to simplify the log output a bit because `branch` and `origin_branch`
+        var refspec =`${branch}:${remote_branch}`
+
+        // We can use `${branch}:${remote_branch}` as a catch-all. But we want
+        // to simplify the log output a bit because `branch` and `remote_branch`
         // are often the same.
-        var refspec
-        if (branch == origin_branch) {
+        if (branch == remote_branch) {
             refspec = branch
-        } else {
-            refspec = `${branch}:${origin_branch}`
         }
 
         // Change directory.
@@ -69,7 +69,7 @@ async function main() {
             } catch (error) {
                 // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
                 // and try again.
-                const delay = (i+1)**2
+                const delay = 2 ** i
                 await exec.exec("sleep", [delay])
                 // `git pull` can also fail, so do the same retry procedure here.
                 for (let j = 0; j < tries; j++) {
