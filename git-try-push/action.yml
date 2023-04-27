@@ -22,7 +22,7 @@ inputs:
   tries:
     description: How many times to try pushing
     required: false
-    default: "20"
+    default: "10"
   force:
     description: Whether to force-with-lease push (rebasing on origin_branch if needed)
     required: false

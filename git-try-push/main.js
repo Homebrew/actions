@@ -69,7 +69,7 @@ async function main() {
             } catch (error) {
                 // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
                 // and try again.
-                const delay = (i+1)**2
+                const delay = 2 ** i
                 await exec.exec("sleep", [delay])
                 // `git pull` can also fail, so do the same retry procedure here.
                 for (let j = 0; j < tries; j++) {
