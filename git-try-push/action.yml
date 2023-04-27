@@ -26,8 +26,11 @@ inputs:
   force:
     description: Whether to force-with-lease push (rebasing on origin_branch if needed)
     required: false
+  remote_branch:
+    description: Remote branch to push to, defaults to `branch`
+    required: false
   origin_branch:
-    description: Remote branch to rebase on and push to, defaults to branch
+    description: Remote branch to rebase on, defaults to `remote_branch`
     required: false
   no_lease:
     description: Whether to force push without lease (requires force)
