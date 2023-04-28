@@ -1,11 +1,13 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const fs = require('fs')
+const path = require('path')
 
 async function main() {
     try {
         const token = core.getInput("token", { required: true })
         const failure_label = core.getInput("failure_label", { required: true })
+        const autosquash_label = core.getInput("autosquash_label", { required: true })
 
         const client = github.getOctokit(token)
 
@@ -21,6 +23,8 @@ async function main() {
         })
 
         let is_success = true
+        let autosquash = false
+        let commit_state = "success"
         let message = "Commit format is correct."
         let files_touched = []
         let target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
@@ -37,14 +41,32 @@ async function main() {
             // Autosquash doesn't support merge commits.
             if (commit_info.data.parents.length != 1) {
                 is_success = false
-                message = `${short_sha} has ${commit_info.data.parents.length} parents (maintainers must rebase manually).`
+                commit_state = "failure"
+                message = `${short_sha} has ${commit_info.data.parents.length} parents. Please rebase against origin/master.`
                 break
             }
 
             // Autosquash doesn't support commits that modify more than one file.
             if (commit_info.data.files.length != 1) {
                 is_success = false
-                message = `${short_sha} modifies ${commit_info.data.files.length} files (maintainers must merge manually).`
+
+                let number_of_formulae_touched = 0
+                let non_formula_modified = false
+                for (const file of commit_info.data.files) {
+                    if (file.filename.startsWith("Formula/")) {
+                        number_of_formulae_touched++
+                    } else {
+                        non_formula_modified = true
+                    }
+                }
+
+                if (number_of_formulae_touched > 1) {
+                    commit_state = "failure"
+                    message = `${short_sha} modifies ${number_of_formulae_touched} formulae. Please split your commits according to Homebrew style.`
+                } else if (non_formula_modified) {
+                    message = `${short_sha} modifies non-formula files (maintainers must merge manually)`
+                }
+
                 break
             }
 
@@ -52,14 +74,13 @@ async function main() {
             const commit_subject = commit_info.data.commit.message.split("\n").shift()
 
             if (file.filename.startsWith("Formula/")) {
-                const formula = file.filename.replace(/^Formula\//, "").replace(/\.rb$/, "")
+                const formula = path.basename(file.filename, '.rb')
                 core.debug(`${short_sha} == ${commit_subject} == ${formula}`)
 
                 // We've already modified this file, or the commit subject doesn't start with the formula name.
                 if (files_touched.includes(file.filename) || !commit_subject.startsWith(formula)) {
-                    is_success = false
-                    message = "Please squash your commits according to the style guide."
-                    break
+                    autosquash = true
+                    message = "Pull request will be replaced."
                 }
                 files_touched.push(file.filename)
             } else if (file.filename.startsWith("Casks/")) {
@@ -88,7 +109,7 @@ async function main() {
         await client.rest.repos.createCommitStatus({
             ...github.context.repo,
             sha: head_sha,
-            state: "success",
+            state: commit_state,
             description: message,
             context: "Commit style",
             target_url: target_url
@@ -104,15 +125,32 @@ async function main() {
         // Copy labels into new Array
         const updatedLabels = existingLabels.slice()
 
+        core.debug(`is_success = ${is_success}`)
+        core.debug(`autosquash = ${autosquash}`)
         if (is_success && existingLabels.includes(failure_label)) {
-            // If commit style is OK or autosquashable, but we have a automerge-skip label, remove it
+            core.debug(`Removing ${failure_label} label`)
+            // If commit style is OK, but we have a automerge-skip label, remove it
             const index = updatedLabels.indexOf(failure_label);
             if (index > -1) {
                 updatedLabels.splice(index, 1);
             }
         } else if (!is_success && !existingLabels.includes(failure_label)) {
+            core.debug(`Adding ${failure_label} label`)
             // If commit style is not OK or not autosquashable but we don't have the automerge-skip label, add it
             updatedLabels.push(failure_label);
+        }
+
+        if (!autosquash && existingLabels.includes(autosquash_label)) {
+            core.debug(`Removing ${autosquash_label} label`)
+            // If commits will not be autosquashed but we have an autosquash label, remove it
+            const index = updatedLabels.indexOf(autosquash_label);
+            if (index > -1) {
+                updatedLabels.splice(index, 1);
+            }
+        } else if (autosquash && !existingLabels.includes(autosquash_label)) {
+            core.debug(`Adding ${autosquash_label} label`)
+            // If commits need autosquashing but we don't have the autosquash label, add it
+            updatedLabels.push(autosquash_label);
         }
 
         // If everything is the same, we're done
