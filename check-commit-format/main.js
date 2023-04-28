@@ -48,13 +48,23 @@ async function main() {
 
             // Autosquash doesn't support commits that modify more than one file.
             if (commit_info.data.files.length != 1) {
+                is_success = false
+
+                let number_of_formulae_touched = 0
+                let non_formula_modified = false
                 for (const file of commit_info.data.files) {
                     if (file.filename.startsWith("Formula/")) {
-                        is_success = false
-                        commit_state = "failure"
-                        message = `${short_sha} modifies ${commit_info.data.files.length} formulae. Please split your commits.`
-                        break
+                        number_of_formulae_touched++
+                    } else {
+                        non_formula_modified = true
                     }
+                }
+
+                if (number_of_formulae_touched > 1) {
+                    commit_state = "failure"
+                    message = `${short_sha} modifies ${number_of_formulae_touched} formulae. Please split your commits according to Homebrew style.`
+                } else if (non_formula_modified) {
+                    message = `${short_sha} modifies non-formula files (maintainers must merge manually)`
                 }
 
                 break
