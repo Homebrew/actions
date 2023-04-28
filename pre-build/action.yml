@@ -1,0 +1,57 @@
+name: Pre-bottle-build steps
+description: Runs the common steps to be done before building bottles.
+inputs:
+  bottles-directory:
+    description: Bottles directory
+    required: true
+  cleanup:
+    description: Do cleanup steps?
+    required: false
+    default: true
+  download-bottles:
+    description: Download bottles built in earlier job?
+    required: false
+    default: false
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Homebrew
+      id: setup-homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+
+    - name: Enable debug mode
+      if: runner.debug
+      run: |
+        {
+          echo 'HOMEBREW_DEBUG=1'
+          echo 'HOMEBREW_VERBOSE=1'
+        } >> "${GITHUB_ENV}"
+      shell: bash
+
+    - run: brew test-bot --only-cleanup-before
+      if: fromJson(inputs.cleanup)
+      shell: bash
+
+    - name: Run brew test-bot --only-setup
+      run: |
+        printf '\n<details><summary>brew test-bot --only-setup</summary>\n<p>\n\n' >> "$GITHUB_STEP_SUMMARY"
+        printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
+        brew test-bot --only-setup | tee -a "${GITHUB_STEP_SUMMARY}"
+        printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
+        printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
+      shell: bash
+
+    - name: Set up bottles directory
+      run: |
+        rm -rvf "${BOTTLES_DIR:?}"
+        mkdir "${BOTTLES_DIR:?}"
+      shell: bash
+      env:
+        BOTTLES_DIR: ${{ inputs.bottles-directory }}
+
+    - name: Download bottles from GitHub Actions
+      if: fromJson(inputs.download-bottles)
+      uses: actions/download-artifact@v3
+      with:
+        name: bottles
+        path: ${{ inputs.bottles-directory }}
