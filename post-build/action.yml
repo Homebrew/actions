@@ -1,0 +1,99 @@
+name: Post-bottle-build steps
+description: Runs the common steps to be done after building bottles.
+inputs:
+  bottles-directory:
+    description: Bottles directory
+    required: true
+  logs-directory:
+    description: Logs directory
+    required: true
+  runner:
+    description: Runner label
+    required: true
+  cleanup:
+    description: Do cleanup steps?
+    required: false
+    default: true
+runs:
+  using: "composite"
+  steps:
+    - name: Failures summary for brew test-bot
+      if: always()
+      uses: Homebrew/actions/failures-summary-and-bottle-result@master
+      with:
+        workdir: ${{ inputs.bottles-directory }}
+        result_path: steps_output.txt
+        step_name: "Steps summary on ${{ inputs.runner }}"
+
+    - name: Output brew linkage result
+      if: always()
+      uses: Homebrew/actions/failures-summary-and-bottle-result@master
+      with:
+        workdir: ${{ inputs.bottles-directory }}
+        result_path: linkage_output.txt
+        step_name: "`brew linkage` output on ${{ inputs.runner }}"
+        collapse: true
+
+    - name: Output brew bottle result
+      if: always()
+      uses: Homebrew/actions/failures-summary-and-bottle-result@master
+      with:
+        workdir: ${{ inputs.bottles-directory }}
+        result_path: bottle_output.txt
+        step_name: "`brew bottle` output on ${{ inputs.runner }}"
+        collapse: true
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@main
+      with:
+        name: logs-${{ inputs.runner }}
+        path: ${{ inputs.logs-directory }}
+
+    - name: Delete logs and home
+      if: always()
+      run: |
+        rm -rvf "${BOTTLES_DIR:?}/logs"
+        rm -rvf "${BOTTLES_DIR:?}/home"
+      shell: bash
+      env:
+        BOTTLES_DIR: ${{ inputs.bottles-directory }}
+
+    - name: Count bottles
+      id: bottles
+      if: always()
+      uses: Homebrew/actions/count-bottles@master
+      with:
+        working-directory: ${{ inputs.bottles-directory }}
+
+    - name: Upload failed bottles
+      if: always() && steps.bottles.outputs.failures > 0
+      uses: actions/upload-artifact@main
+      with:
+        name: bottles-${{ inputs.runner }}
+        path: ${{ inputs.bottles-directory }}/failed
+
+    # Must be run before the `Upload bottles` step so that failed
+    # bottles are not included in the `bottles` artifact.
+    - name: Delete failed bottles
+      if: always()
+      run: rm -rvf "${BOTTLES_DIR:?}/failed"
+      shell: bash
+      env:
+        BOTTLES_DIR: ${{ inputs.bottles-directory }}
+
+    - name: Upload bottles
+      if: always() && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
+      uses: actions/upload-artifact@main
+      with:
+        name: bottles
+        path: ${{ inputs.bottles-directory }}
+
+    - name: Post cleanup
+      if: always() && fromJson(inputs.cleanup)
+      run: |
+        brew test-bot --only-cleanup-after
+        rm -rvf "${BOTTLES_DIR:?}"
+      shell: bash
+      env:
+        BOTTLES_DIR: ${{ inputs.bottles-directory }}
