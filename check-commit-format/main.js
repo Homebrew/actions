@@ -125,24 +125,30 @@ async function main() {
         // Copy labels into new Array
         const updatedLabels = existingLabels.slice()
 
+        core.debug(`is_success = ${is_success}`)
+        core.debug(`autosquash = ${autosquash}`)
         if (is_success && existingLabels.includes(failure_label)) {
+            core.debug(`Removing ${failure_label} label`)
             // If commit style is OK, but we have a automerge-skip label, remove it
             const index = updatedLabels.indexOf(failure_label);
             if (index > -1) {
                 updatedLabels.splice(index, 1);
             }
         } else if (!is_success && !existingLabels.includes(failure_label)) {
+            core.debug(`Adding ${failure_label} label`)
             // If commit style is not OK or not autosquashable but we don't have the automerge-skip label, add it
             updatedLabels.push(failure_label);
         }
 
         if (!autosquash && existingLabels.includes(autosquash_label)) {
+            core.debug(`Removing ${autosquash_label} label`)
             // If commits will not be autosquashed but we have an autosquash label, remove it
             const index = updatedLabels.indexOf(autosquash_label);
             if (index > -1) {
                 updatedLabels.splice(index, 1);
             }
         } else if (autosquash && !existingLabels.includes(autosquash_label)) {
+            core.debug(`Adding ${autosquash_label} label`)
             // If commits need autosquashing but we don't have the autosquash label, add it
             updatedLabels.push(autosquash_label);
         }
