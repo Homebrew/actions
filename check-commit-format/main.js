@@ -8,6 +8,7 @@ async function main() {
         const token = core.getInput("token", { required: true })
         const failure_label = core.getInput("failure_label", { required: true })
         const autosquash_label = core.getInput("autosquash_label", { required: true })
+        const ignore_label = core.getInput("ignore_label", { required: true })
 
         const client = github.getOctokit(token)
 
@@ -134,7 +135,7 @@ async function main() {
             if (index > -1) {
                 updatedLabels.splice(index, 1);
             }
-        } else if (!is_success && !existingLabels.includes(failure_label)) {
+        } else if (!is_success && !existingLabels.includes(failure_label) && !existingLabels.includes(ignore_label)) {
             core.debug(`Adding ${failure_label} label`)
             // If commit style is not OK or not autosquashable but we don't have the automerge-skip label, add it
             updatedLabels.push(failure_label);
@@ -147,7 +148,7 @@ async function main() {
             if (index > -1) {
                 updatedLabels.splice(index, 1);
             }
-        } else if (autosquash && !existingLabels.includes(autosquash_label)) {
+        } else if (autosquash && !existingLabels.includes(autosquash_label) && !existingLabels.includes(ignore_label)) {
             core.debug(`Adding ${autosquash_label} label`)
             // If commits need autosquashing but we don't have the autosquash label, add it
             updatedLabels.push(autosquash_label);
