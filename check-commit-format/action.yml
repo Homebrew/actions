@@ -8,11 +8,15 @@ inputs:
   token:
     description: GitHub token
     required: false
-    default: ${{github.token}}
+    default: ${{ github.token }}
   failure_label:
     description: Label to set on failure. Default is automerge-skip
     required: false
     default: automerge-skip
+  autosquash_label:
+    description: Label to set to autosquash. Default is autosquash
+    required: false
+    default: autosquash
 runs:
   using: node16
   main: main.js
