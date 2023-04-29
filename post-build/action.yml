@@ -14,6 +14,10 @@ inputs:
     description: Do cleanup steps?
     required: false
     default: true
+  upload-bottles:
+    description: Upload built bottles?
+    required: false
+    default: true
 runs:
   using: "composite"
   steps:
@@ -83,7 +87,7 @@ runs:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
 
     - name: Upload bottles
-      if: always() && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
+      if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
       uses: actions/upload-artifact@main
       with:
         name: bottles
