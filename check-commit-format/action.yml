@@ -17,6 +17,10 @@ inputs:
     description: Label to set to autosquash. Default is autosquash
     required: false
     default: autosquash
+  ignore_label:
+    description: Label to set to make this action ignore the pull request. Default is CI-published-bottle-commits
+    required: false
+    default: CI-published-bottle-commits
 runs:
   using: node16
   main: main.js
