@@ -26,6 +26,7 @@ raise err unless status.success?
 
 if out.chomp.empty?
   puts 'No formulae removed.'
+  File.open(ENV['GITHUB_OUTPUT'], 'a') { |f| f.puts('formulae-removed=false') }
   exit
 end
 
