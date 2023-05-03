@@ -30,7 +30,7 @@ runs:
 
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
-      shell: bash
+      shell: /bin/bash -e {0}
 
     - name: Run brew test-bot --only-setup
       run: |
