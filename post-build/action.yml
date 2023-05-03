@@ -98,6 +98,6 @@ runs:
       run: |
         brew test-bot --only-cleanup-after
         rm -rvf "${BOTTLES_DIR:?}"
-      shell: bash
+      shell: /bin/bash -e {0}
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
