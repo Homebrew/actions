@@ -97,6 +97,10 @@ runs:
       if: always() && fromJson(inputs.cleanup)
       run: |
         brew test-bot --only-cleanup-after
+        if command -v lsof >/dev/null
+        then
+          lsof -x +D "$BOTTLES_DIR"
+        fi
         rm -rvf "${BOTTLES_DIR:?}"
       shell: bash
       env:
