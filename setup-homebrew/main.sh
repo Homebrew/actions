@@ -50,7 +50,7 @@ HOMEBREW_OTHER_CASK_REPOSITORIES=(
     "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
 )
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
-    HOMEBREW_TAP_REPOSITORY="$(brew --repo "$GITHUB_REPOSITORY")"
+    HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
 fi
 
 # Do in container or on the runner
