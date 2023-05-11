@@ -98,6 +98,12 @@ else
     echo "$HOMEBREW_PREFIX/bin" >> "$GITHUB_PATH"
 fi
 
+# This needs to be done after permission fixes above.
+if [[ "${DEBUG}" == 'true' ]]; then
+  echo HOMEBREW_DEBUG=1 >> "$GITHUB_ENV"
+  echo HOMEBREW_VERBOSE=1 >> "$GITHUB_ENV"
+fi
+
 # Use an access token to checkout (private repositories)
 if [[ -n "${TOKEN}" ]]; then
     base64_token=$(echo -n "x-access-token:${TOKEN}" | base64)

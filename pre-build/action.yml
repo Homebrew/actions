@@ -19,15 +19,6 @@ runs:
       id: setup-homebrew
       uses: Homebrew/actions/setup-homebrew@master
 
-    - name: Enable debug mode
-      if: runner.debug
-      run: |
-        {
-          echo 'HOMEBREW_DEBUG=1'
-          echo 'HOMEBREW_VERBOSE=1'
-        } >> "${GITHUB_ENV}"
-      shell: bash
-
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
       shell: /bin/bash -e {0}
