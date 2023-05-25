@@ -54,11 +54,12 @@ runs:
         name: logs-${{ inputs.runner }}
         path: ${{ inputs.logs-directory }}
 
-    - name: Delete logs and home
+    - name: Delete logs, home, and bottle-cache
       if: always()
       run: |
         rm -rvf "${BOTTLES_DIR:?}/logs"
         rm -rvf "${BOTTLES_DIR:?}/home"
+        rm -rvf "${BOTTLES_DIR:?}/bottle-cache"
       shell: bash
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
