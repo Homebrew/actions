@@ -19,6 +19,9 @@ outputs:
   skipped:
     description: Number of lists of skipped or failed formulae generated
     value: ${{ steps.count.outputs.skipped }}
+  dependents:
+    description: Number of lists of successfully tested dependents generated
+    value: ${{ steps.count.outputs.dependents }}
 runs:
   using: "composite"
   steps:

@@ -54,16 +54,6 @@ runs:
         name: logs-${{ inputs.runner }}
         path: ${{ inputs.logs-directory }}
 
-    - name: Delete logs, home, and bottle-cache
-      if: always()
-      run: |
-        rm -rvf "${BOTTLES_DIR:?}/logs"
-        rm -rvf "${BOTTLES_DIR:?}/home"
-        rm -rvf "${BOTTLES_DIR:?}/bottle-cache"
-      shell: bash
-      env:
-        BOTTLES_DIR: ${{ inputs.bottles-directory }}
-
     - name: Count bottles
       id: bottles
       if: always()
@@ -78,14 +68,22 @@ runs:
         name: bottles-${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/failed
 
+    - name: Upload list of successfully tested dependents
+      if: always() && !fromJson(inputs.upload-bottles) && steps.bottles.outputs.dependents > 0
+      uses: actions/upload-artifact@main
+      with:
+        name: dependents
+        path: ${{ inputs.bottles-directory }}/tested-dependents-*.txt
+
     # Must be run before the `Upload bottles` step so that failed
     # bottles are not included in the `bottles` artifact.
-    - name: Delete failed bottles
+    - name: Delete unneeded files
       if: always()
-      run: rm -rvf "${BOTTLES_DIR:?}/failed"
+      run: |
+        rm -rvf logs home failed artifact-cache
+        rm -rvf tested-dependents-*.txt
+      working-directory: ${{ inputs.bottles-directory }}
       shell: bash
-      env:
-        BOTTLES_DIR: ${{ inputs.bottles-directory }}
 
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
