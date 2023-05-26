@@ -80,10 +80,7 @@ runs:
     - name: Delete unneeded files
       if: always()
       run: |
-        rm -rvf logs
-        rm -rvf home
-        rm -rvf failed
-        rm -rvf artifact-cache
+        rm -rvf logs home failed artifact-cache
         rm -rvf tested-dependents-*.txt
       working-directory: ${{ inputs.bottles-directory }}
       shell: bash
