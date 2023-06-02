@@ -25,11 +25,9 @@ runs:
 
     - name: Set up RubyGems cache
       shell: bash
-      env:
-        OS: ${{ runner.os }}
       run: |
-        cache_key_prefix="${OS}"
-        if [[ "${OS}" = macOS ]]
+        cache_key_prefix="${{ runner.os }}"
+        if [[ "${{ runner.os }}" = macOS ]]
         then
           macos_full_version="$(sw_vers -productVersion)"
           macos_version="${macos_full_version%%.*}"
