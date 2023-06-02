@@ -38,7 +38,7 @@ runs:
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
-      uses: actions/cache@v3
+      uses: actions/cache/restore@v3
       with:
         path: ${{ steps.set-up-homebrew.outputs.gems-path }}
         key: ${{ env.cache_key_prefix }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
