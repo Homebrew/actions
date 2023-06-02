@@ -16,12 +16,38 @@ runs:
   using: "composite"
   steps:
     - name: Set up Homebrew
-      id: setup-homebrew
+      id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@master
 
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
       shell: /bin/bash -e {0}
+
+    - name: Set up RubyGems cache
+      shell: bash
+      run: |
+        cache_key_prefix="${{ runner.os }}"
+        if [[ "${{ runner.os }}" = macOS ]]
+        then
+          macos_full_version="$(sw_vers -productVersion)"
+          macos_version="${macos_full_version%%.*}"
+          arch="$(uname -m)"
+          cache_key_prefix="${macos_version}-${arch}"
+        fi
+        echo "cache_key_prefix=${cache_key_prefix}" >> "$GITHUB_ENV"
+
+    - name: Cache Homebrew Bundler RubyGems
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+        key: ${{ env.cache_key_prefix }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+        restore-keys: ${{ env.cache_key_prefix }}-rubygems-
+
+    - name: Install Homebrew Bundler RubyGems
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: brew install-bundler-gems
 
     - name: Run brew test-bot --only-setup
       run: |
