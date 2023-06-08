@@ -45,7 +45,6 @@ HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
 HOMEBREW_OTHER_CASK_REPOSITORIES=(
-    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-drivers"
     "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts"
     "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
 )
