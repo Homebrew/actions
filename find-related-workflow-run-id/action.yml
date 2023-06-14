@@ -1,0 +1,56 @@
+name: Find related workflow run ID
+description: Finds the run ID of a workflow run given another run ID on the same commit
+inputs:
+  run-id:
+    description: Workflow run ID
+    required: true
+  workflow-name:
+    description: Name of workflow to look up
+    required: true
+  repository:
+    description: Repository containing the workflow run
+    required: false
+    default: ${{ github.repository }}
+  token:
+    description: Authentication token for `gh`
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      id: result
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ inputs.repository }}/actions/runs/${{ inputs.run-id }}
+        QUERY: >-
+          query($url: URI!) {
+            resource(url: $url) {
+              ... on WorkflowRun {
+                checkSuite {
+                  commit {
+                    checkSuites(last: 100) {
+                      nodes {
+                        workflowRun {
+                          databaseId
+                          workflow {
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+      run: |
+        run_id="$(
+          gh api graphql \
+            --field url="$WORKFLOW_RUN_URL" \
+            --raw-field query="$QUERY" \
+            --jq '.data.resource.checkSuite.commit.checkSuites.nodes |
+                    map(select(.workflowRun.workflow.name == "${{ inputs.workflow-name }}")) |
+                    last | .workflowRun.databaseId'
+        )"
+        echo "workflow_run_id=$run_id" >> "$GITHUB_ENV"
