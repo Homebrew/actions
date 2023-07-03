@@ -11,6 +11,8 @@ on:
 permissions:
   contents: write
 
+concurrency: git-try-push
+
 jobs:
   try-push:
     runs-on: ubuntu-latest

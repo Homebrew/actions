@@ -10,13 +10,13 @@ on:
 
 jobs:
   bump:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure PATH
-        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "${GITHUB_PATH}"
+      - name: Update core
+        run: brew update-reset "$(brew --repo Homebrew/core)"
 
       - name: Bump
         uses: ./bump-formulae/
