@@ -24,6 +24,7 @@ jobs:
           workflow: download-artifact-upload.yml
           name: artifact
           path: artifact
+          commit: ${{github.event.pull_request.head.sha}}
 
       - name: Test
         run: grep "$GITHUB_SHA" artifact/sha
