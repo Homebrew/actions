@@ -5,6 +5,14 @@ branding:
   icon: settings
   color: yellow
 inputs:
+  core:
+    description: Update the `homebrew/core` tap.
+    required: false
+    default: true
+  cask:
+    description: Update the `homebrew/cask` tap.
+    required: false
+    default: true
   test-bot:
     description: Install the `homebrew/test-bot` tap.
     required: false

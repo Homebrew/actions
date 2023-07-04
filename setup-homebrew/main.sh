@@ -2,9 +2,11 @@
 
 set -euo pipefail
 
-TEST_BOT="${1}"
-DEBUG="${2}"
-TOKEN="${3}"
+UPDATE_CORE="${1}"
+UPDATE_CASK="${2}"
+TEST_BOT="${3}"
+DEBUG="${4}"
+TOKEN="${5}"
 
 if [[ "${DEBUG}" == 'true' ]]; then
   set -x
@@ -191,7 +193,7 @@ else
         cd -
     fi
 
-    if [[ -d "${HOMEBREW_CORE_REPOSITORY}" ]]; then
+    if [[ -d "${HOMEBREW_CORE_REPOSITORY}" && "${UPDATE_CORE}" == "true" ]]; then
         # Migrate linuxbrew-core to homebrew-core
         HOMEBREW_CORE_REPOSITORY_ORIGIN="$(git -C "$HOMEBREW_CORE_REPOSITORY" remote get-url origin 2>/dev/null)"
         if [[ "$HOMEBREW_CORE_REPOSITORY_ORIGIN" == "https://github.com/Homebrew/linuxbrew-core" ]]
@@ -208,7 +210,7 @@ else
         git_retry clone https://github.com/Homebrew/homebrew-core "${HOMEBREW_CORE_REPOSITORY}"
     fi
 
-    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
+    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" ]] && [[ -d "${HOMEBREW_CASK_REPOSITORY}" && "${UPDATE_CASK}" == "true" ]]; then
         ohai "Fetching Homebrew/cask..."
         git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
         git -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
@@ -220,7 +222,7 @@ else
 
     for cask_repo in "${HOMEBREW_OTHER_CASK_REPOSITORIES[@]}"
     do
-        if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" ]]; then
+        if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" && "${UPDATE_CASK}" == "true" ]]; then
             ohai "Fetching Homebrew/${cask_repo##*/}..."
             git_retry -C "${cask_repo}" fetch --force origin
             git -C "${cask_repo}" remote set-head origin --auto

@@ -5,6 +5,8 @@ import core from "@actions/core"
 try {
   await exec("bash", [
     new URL("./main.sh", import.meta.url).pathname,
+    core.getInput("core"),
+    core.getInput("cask"),
     core.getInput("test-bot"),
     core.getInput("debug"),
     core.getInput("token")
