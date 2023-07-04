@@ -205,7 +205,7 @@ else
         git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
         git -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
         git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
-    elif [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" ]]; then
+    elif [[ -n "${HOMEBREW_NO_INSTALL_FROM_API-}" ]] && [[ ! -d "${HOMEBREW_CORE_REPOSITORY}" ]]; then
         ohai "Fetching Homebrew/core..."
         git_retry clone https://github.com/Homebrew/homebrew-core "${HOMEBREW_CORE_REPOSITORY}"
     fi
