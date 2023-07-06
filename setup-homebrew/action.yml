@@ -8,15 +8,15 @@ inputs:
   core:
     description: Update the `homebrew/core` tap.
     required: false
-    default: true
+    default: false
   cask:
     description: Update the `homebrew/cask` tap.
     required: false
-    default: true
+    default: false
   test-bot:
     description: Install the `homebrew/test-bot` tap.
     required: false
-    default: true
+    default: auto
   debug:
     description: Show debugging output
     required: false
@@ -24,7 +24,7 @@ inputs:
   token:
     description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
-    default: ''
+    default: ""
 outputs:
   repository-path:
     description: Path to where the repository has been checked out (if applicable)
