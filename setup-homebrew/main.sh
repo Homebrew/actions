@@ -257,7 +257,12 @@ if [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW
 fi
 
 # Run `brew update` once to e.g. download formula/cask JSON files.
-brew update --auto
+(
+    # Unset these to ensure homebrew/core and homebrew/cask are not updated (again)
+    unset HOMEBREW_NO_INSTALL_FROM_API HOMEBREW_DEVELOPER HOMEBREW_DEV_CMD_RUN
+    unset HOMEBREW_UPDATE_CORE_TAP HOMEBREW_UPDATE_CASK_TAP
+    brew update --auto
+)
 
 # Setup Linux permissions
 if [[ "$RUNNER_OS" = "Linux" ]] && [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
