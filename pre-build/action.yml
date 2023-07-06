@@ -18,6 +18,10 @@ runs:
     - name: Set up Homebrew
       id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@master
+      with:
+        core: true
+        cask: false
+        test-bot: true
 
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)

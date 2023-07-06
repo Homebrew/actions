@@ -28,6 +28,8 @@ jobs:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
         with:
+          core: false
+          cask: false
           test-bot: false
 
       - uses: actions/checkout@v3
