@@ -110,9 +110,11 @@ if [[ "${DEBUG}" == "true" ]]; then
     echo HOMEBREW_VERBOSE=1 >>"$GITHUB_ENV"
 fi
 
-# This is set by GitHub Actions by default but we don't want that.
-echo HOMEBREW_NO_INSTALL_FROM_API= >>"$GITHUB_ENV"
-unset HOMEBREW_NO_INSTALL_FROM_API
+if [[ ! "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
+    # This is set by GitHub Actions by default but we don't want that.
+    echo HOMEBREW_NO_INSTALL_FROM_API= >>"$GITHUB_ENV"
+    unset HOMEBREW_NO_INSTALL_FROM_API
+fi
 
 # Use an access token to checkout (private repositories)
 if [[ -n "${TOKEN}" ]]; then
@@ -149,7 +151,7 @@ fi
     unset HOMEBREW_NO_INSTALL_FROM_API HOMEBREW_DEVELOPER HOMEBREW_DEV_CMD_RUN
     unset HOMEBREW_UPDATE_CORE_TAP HOMEBREW_UPDATE_CASK_TAP
     unset HOMEBREW_BOOTSNAP # so we don't install bundler gems here before any caching
-    brew update --auto
+    HOMEBREW_UPDATE_SKIP_BREW=1 brew update --auto
 )
 
 # Setup Homebrew Bundler RubyGems cache
