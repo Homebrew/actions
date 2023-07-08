@@ -144,15 +144,17 @@ else
     fi
 fi
 
-# Run `brew update` once to e.g. download formula/cask JSON files.
-(
-    ohai "brew update --auto"
-    # Unset these to ensure homebrew/core and homebrew/cask are not updated (again)
-    unset HOMEBREW_NO_INSTALL_FROM_API HOMEBREW_DEVELOPER HOMEBREW_DEV_CMD_RUN
-    unset HOMEBREW_UPDATE_CORE_TAP HOMEBREW_UPDATE_CASK_TAP
-    unset HOMEBREW_BOOTSNAP # so we don't install bundler gems here before any caching
-    HOMEBREW_UPDATE_SKIP_BREW=1 brew update --auto
-)
+if [[ "$GITHUB_REPOSITORY" != "Homebrew/formulae.brew.sh" ]]; then
+    # Run `brew update` once to e.g. download formula/cask JSON files.
+    (
+        ohai "brew update --auto"
+        # Unset these to ensure homebrew/core and homebrew/cask are not updated (again)
+        unset HOMEBREW_NO_INSTALL_FROM_API HOMEBREW_DEVELOPER HOMEBREW_DEV_CMD_RUN
+        unset HOMEBREW_UPDATE_CORE_TAP HOMEBREW_UPDATE_CASK_TAP
+        unset HOMEBREW_BOOTSNAP # so we don't install bundler gems here before any caching
+        HOMEBREW_UPDATE_SKIP_BREW=1 brew update --auto
+    )
+fi
 
 # Setup Homebrew Bundler RubyGems cache
 GEMS_PATH="$HOMEBREW_REPOSITORY/Library/Homebrew/vendor/bundle/ruby/"
