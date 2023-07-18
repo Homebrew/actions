@@ -144,6 +144,9 @@ else
     fi
 fi
 
+# Skip autoupdate for formulae.brew.sh CI
+# Otherwise you have a chicken and egg problem where generating formulae.brew.sh
+# requires a working formulae.brew.sh.
 if [[ "$GITHUB_REPOSITORY" != "Homebrew/formulae.brew.sh" ]]; then
     # Run `brew update` once to e.g. download formula/cask JSON files.
     (
