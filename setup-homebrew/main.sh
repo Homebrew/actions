@@ -16,16 +16,16 @@ ohai() {
     echo -e "\\033[34m==>\\033[0m \\033[1m$*\\033[0m"
 }
 
-MAX_GIT_RETRIES=5
+MAX_RETRIES=10
 
-function git_retry {
+function retry {
     local try=0
 
-    until git "$@"; do
+    until "$@"; do
         exit_code="$?"
         try=$((try + 1))
 
-        if [ $try -lt $MAX_GIT_RETRIES ]; then
+        if [ $try -lt $MAX_RETRIES ]; then
             sleep $((2 ** try))
         else
             return $exit_code
@@ -33,6 +33,10 @@ function git_retry {
     done
 
     return 0
+}
+
+function git_retry {
+    retry git "$@"
 }
 
 # Check brew's existence
@@ -155,7 +159,7 @@ if [[ "$GITHUB_REPOSITORY" != "Homebrew/formulae.brew.sh" ]]; then
         unset HOMEBREW_NO_INSTALL_FROM_API HOMEBREW_DEVELOPER HOMEBREW_DEV_CMD_RUN
         unset HOMEBREW_UPDATE_CORE_TAP HOMEBREW_UPDATE_CASK_TAP
         unset HOMEBREW_BOOTSNAP # so we don't install bundler gems here before any caching
-        HOMEBREW_UPDATE_SKIP_BREW=1 brew update --auto
+        HOMEBREW_UPDATE_SKIP_BREW=1 retry brew update --auto
     )
 fi
 
