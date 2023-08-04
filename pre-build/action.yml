@@ -57,7 +57,7 @@ runs:
       run: |
         printf '\n<details><summary>brew test-bot --only-setup</summary>\n<p>\n\n' >> "$GITHUB_STEP_SUMMARY"
         printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
-        brew test-bot --only-setup | tee -a "${GITHUB_STEP_SUMMARY}"
+        HOMEBREW_NO_COLOR=1 brew test-bot --only-setup | tee -a "${GITHUB_STEP_SUMMARY}"
         printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
         printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
       shell: bash
