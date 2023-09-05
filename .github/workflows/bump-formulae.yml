@@ -13,7 +13,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Update core
         run: brew update-reset "$(brew --repo Homebrew/core)"
