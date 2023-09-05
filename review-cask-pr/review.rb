@@ -2,6 +2,7 @@ require "json"
 require "tmpdir"
 require "open3"
 require "English"
+require "utils/curl"
 
 Homebrew.install_gem! "git_diff"
 require "git_diff"
@@ -14,7 +15,7 @@ require "utils/github"
 def diff_for_pull_request(pr)
   diff_url = pr.fetch("diff_url")
 
-  output, _, status = curl_output("--location", diff_url)
+  output, _, status = Utils::Curl.curl_output("--location", diff_url)
 
   GitDiff.from_string(output) if status.success?
 end
