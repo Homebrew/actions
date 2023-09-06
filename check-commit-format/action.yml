@@ -22,5 +22,5 @@ inputs:
     required: false
     default: CI-published-bottle-commits
 runs:
-  using: node16
+  using: node20
   main: main.js

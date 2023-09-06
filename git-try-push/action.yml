@@ -36,5 +36,5 @@ inputs:
     description: Whether to force push without lease (requires force)
     required: false
 runs:
-  using: node16
+  using: node20
   main: main.js
