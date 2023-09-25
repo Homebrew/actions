@@ -5,6 +5,10 @@ on:
     paths:
       - '**review-cask-pr**'
 
+defaults:
+  run:
+    working-directory: review-cask-pr
+
 jobs:
   unit-tests:
     runs-on: ubuntu-latest
@@ -14,8 +18,6 @@ jobs:
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.6'
 
       - name: Run RSpec
         run: |
@@ -23,4 +25,3 @@ jobs:
           gem install rspec
 
           rspec
-        working-directory: review-cask-pr
