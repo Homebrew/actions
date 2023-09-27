@@ -81,7 +81,8 @@ async function main() {
                 // We've already modified this file, or the commit subject doesn't start with the formula name.
                 if (files_touched.includes(file.filename) || !commit_subject.startsWith(formula)) {
                     autosquash = true
-                    message = "Pull request will be replaced."
+                    commit_state = "failure"
+                    message = "Please follow the commit style guidelines, or this pull request will be replaced."
                 }
                 files_touched.push(file.filename)
             } else if (file.filename.startsWith("Casks/")) {
