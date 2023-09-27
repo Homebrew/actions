@@ -48,11 +48,6 @@ runs:
         key: ${{ env.cache_key_prefix }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
         restore-keys: ${{ env.cache_key_prefix }}-rubygems-
 
-    - name: Install Homebrew Bundler RubyGems
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: brew install-bundler-gems
-
     - name: Run brew test-bot --only-setup
       run: |
         printf '\n<details><summary>brew test-bot --only-setup</summary>\n<p>\n\n' >> "$GITHUB_STEP_SUMMARY"
