@@ -33,6 +33,6 @@ outputs:
   gems-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
 runs:
-  using: node20
+  using: node16 # Bump to node 20 once portable-ruby CI supports it
   main: main.mjs
   post: post.mjs
