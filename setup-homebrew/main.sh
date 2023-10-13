@@ -134,7 +134,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     cd "$HOMEBREW_REPOSITORY"
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git_retry fetch --tags origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
-    git remote set-head origin --auto
+    git_retry remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
 
@@ -182,7 +182,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
         git remote add origin "https://github.com/$GITHUB_REPOSITORY"
     fi
     git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
-    git remote set-head origin --auto
+    git_retry remote set-head origin --auto
     git checkout --force -B master FETCH_HEAD
     cd -
 # Setup all other taps
@@ -215,7 +215,7 @@ else
         fi
 
         git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
-        git remote set-head origin --auto
+        git_retry remote set-head origin --auto
         head="$(git symbolic-ref refs/remotes/origin/HEAD)"
         head="${head#refs/remotes/origin/}"
         git checkout --force -B "$head" FETCH_HEAD
@@ -232,7 +232,7 @@ else
 
             ohai "Fetching Homebrew/core..."
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
-            git -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
+            git_retry -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
             git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
         else
             ohai "Cloning Homebrew/core..."
@@ -244,7 +244,7 @@ else
         if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
             ohai "Fetching Homebrew/cask..."
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
-            git -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
+            git_retry -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
             git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
         else
             ohai "Cloning Homebrew/cask..."
@@ -256,7 +256,7 @@ else
         if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" && "${UPDATE_CASK}" == "true" ]]; then
             ohai "Fetching Homebrew/${cask_repo##*/}..."
             git_retry -C "${cask_repo}" fetch --force origin
-            git -C "${cask_repo}" remote set-head origin --auto
+            git_retry -C "${cask_repo}" remote set-head origin --auto
             git -C "${cask_repo}" checkout --force -B master origin/HEAD
         fi
     done
@@ -268,7 +268,7 @@ if [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW
     if [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
         ohai "Fetching Homebrew/test-bot..."
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
-        git -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
+        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
         git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B master origin/HEAD
     else
         ohai "Cloning Homebrew/test-bot..."
