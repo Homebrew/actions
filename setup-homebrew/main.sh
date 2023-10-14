@@ -58,6 +58,7 @@ HOMEBREW_OTHER_CASK_REPOSITORIES=(
     "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts"
     "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
 )
+HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
 fi
@@ -262,9 +263,9 @@ else
     done
 fi
 
-if [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
+if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
+   { [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; }; then
     # Setup Homebrew/homebrew-test-bot
-    HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
     if [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
         ohai "Fetching Homebrew/test-bot..."
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
