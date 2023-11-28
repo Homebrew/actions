@@ -12,7 +12,7 @@ on:
 
 jobs:
   commit-signing:
-    if: github.repository_owner == 'Homebrew'
+    if: github.repository_owner == 'Homebrew' && github.actor != 'dependabot[bot]'
     strategy:
       matrix:
         container:
