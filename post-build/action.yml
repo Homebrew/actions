@@ -49,7 +49,7 @@ runs:
 
     - name: Upload logs
       if: always()
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v3
       with:
         name: logs-${{ inputs.runner }}
         path: ${{ inputs.logs-directory }}
@@ -63,14 +63,14 @@ runs:
 
     - name: Upload failed bottles
       if: always() && steps.bottles.outputs.failures > 0
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v3
       with:
         name: bottles-${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/failed
 
     - name: Upload list of successfully tested dependents
       if: always() && !fromJson(inputs.upload-bottles) && steps.bottles.outputs.dependents > 0
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v3
       with:
         name: dependents
         path: ${{ inputs.bottles-directory }}/tested-dependents-*.txt
@@ -87,7 +87,7 @@ runs:
 
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v3
       with:
         name: bottles
         path: ${{ inputs.bottles-directory }}
