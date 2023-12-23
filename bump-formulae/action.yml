@@ -14,8 +14,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: brew bump --open-pr ${{inputs.formulae}}
+    - run: echo "::warning::Homebrew/actions/bump-formulae is deprecated. Please use Homebrew/actions/bump-packages instead."
       shell: sh
-      env:
-        HOMEBREW_DEVELOPER: "1"
-        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
+
+    - uses: Homebrew/actions/bump-packages@master
+      with:
+        token: ${{ inputs.token }}
+        formulae: ${{ inputs.formulae }}

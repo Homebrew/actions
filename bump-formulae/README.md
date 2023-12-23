@@ -1,5 +1,8 @@
 # Bump formulae GitHub Action
 
+> [!WARNING]
+> This action is deprecated. Please use `Homebrew/actions/bump-packages` instead.
+
 An action that wraps `brew bump-formula-pr` to ease the process of updating formulae. It uses `brew livecheck` under the hood to get a list of outdated formulae.
 
 Runs on `ubuntu` and `macos`.
