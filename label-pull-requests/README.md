@@ -18,7 +18,8 @@ Will remove labels from a pull request that no longer apply.
           {
               "label": "new formula",
               "status": "added",
-              "path": "Formula/.+"
+              "path": "Formula/.+",
+              "allow_any_match": true
           },
           {
               "label": "bottle unneeded",
@@ -65,6 +66,7 @@ Will remove labels from a pull request that no longer apply.
       - label: new formula
         status: added
         path: Formula/.+
+        allow_any_match: true
 
       - label: bottle unneeded
         content: bottle :unneeded
