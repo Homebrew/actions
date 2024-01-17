@@ -86,9 +86,10 @@ runs:
       shell: bash
 
     - name: generate build provenance
-        uses: github-early-access/generate-build-provenance@main
-        with:
-          subject-path: '${{ inputs.bottles-directory }}/*.tar.gz'
+      if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
+      uses: github-early-access/generate-build-provenance@main
+      with:
+        subject-path: '${{ inputs.bottles-directory }}/*.tar.gz'
 
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
