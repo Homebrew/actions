@@ -85,6 +85,12 @@ runs:
       working-directory: ${{ inputs.bottles-directory }}
       shell: bash
 
+    - name: generate build provenance
+      if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
+      uses: github-early-access/generate-build-provenance@main
+      with:
+        subject-path: '${{ inputs.bottles-directory }}/*.tar.gz'
+
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
       uses: actions/upload-artifact@v3
