@@ -132,6 +132,11 @@ async function main() {
             const constraint = constraintAndMatchingFiles[0]
             const matchingFiles = constraintAndMatchingFiles[1]
 
+            // Continue if constraint allows any PR file to match
+            if (constraint.allow_any_match) {
+                continue
+            }
+
             if (matchingFiles.length == files.data.length) {
                 continue
             }
