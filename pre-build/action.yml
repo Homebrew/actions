@@ -25,10 +25,10 @@ runs:
 
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
-      shell: /bin/bash -e {0}
+      shell: /bin/bash -euo pipefail {0}
 
     - name: Set up RubyGems cache
-      shell: bash
+      shell: /bin/bash -euo pipefail {0}
       run: |
         cache_key_prefix="${{ runner.os }}"
         if [[ "${{ runner.os }}" = macOS ]]
@@ -55,13 +55,13 @@ runs:
         HOMEBREW_NO_COLOR=1 brew test-bot --only-setup | tee -a "${GITHUB_STEP_SUMMARY}"
         printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
         printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
-      shell: bash
+      shell: /bin/bash -euo pipefail {0}
 
     - name: Set up bottles directory
       run: |
         rm -rvf "${BOTTLES_DIR:?}"
         mkdir "${BOTTLES_DIR:?}"
-      shell: bash
+      shell: /bin/bash -euo pipefail {0}
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
 

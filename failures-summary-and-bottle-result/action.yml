@@ -40,4 +40,4 @@ runs:
         "${{ inputs.collapse }}" && printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
 
         rm "$full_result_path"
-      shell: bash
+      shell: /bin/bash -euo pipefail {0}

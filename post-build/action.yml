@@ -83,7 +83,7 @@ runs:
         rm -rvf logs home failed artifact-cache
         rm -rvf tested-dependents-*.txt
       working-directory: ${{ inputs.bottles-directory }}
-      shell: bash
+      shell: /bin/bash -euo pipefail {0}
 
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
@@ -97,6 +97,6 @@ runs:
       run: |
         brew test-bot --only-cleanup-after
         rm -rvf "${BOTTLES_DIR:?}"
-      shell: /bin/bash -e {0}
+      shell: /bin/bash -euo pipefail {0}
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
