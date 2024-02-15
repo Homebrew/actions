@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 WORKING_DIRECTORY="$1"
 DEBUG="$2"
