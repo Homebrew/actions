@@ -32,12 +32,12 @@ runs:
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - run: |
         if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
-          brew bump --no-fork --open-pr --cask ${{ inputs.cask}}
+          brew bump --no-fork --open-pr --casks ${{ inputs.casks }}
         else
-          brew bump --open-pr --cask ${{ inputs.cask }}
+          brew bump --open-pr --casks ${{ inputs.casks }}
         fi
       shell: bash
-      if: inputs.cask != ''
+      if: inputs.casks != ''
       env:
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
