@@ -1,6 +1,7 @@
 # Limit Pull Requests GitHub Action
 
-An action that limits the number of pull requests opened by a user.
+An action that limits the number of open pull requests to the repository created
+by a user.
 
 ## Prerequisites
 

@@ -1,5 +1,6 @@
 name: Limit pull requests
-description: Limit the number of pull requests to the repository created by a user
+description: >
+  Limit the number of open pull requests to the repository created by a user
 author: ZhongRuoyu
 branding:
   icon: alert-triangle
