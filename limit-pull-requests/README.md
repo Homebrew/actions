@@ -20,6 +20,9 @@ by a user.
   with:
     except-users: |
       BrewTestBot
+    # https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
+    except-author-associations: |
+      MEMBER
     comment-limit: 10
     comment: >
       You already have 10 pull requests open. Please consider working on getting
