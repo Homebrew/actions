@@ -1,0 +1,82 @@
+name: Limit pull requests
+description: Limit the number of pull requests to the repository created by a user
+author: ZhongRuoyu
+branding:
+  icon: alert-triangle
+  color: yellow
+
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{ github.token }}
+  limit:
+    description: The maximum number of pull requests allowed
+    required: true
+    default: "10"
+  except-users:
+    description: The users exempted from the limit, one per line
+    required: false
+  # https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
+  except-author-associations:
+    description: The author associations exempted from the limit, one per line
+    required: false
+  comment:
+    description: The comment to post when the limit is reached
+    required: false
+  close:
+    description: Whether to close the pull request when the limit is reached
+    required: true
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Check the number of pull requests
+      id: count-pull-requests
+      run: |
+        # If the user is exempted, assume they have no pull requests.
+        if grep -Fqx '${{ github.actor }}' <<<'${{ inputs.except-users }}'; then
+          echo "::notice::@${{ github.actor }} is exempted from the limit."
+          echo "count=0" >>"$GITHUB_OUTPUT"
+          exit 0
+        fi
+        if grep -Fqx '${{ github.event.pull_request.author_association }}' <<<'${{ inputs.except-author-associations }}'; then
+          echo "::notice::@{{ github.actor }} is a ${{ github.event.pull_request.author_association }} exempted from the limit."
+          echo "count=0" >>"$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        count="$(
+          gh pr list \
+            --state=open \
+            --author='${{ github.actor }}' \
+            --json=number \
+            --jq=length
+        )"
+        echo "::notice::Open pull requests by @${{ github.actor }}: $count."
+        echo "count=$count" >>"$GITHUB_OUTPUT"
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
+
+    - name: Comment on pull request
+      if: >
+        steps.count-pull-requests.outputs.count > inputs.limit &&
+        inputs.comment != ''
+      run: |
+        gh pr comment '${{ github.event.pull_request.number }}' \
+          --body='${{ inputs.comment }}'
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
+
+    - name: Close pull request
+      if: >
+        steps.count-pull-requests.outputs.count > inputs.limit &&
+        inputs.close == 'true'
+      run: |
+        gh pr close '${{ github.event.pull_request.number }}'
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
