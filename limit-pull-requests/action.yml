@@ -11,12 +11,6 @@ inputs:
     description: GitHub token
     required: false
     default: ${{ github.token }}
-  comment-limit:
-    description: >
-      Post the comment when the user's number of open pull requests exceeds this
-      number and `comment` is not empty
-    required: true
-    default: "10"
   except-users:
     description: The users exempted from the limit, one per line
     required: false
@@ -24,6 +18,12 @@ inputs:
   except-author-associations:
     description: The author associations exempted from the limit, one per line
     required: false
+  comment-limit:
+    description: >
+      Post the comment when the user's number of open pull requests exceeds this
+      number and `comment` is not empty
+    required: true
+    default: "10"
   comment:
     description: The comment to post when the limit is reached
     required: false
