@@ -10,8 +10,10 @@ inputs:
     description: GitHub token
     required: false
     default: ${{ github.token }}
-  limit:
-    description: The maximum number of pull requests allowed
+  comment-limit:
+    description: >
+      Post the comment when the user's number of open pull requests exceeds this
+      number and `comment` is not empty
     required: true
     default: "10"
   except-users:
@@ -24,6 +26,12 @@ inputs:
   comment:
     description: The comment to post when the limit is reached
     required: false
+  close-limit:
+    description: >
+      Close the pull request when the user's number of open pull requests
+      exceeds this number and `close` is set to `true`
+    required: true
+    default: "50"
   close:
     description: Whether to close the pull request when the limit is reached
     required: true
@@ -62,7 +70,7 @@ runs:
 
     - name: Comment on pull request
       if: >
-        steps.count-pull-requests.outputs.count > inputs.limit &&
+        steps.count-pull-requests.outputs.count > inputs.comment-limit &&
         inputs.comment != ''
       run: |
         gh pr comment '${{ github.event.pull_request.number }}' \
@@ -73,7 +81,7 @@ runs:
 
     - name: Close pull request
       if: >
-        steps.count-pull-requests.outputs.count > inputs.limit &&
+        steps.count-pull-requests.outputs.count > inputs.close-limit &&
         inputs.close == 'true'
       run: |
         gh pr close '${{ github.event.pull_request.number }}'

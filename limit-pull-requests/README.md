@@ -17,11 +17,12 @@ An action that limits the number of pull requests opened by a user.
 ```yaml
 - uses: Homebrew/actions/limit-pull-requests@master
   with:
-    limit: 10
     except-users: |
       BrewTestBot
+    comment-limit: 10
     comment: >
       You already have 10 pull requests open. Please consider working on getting
       the existing ones merged before opening new ones. Thanks!
-    close: false
+    close-limit: 50
+    close: true
 ```
