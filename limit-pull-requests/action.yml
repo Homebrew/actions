@@ -45,12 +45,12 @@ runs:
       id: count-pull-requests
       run: |
         # If the user is exempted, assume they have no pull requests.
-        if grep -Fqx '${{ github.actor }}' <<<'${{ inputs.except-users }}'; then
+        if grep -Fiqx '${{ github.actor }}' <<<'${{ inputs.except-users }}'; then
           echo "::notice::@${{ github.actor }} is exempted from the limit."
           echo "count=0" >>"$GITHUB_OUTPUT"
           exit 0
         fi
-        if grep -Fqx '${{ github.event.pull_request.author_association }}' <<<'${{ inputs.except-author-associations }}'; then
+        if grep -Fiqx '${{ github.event.pull_request.author_association }}' <<<'${{ inputs.except-author-associations }}'; then
           echo "::notice::@{{ github.actor }} is a ${{ github.event.pull_request.author_association }} exempted from the limit."
           echo "count=0" >>"$GITHUB_OUTPUT"
           exit 0
