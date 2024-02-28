@@ -19,15 +19,25 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: brew bump --open-pr --formulae ${{ inputs.formulae }}
+    - run: |
+        if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
+          brew bump --no-fork --open-pr --formulae ${{ inputs.formulae }}
+        else
+          brew bump --open-pr --formulae ${{ inputs.formulae }}
+        fi
+      shell: bash
       if: inputs.formulae != ''
-      shell: sh
       env:
         HOMEBREW_DEVELOPER: "1"
-        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
-    - run: brew bump --open-pr --casks ${{ inputs.casks }}
+        HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
+    - run: |
+        if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
+          brew bump --no-fork --open-pr --casks ${{ inputs.casks }}
+        else
+          brew bump --open-pr --casks ${{ inputs.casks }}
+        fi
+      shell: bash
       if: inputs.casks != ''
-      shell: sh
       env:
         HOMEBREW_DEVELOPER: "1"
-        HOMEBREW_GITHUB_API_TOKEN: ${{inputs.token}}
+        HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
