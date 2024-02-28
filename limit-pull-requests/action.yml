@@ -77,7 +77,7 @@ runs:
 
     - name: Comment on pull request
       if: >
-        steps.count-pull-requests.outputs.count > inputs.comment-limit &&
+        fromJSON(steps.count-pull-requests.outputs.count) > fromJSON(inputs.comment-limit) &&
         inputs.comment != ''
       run: |
         gh pr comment '${{ github.event.pull_request.number }}' \
@@ -88,7 +88,7 @@ runs:
 
     - name: Close pull request
       if: >
-        steps.count-pull-requests.outputs.count > inputs.close-limit &&
+        fromJSON(steps.count-pull-requests.outputs.count) > fromJSON(inputs.close-limit) &&
         inputs.close == 'true'
       run: |
         gh pr close '${{ github.event.pull_request.number }}'
