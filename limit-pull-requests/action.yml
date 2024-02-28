@@ -21,7 +21,7 @@ inputs:
   comment-limit:
     description: >
       Post the comment when the user's number of open pull requests exceeds this
-      number and `comment` is not empty
+      number and `comment` is not empty (maximum: 99)
     required: true
     default: "10"
   comment:
@@ -30,7 +30,7 @@ inputs:
   close-limit:
     description: >
       Close the pull request when the user's number of open pull requests
-      exceeds this number and `close` is set to `true`
+      exceeds this number and `close` is set to `true` (maximum: 99)
     required: true
     default: "50"
   close:
@@ -61,7 +61,8 @@ runs:
             --state=open \
             --author='${{ github.actor }}' \
             --json=number \
-            --jq=length
+            --jq=length \
+            --limit=100
         )"
         echo "::notice::Open pull requests by @${{ github.actor }}: $count."
         echo "count=$count" >>"$GITHUB_OUTPUT"
