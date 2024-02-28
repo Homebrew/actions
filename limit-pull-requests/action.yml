@@ -21,7 +21,7 @@ inputs:
   comment-limit:
     description: >
       Post the comment when the user's number of open pull requests exceeds this
-      number and `comment` is not empty (maximum: 99)
+      number and `comment` is not empty
     required: true
     default: "10"
   comment:
@@ -30,7 +30,7 @@ inputs:
   close-limit:
     description: >
       Close the pull request when the user's number of open pull requests
-      exceeds this number and `close` is set to `true` (maximum: 99)
+      exceeds this number and `close` is set to `true`
     required: true
     default: "50"
   close:
@@ -57,12 +57,17 @@ runs:
         fi
 
         count="$(
-          gh pr list \
-            --state=open \
-            --author='${{ github.actor }}' \
-            --json=number \
-            --jq=length \
-            --limit=100
+          gh api \
+            --method GET \
+            --header 'Accept: application/vnd.github+json' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            --field state=open \
+            --paginate \
+            '/repos/{owner}/{repo}/pulls' |
+            jq \
+              --raw-output \
+              --arg USER '${{ github.actor }}' \
+              'map(select(.user.login == $USER)) | length'
         )"
         echo "::notice::Open pull requests by @${{ github.actor }}: $count."
         echo "count=$count" >>"$GITHUB_OUTPUT"
