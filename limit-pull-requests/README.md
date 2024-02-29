@@ -5,7 +5,8 @@ by a user.
 
 ## Prerequisites
 
-- [GitHub CLI (`gh`)](https://github.com/cli/cli) needs to be installed.
+- [GitHub CLI (`gh`)](https://github.com/cli/cli) and
+  [`jq`](https://jqlang.github.io/jq/) need to be installed.
 - These permissions need to be set:
   ```yaml
   permissions:
@@ -14,6 +15,8 @@ by a user.
   ```
 
 ## Usage
+
+This action should be used in a `pull_request_target` workflow.
 
 ```yaml
 - uses: Homebrew/actions/limit-pull-requests@master
