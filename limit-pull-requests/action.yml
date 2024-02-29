@@ -81,9 +81,10 @@ runs:
         inputs.comment != ''
       run: |
         gh pr comment '${{ github.event.pull_request.number }}' \
-          --body='${{ inputs.comment }}'
+          --body="${COMMENT_BODY}"
       env:
         GH_TOKEN: ${{ inputs.token }}
+        COMMENT_BODY: ${{ inputs.comment }}
       shell: bash
 
     - name: Close pull request
