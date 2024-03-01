@@ -29,6 +29,7 @@ runs:
       if: inputs.formulae != ''
       env:
         HOMEBREW_DEVELOPER: "1"
+        HOMEBREW_TEST_BOT_AUTOBUMP: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - run: |
         if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
@@ -40,4 +41,5 @@ runs:
       if: inputs.casks != ''
       env:
         HOMEBREW_DEVELOPER: "1"
+        HOMEBREW_TEST_BOT_AUTOBUMP: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
