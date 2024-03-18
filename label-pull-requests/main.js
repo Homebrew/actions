@@ -133,7 +133,7 @@ async function main() {
             const matchingFiles = constraintAndMatchingFiles[1]
 
             // Continue if constraint allows any PR file to match
-            if (constraint.allow_any_match) {
+            if (constraint.allow_any_match && constraint.wanted) {
                 continue
             }
 
@@ -159,8 +159,8 @@ async function main() {
             }
 
             if (body) {
-            	constraintApplies = body.match(constraint.pr_body_content)
-	    }
+                constraintApplies = body.match(constraint.pr_body_content)
+            }
 
             if (labelExists && constraintApplies) {
                 continue
