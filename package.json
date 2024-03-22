@@ -5,7 +5,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
     "adm-zip": "^0.5.12",
-    "filesize": "^10.1.0",
+    "filesize": "^10.1.1",
     "js-yaml": "^4.1.0"
   }
 }
