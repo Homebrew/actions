@@ -25,6 +25,10 @@ inputs:
     description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
     default: ""
+  stable:
+    description: Use the latest stable `homebrew/brew` tag.
+    required: false
+    default: false
 outputs:
   repository-path:
     description: Path to where the repository has been checked out (if applicable)
