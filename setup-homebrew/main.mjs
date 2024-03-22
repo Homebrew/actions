@@ -9,7 +9,8 @@ try {
     core.getInput("cask"),
     core.getInput("test-bot"),
     core.getInput("debug"),
-    core.getInput("token")
+    core.getInput("token"),
+    core.getInput("stable")
   ])
 } catch (error) {
   core.setFailed(error.message)

@@ -7,6 +7,7 @@ UPDATE_CASK="${2}"
 TEST_BOT="${3}"
 DEBUG="${4}"
 TOKEN="${5}"
+STABLE="${6}"
 
 if [[ "${DEBUG}" == "true" ]]; then
     set -x
@@ -148,6 +149,11 @@ else
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
         echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >>"$GITHUB_OUTPUT"
     fi
+fi
+if [[ "${STABLE}" == "true" ]]; then
+  echo HOMEBREW_UPDATE_TO_TAG=1 >>"$GITHUB_ENV"
+  latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
+  git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
 fi
 
 # Skip autoupdate for formulae.brew.sh CI
