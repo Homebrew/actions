@@ -143,7 +143,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
 
     echo "repository-path=$HOMEBREW_REPOSITORY" >>"$GITHUB_OUTPUT"
 else
-    git_retry -C "$HOMEBREW_REPOSITORY" fetch --force origin
+    git_retry -C "$HOMEBREW_REPOSITORY" fetch --force --tags origin
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
 
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
