@@ -42,7 +42,7 @@ runs:
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ steps.set-up-homebrew.outputs.gems-path }}
         key: ${{ env.cache_key_prefix }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
@@ -67,7 +67,7 @@ runs:
 
     - name: Download bottles from GitHub Actions
       if: fromJson(inputs.download-bottles)
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v3-node20
       with:
         name: bottles
         path: ${{ inputs.bottles-directory }}
