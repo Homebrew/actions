@@ -1,14 +1,11 @@
 #!/bin/bash
 
-WORKING_DIRECTORY="$1"
-DEBUG="$2"
+DEBUG="$1"
 
 if [[ "${DEBUG}" = "true" ]]
 then
   set -x
 fi
-
-cd "${WORKING_DIRECTORY}" || exit 1
 
 shopt -s nullglob
 

@@ -57,9 +57,9 @@ runs:
     - name: Count bottles
       id: bottles
       if: always()
-      uses: Homebrew/actions/count-bottles@master
-      with:
-        working-directory: ${{ inputs.bottles-directory }}
+      run: "${{ github.action_path }}/count-bottles.sh" "${{ inputs.debug }}"
+      working-directory: ${{ inputs.bottles-directory }}
+      shell: /bin/bash -euo pipefail {0}
 
     - name: Upload failed bottles
       if: always() && steps.bottles.outputs.failures > 0
