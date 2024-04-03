@@ -29,4 +29,6 @@ If there are no outdated packages, the Action will just exit.
       CASK-2
       CASKS-3
       ...
+    # Do not use a fork for opening PR's
+    fork: false
 ```
