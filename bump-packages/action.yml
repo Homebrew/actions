@@ -16,14 +16,18 @@ inputs:
     description: Cask names, one per line
     required: false
     default: ''
+  fork:
+    description: Use a fork when opening a PR
+    required: false
+    default: ${{ github.repository_owner != "Homebrew" }}
 runs:
   using: composite
   steps:
     - run: |
-        if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
-          brew bump --no-fork --open-pr --formulae ${{ inputs.formulae }}
-        else
+        if [[ "$INPUT_FORK" == "true" ]]; then
           brew bump --open-pr --formulae ${{ inputs.formulae }}
+        else
+          brew bump --no-fork --open-pr --formulae ${{ inputs.formulae }}
         fi
       shell: bash
       if: inputs.formulae != ''
@@ -31,10 +35,10 @@ runs:
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - run: |
-        if [[ "${GITHUB_REPOSITORY_OWNER}" == 'Homebrew' ]]; then
-          brew bump --no-fork --open-pr --casks ${{ inputs.casks }}
-        else
+        if [[ "$INPUT_FORK" == "true" ]]; then
           brew bump --open-pr --casks ${{ inputs.casks }}
+        else
+          brew bump --no-fork --open-pr --casks ${{ inputs.casks }}
         fi
       shell: bash
       if: inputs.casks != ''
