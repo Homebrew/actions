@@ -19,7 +19,7 @@ inputs:
   fork:
     description: Use a fork when opening a PR
     required: false
-    default: ${{ github.repository_owner != "Homebrew" }}
+    default: ${{ github.repository_owner != 'Homebrew' }}
 runs:
   using: composite
   steps:
