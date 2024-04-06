@@ -57,7 +57,7 @@ runs:
     - name: Count bottles
       id: bottles
       if: always()
-      run: "${{ GITHUB_ACTION_PATH }}/count-bottles.sh ${{ inputs.debug }}"
+      run: "${ GITHUB_ACTION_PATH }/count-bottles.sh \"${{ inputs.debug }}\""
       working-directory: ${{ inputs.bottles-directory }}
       shell: /bin/bash -euo pipefail {0}
 
