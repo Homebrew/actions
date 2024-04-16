@@ -65,7 +65,7 @@ runs:
       if: always() && steps.bottles.outputs.failures > 0
       uses: actions/upload-artifact@v4
       with:
-        name: bottles-${{ inputs.runner }}
+        name: failed-bottles-${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/failed
 
     - name: Upload list of successfully tested dependents
