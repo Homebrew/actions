@@ -67,7 +67,8 @@ runs:
 
     - name: Download bottles from GitHub Actions
       if: fromJson(inputs.download-bottles)
-      uses: actions/download-artifact@v3-node20
+      uses: actions/download-artifact@v4
       with:
-        name: bottles
+        pattern: bottles{,-*}
         path: ${{ inputs.bottles-directory }}
+        merge-multiple: true
