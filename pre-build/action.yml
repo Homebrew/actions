@@ -69,6 +69,6 @@ runs:
       if: fromJson(inputs.download-bottles)
       uses: actions/download-artifact@v4
       with:
-        pattern: bottles{,_*}
+        pattern: bottles_*
         path: ${{ inputs.bottles-directory }}
         merge-multiple: true
