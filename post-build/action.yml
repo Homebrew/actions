@@ -51,7 +51,7 @@ runs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: logs-${{ inputs.runner }}
+        name: logs_${{ inputs.runner }}
         path: ${{ inputs.logs-directory }}
 
     - name: Count bottles
@@ -65,14 +65,14 @@ runs:
       if: always() && steps.bottles.outputs.failures > 0
       uses: actions/upload-artifact@v4
       with:
-        name: failed-bottles-${{ inputs.runner }}
+        name: failed-bottles_${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/failed
 
     - name: Upload list of successfully tested dependents
       if: always() && !fromJson(inputs.upload-bottles) && steps.bottles.outputs.dependents > 0
       uses: actions/upload-artifact@v4
       with:
-        name: dependents-${{ inputs.runner }}
+        name: dependents_${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/tested-dependents-*.txt
 
     # Must be run before the `Upload bottles` step so that failed
