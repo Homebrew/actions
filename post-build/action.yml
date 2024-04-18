@@ -49,9 +49,9 @@ runs:
 
     - name: Upload logs
       if: always()
-      uses: actions/upload-artifact@v3-node20
+      uses: actions/upload-artifact@v4
       with:
-        name: logs-${{ inputs.runner }}
+        name: logs_${{ inputs.runner }}
         path: ${{ inputs.logs-directory }}
 
     - name: Count bottles
@@ -63,16 +63,16 @@ runs:
 
     - name: Upload failed bottles
       if: always() && steps.bottles.outputs.failures > 0
-      uses: actions/upload-artifact@v3-node20
+      uses: actions/upload-artifact@v4
       with:
-        name: bottles-${{ inputs.runner }}
+        name: failed-bottles_${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/failed
 
     - name: Upload list of successfully tested dependents
       if: always() && !fromJson(inputs.upload-bottles) && steps.bottles.outputs.dependents > 0
-      uses: actions/upload-artifact@v3-node20
+      uses: actions/upload-artifact@v4
       with:
-        name: dependents
+        name: dependents_${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}/tested-dependents-*.txt
 
     # Must be run before the `Upload bottles` step so that failed
@@ -87,9 +87,9 @@ runs:
 
     - name: Upload bottles
       if: always() && fromJson(inputs.upload-bottles) && (steps.bottles.outputs.count > 0 || steps.bottles.outputs.skipped > 0)
-      uses: actions/upload-artifact@v3-node20
+      uses: actions/upload-artifact@v4
       with:
-        name: bottles
+        name: bottles_${{ inputs.runner }}
         path: ${{ inputs.bottles-directory }}
 
     - name: Post cleanup
