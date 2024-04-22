@@ -20,7 +20,7 @@ If there are no outdated formulae, the Action will just exit.
     # Custom GitHub access token with only the 'public_repo' scope enabled
     token: ${{secrets.TOKEN}}
     # Bump only these formulae if outdated
-    formulae: |
+    formulae: >
       FORMULA-1
       FORMULA-2
       FORMULA-3

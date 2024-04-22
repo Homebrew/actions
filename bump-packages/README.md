@@ -18,13 +18,13 @@ If there are no outdated packages, the Action will just exit.
     # Custom GitHub access token with only the 'public_repo' scope enabled
     token: ${{secrets.TOKEN}}
     # Bump only these formulae if outdated
-    formulae: |
+    formulae: >
       FORMULA-1
       FORMULA-2
       FORMULA-3
       ...
     # Bump only these casks if outdated
-    casks: |
+    casks: >
       CASK-1
       CASK-2
       CASKS-3
