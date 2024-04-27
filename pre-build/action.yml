@@ -28,6 +28,7 @@ runs:
       shell: /bin/bash -euo pipefail {0}
 
     - name: Set up RubyGems cache
+      id: setup-cache
       shell: /bin/bash -euo pipefail {0}
       run: |
         cache_key_prefix="${{ runner.os }}"
@@ -39,6 +40,8 @@ runs:
           cache_key_prefix="${macos_version}-${arch}"
         fi
         echo "cache_key_prefix=${cache_key_prefix}" >> "$GITHUB_ENV"
+        echo "macos_version=${macos_version}" >> "$GITHUB_OUTPUT"
+        echo "arch=${arch}" >> "$GITHUB_OUTPUT"
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
@@ -58,17 +61,29 @@ runs:
       shell: /bin/bash -euo pipefail {0}
 
     - name: Set up bottles directory
+      id: setup-bottles
       run: |
         rm -rvf "${BOTTLES_DIR:?}"
         mkdir "${BOTTLES_DIR:?}"
+
+        if [[ "${{ runner.os }}" = Linux ]]; then
+          bottle_specifier="{ubuntu,linux}"
+        else
+          bottle_specifier="$MACOS_VERSION"
+          [[ "$ARCH" = arm64 ]] && bottle_specifier="${bottle_specifier}-${ARCH}"
+        fi
+
+        echo "bottle_specifier=$bottle_specifier" >> "$GITHUB_OUTPUT"
       shell: /bin/bash -euo pipefail {0}
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
+        MACOS_VERSION: ${{ steps.setup-cache.macos_version }}
+        ARCH: ${{ steps.setup_cache.arch }}
 
     - name: Download bottles from GitHub Actions
       if: fromJson(inputs.download-bottles)
       uses: actions/download-artifact@v4
       with:
-        pattern: bottles_*
+        pattern: bottles_${{ steps.setup-bottles.bottle_specifier }}*
         path: ${{ inputs.bottles-directory }}
         merge-multiple: true
