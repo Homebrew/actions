@@ -77,13 +77,13 @@ runs:
       shell: /bin/bash -euo pipefail {0}
       env:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
-        MACOS_VERSION: ${{ steps.setup-cache.macos_version }}
-        ARCH: ${{ steps.setup-cache.arch }}
+        MACOS_VERSION: ${{ steps.setup-cache.outputs.macos_version }}
+        ARCH: ${{ steps.setup-cache.outputs.arch }}
 
     - name: Download bottles from GitHub Actions
       if: fromJson(inputs.download-bottles)
       uses: actions/download-artifact@v4
       with:
-        pattern: bottles_${{ steps.setup-bottles.bottle_specifier }}*
+        pattern: bottles_${{ steps.setup-bottles.outputs.bottle_specifier }}*
         path: ${{ inputs.bottles-directory }}
         merge-multiple: true
