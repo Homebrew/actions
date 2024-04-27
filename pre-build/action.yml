@@ -40,8 +40,8 @@ runs:
           cache_key_prefix="${macos_version}-${arch}"
         fi
         echo "cache_key_prefix=${cache_key_prefix}" >> "$GITHUB_ENV"
-        echo "macos_version=${macos_version}" >> "$GITHUB_OUTPUT"
-        echo "arch=${arch}" >> "$GITHUB_OUTPUT"
+        echo "macos_version=${macos_version:-}" >> "$GITHUB_OUTPUT"
+        echo "arch=${arch:-}" >> "$GITHUB_OUTPUT"
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
