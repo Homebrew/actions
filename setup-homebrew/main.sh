@@ -144,7 +144,12 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     echo "repository-path=$HOMEBREW_REPOSITORY" >>"$GITHUB_OUTPUT"
 else
     git_retry -C "$HOMEBREW_REPOSITORY" fetch --force --tags origin
-    git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
+    git_retry -C "$HOMEBREW_REPOSITORY" remote set-head origin --auto
+    if [[ "${STABLE}" == "true" && "$(git -C "$HOMEBREW_REPOSITORY" symbolic-ref --short HEAD 2>/dev/null)" != "master" ]]; then
+      git -C "$HOMEBREW_REPOSITORY" branch --force master origin/HEAD
+    else
+      git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
+    fi
 
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
         echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >>"$GITHUB_OUTPUT"
