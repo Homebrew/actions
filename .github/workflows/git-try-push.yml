@@ -9,9 +9,7 @@ on:
       - 'node_modules/**'
 
 permissions:
-  contents: write
-
-concurrency: git-try-push
+  contents: read
 
 jobs:
   try-push:
@@ -20,20 +18,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: Prepare remote
+        run: |
+          git init --bare "${RUNNER_TEMP}/remote-repo"
+          git remote add local-remote "file://${RUNNER_TEMP}/remote-repo"
 
       - name: Prepare
         run: |
           git checkout -b test-try-push
-          git push origin test-try-push
+          git push local-remote test-try-push
           git reset --hard HEAD~1
           git checkout -
 
       - name: Push
         uses: ./git-try-push/
         with:
+          remote: local-remote
           branch: test-try-push
-
-      - name: Clean
-        if: always()
-        run: git push --delete origin test-try-push
