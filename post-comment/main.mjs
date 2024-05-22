@@ -1,5 +1,5 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
+import core from "@actions/core"
+import github from "@actions/github"
 
 async function main() {
     try {
@@ -19,8 +19,8 @@ async function main() {
             body: github.context.actor == bot ? bot_body : body
         })
     } catch (error) {
-        core.setFailed(error.message)
+        core.setFailed(error)
     }
 }
 
-main()
+await main()

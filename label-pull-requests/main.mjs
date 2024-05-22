@@ -1,7 +1,7 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const fs = require('fs')
-const yaml = require('js-yaml')
+import core from "@actions/core"
+import github from "@actions/github"
+import fs from "fs"
+import yaml from "js-yaml"
 
 async function main() {
     try {
@@ -215,7 +215,7 @@ async function main() {
             labels: updatedLabels
         })
     } catch (error) {
-        core.setFailed(error.message)
+        core.setFailed(error)
     }
 }
 
@@ -283,4 +283,4 @@ function doesConstraintApply(constraint, file) {
     return true
 }
 
-main()
+await main()
