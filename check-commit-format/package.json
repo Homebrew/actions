@@ -1,4 +1,4 @@
 {
   "name": "check-commit-format",
-  "main": "main.js"
+  "main": "main.mjs"
 }

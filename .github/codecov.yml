@@ -1,0 +1,4 @@
+ignore:
+  - "spec-helper.mjs"
+  - "test-reporter.mjs"
+  - "**/*.test.mjs"

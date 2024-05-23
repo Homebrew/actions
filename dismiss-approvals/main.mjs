@@ -1,5 +1,5 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
+import core from "@actions/core"
+import github from "@actions/github"
 
 async function main() {
     try {
@@ -20,7 +20,7 @@ async function main() {
 
             core.info(`==> Dismissing approvals in PR #${pr}`)
 
-            client.rest.pulls.dismissReview({
+            await client.rest.pulls.dismissReview({
                 ...github.context.repo,
                 pull_number: pr,
                 review_id: review.id,
@@ -28,8 +28,8 @@ async function main() {
             });
         }
     } catch (error) {
-        core.setFailed(error.message)
+        core.setFailed(error)
     }
 }
 
-main()
+await main()

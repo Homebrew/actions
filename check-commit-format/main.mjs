@@ -1,7 +1,7 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const fs = require('fs')
-const path = require('path')
+import core from "@actions/core"
+import github from "@actions/github"
+import fs from "fs"
+import path from "path"
 
 async function main() {
     try {
@@ -37,7 +37,7 @@ async function main() {
                 ref: commit.sha
             })
 
-            short_sha = commit.sha.substring(0, 10);
+            const short_sha = commit.sha.substring(0, 10);
 
             // Autosquash doesn't support merge commits.
             if (commit_info.data.parents.length != 1) {
@@ -167,8 +167,8 @@ async function main() {
             labels: updatedLabels
         })
     } catch (error) {
-        core.setFailed(error.message)
+        core.setFailed(error)
     }
 }
 
-main()
+await main()
