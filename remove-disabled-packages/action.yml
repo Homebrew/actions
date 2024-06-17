@@ -1,0 +1,17 @@
+name: Remove disabled packages
+description: Delete packages that have a disable date of more than one year ago
+branding:
+  icon: trash-2
+  color: red
+outputs:
+  packages-removed:
+    description: Whether any packages were removed or not
+    value: ${{steps.remove-packages.outputs.packages-removed}}
+runs:
+  using: composite
+  steps:
+    - run: brew ruby "$GITHUB_ACTION_PATH/main.rb"
+      id: remove-packages
+      shell: bash
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: 1
