@@ -124,7 +124,7 @@ if [[ ! "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
 fi
 
 # Only do so if the user hasn't already explicitly set HOMEBREW_GITHUB_API_TOKEN.
-if [[ -n "${BREW_GH_API_TOKEN}" && -z "${HOMEBREW_GITHUB_API_TOKEN}" ]]; then
+if [[ -n "${BREW_GH_API_TOKEN}" && -z "${HOMEBREW_GITHUB_API_TOKEN-}" ]]; then
     echo "HOMEBREW_GITHUB_API_TOKEN=${BREW_GH_API_TOKEN}" >> "${GITHUB_ENV}"
 fi
 
