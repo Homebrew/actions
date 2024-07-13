@@ -41,11 +41,12 @@ jobs:
       - name: Check out pull request
         id: checkout
         run: |
-          gh pr checkout '${{ github.event.pull_request.number || github.event.inputs.pull_request }}'
+          gh pr checkout "$PR"
 
           branch="$(git branch --show-current)"
           echo "branch=${branch}" >> "$GITHUB_OUTPUT"
         env:
+          PR: ${{ github.event.pull_request.number || github.event.inputs.pull_request }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
         run: npm install
