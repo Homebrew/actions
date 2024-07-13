@@ -9,11 +9,11 @@ inputs:
     description: GitHub token (not the default one)
     required: true
   formulae:
-    description: Formula names, one per line
+    description: Formula names, space-separated
     required: false
     default: ''
   casks:
-    description: Cask names, one per line
+    description: Cask names, space-separated
     required: false
     default: ''
   fork:
@@ -23,23 +23,29 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
+    - name: Bump formulae
+      run: |
         if [[ "$INPUT_FORK" == "true" ]]; then
-          brew bump --open-pr --formulae ${{ inputs.formulae }}
+          NO_FORK=""
         else
-          brew bump --no-fork --open-pr --formulae ${{ inputs.formulae }}
+          NO_FORK="--no-fork"
         fi
+        IFS=" " read -r -a formulae <<<"${INPUT_FORMULAE}"
+        brew bump $NO_FORK --open-pr --formulae "${formulae[@]}"
       shell: bash
       if: inputs.formulae != ''
       env:
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
-    - run: |
+    - name: Bump casks
+      run: |
         if [[ "$INPUT_FORK" == "true" ]]; then
-          brew bump --open-pr --casks ${{ inputs.casks }}
+          NO_FORK=""
         else
-          brew bump --no-fork --open-pr --casks ${{ inputs.casks }}
+          NO_FORK="--no-fork"
         fi
+        IFS=" " read -r -a casks <<<"${INPUT_CASKS}"
+        brew bump $NO_FORK --open-pr --casks "${casks[@]}"
       shell: bash
       if: inputs.casks != ''
       env:
