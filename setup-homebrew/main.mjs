@@ -11,7 +11,7 @@ try {
     core.getInput("debug"),
     core.getInput("token"),
     core.getInput("stable"),
-    core.getIDToken("brew-gh-api-token"),
+    core.getInput("brew-gh-api-token"),
   ])
 } catch (error) {
   core.setFailed(error.message)
