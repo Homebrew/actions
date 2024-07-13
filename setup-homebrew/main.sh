@@ -8,6 +8,7 @@ TEST_BOT="${3}"
 DEBUG="${4}"
 TOKEN="${5}"
 STABLE="${6}"
+BREW_GH_API_TOKEN="${7}"
 
 if [[ "${DEBUG}" == "true" ]]; then
     set -x
@@ -120,6 +121,11 @@ if [[ ! "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     # This is set by GitHub Actions by default but we don't want that.
     echo HOMEBREW_NO_INSTALL_FROM_API= >>"$GITHUB_ENV"
     unset HOMEBREW_NO_INSTALL_FROM_API
+fi
+
+# Configure HOMEBREW_GITHUB_API_TOKEN (needed for attestations)
+if [[ -n "${BREW_GH_API_TOKEN}" ]]; then
+    echo "HOMEBREW_GITHUB_API_TOKEN=${BREW_GH_API_TOKEN}" >> "${GITHUB_ENV}"
 fi
 
 # Use an access token to checkout (private repositories)
