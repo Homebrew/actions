@@ -25,6 +25,10 @@ inputs:
     description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
     default: ""
+  brew-gh-api-token:
+    description: Token to be used for GitHub API operations within `brew`. This is confusingly not the same thing as `token` above.
+    required: false
+    default: "${{ secrets.GITHUB_TOKEN }}"
   stable:
     description: Use the latest stable `homebrew/brew` tag.
     required: false
