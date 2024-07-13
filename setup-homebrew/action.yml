@@ -28,7 +28,7 @@ inputs:
   brew-gh-api-token:
     description: Token to be used for GitHub API operations within `brew`. This is confusingly not the same thing as `token` above.
     required: false
-    default: "${{ secrets.GITHUB_TOKEN }}"
+    default: ""
   stable:
     description: Use the latest stable `homebrew/brew` tag.
     required: false
