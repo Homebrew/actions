@@ -9,7 +9,7 @@ inputs:
     description: GitHub token (not the default one)
     required: true
   formulae:
-    description: Formula names, one per line
+    description: Formula names, space-separated
     required: true
 runs:
   using: composite
