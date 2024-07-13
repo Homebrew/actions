@@ -28,16 +28,24 @@ runs:
           sudo chown "$(whoami)" "$GITHUB_STEP_SUMMARY"
         fi
 
-        full_result_path="${{ inputs.workdir }}/${{ inputs.result_path }}"
+        full_result_path="$WORKDIR/$RESULT_PATH"
 
         [[ -s "$full_result_path" ]] || exit 0
 
-        printf '### ${{ inputs.step_name }}\n' >> "$GITHUB_STEP_SUMMARY"
-        "${{ inputs.collapse }}" && printf '\n<details><summary>Details</summary>\n<p>\n\n' >> "$GITHUB_STEP_SUMMARY"
-        printf '```\n' >> "$GITHUB_STEP_SUMMARY"
-        sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' "$full_result_path" | tee -a "$GITHUB_STEP_SUMMARY"
-        printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
-        "${{ inputs.collapse }}" && printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
+        {
+          printf '%s' "### $STEP_NAME\n"
+          [[ "$COLLAPSE" != true ]] || printf '%s' '\n<details><summary>Details</summary>\n<p>\n\n'
+          printf '%s' '```\n'
+          # Remove colours from the output
+          sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' "$full_result_path"
+          printf '%s' '\n```\n'
+          [[ "$COLLAPSE" != true ]] || printf '%s' '\n</p>\n</details>\n'
+        } | tee -a "$GITHUB_STEP_SUMMARY"
 
         rm "$full_result_path"
       shell: /bin/bash -euo pipefail {0}
+      env:
+        WORKDIR: ${{ inputs.workdir }}
+        RESULT_PATH: ${{ inputs.result_path }}
+        STEP_NAME: ${{ inputs.step_name }}
+        COLLAPSE: ${{ inputs.collapse }}
