@@ -57,9 +57,12 @@ runs:
     - name: Count bottles
       id: bottles
       if: always()
-      run: '"${GITHUB_ACTION_PATH}/count-bottles.sh" "${{ inputs.debug }}"'
+      run: |
+        "${GITHUB_ACTION_PATH}/count-bottles.sh" "${DEBUG}"
       working-directory: ${{ inputs.bottles-directory }}
       shell: /bin/bash -euo pipefail {0}
+      env:
+        DEBUG: ${{ runner.debug == '1' }}
 
     - name: Upload failed bottles
       if: always() && steps.bottles.outputs.failures > 0

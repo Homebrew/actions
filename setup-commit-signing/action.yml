@@ -12,6 +12,8 @@ runs:
   using: composite
   steps:
     - run: |
-        "$GITHUB_ACTION_PATH/main.sh" '${{ inputs.signing_key }}'
+        "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
       shell: bash
       id: setup
+      env:
+        SIGNING_KEY: ${{ inputs.signing_key }}

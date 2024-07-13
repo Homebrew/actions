@@ -15,11 +15,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
-        cat << 'EOF' > "/tmp/brew-script-$GITHUB_SHA"
-        ${{inputs.script}}
-        EOF
+    - run: echo "$SCRIPT" > "/tmp/brew-script-$GITHUB_SHA"
       shell: bash
+      env:
+        SCRIPT: ${{inputs.script}}
     - run: brew ruby "/tmp/brew-script-$GITHUB_SHA"
       shell: bash
       env:
