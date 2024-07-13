@@ -22,6 +22,7 @@ runs:
       id: result
       env:
         GH_TOKEN: ${{ inputs.token }}
+        WORKFLOW_NAME: ${{ inputs.workflow-name }}
         WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ inputs.repository }}/actions/runs/${{ inputs.run-id }}
         QUERY: >-
           query($url: URI!) {
@@ -49,8 +50,8 @@ runs:
           gh api graphql \
             --field url="$WORKFLOW_RUN_URL" \
             --raw-field query="$QUERY" \
-            --jq '.data.resource.checkSuite.commit.checkSuites.nodes |
-                    map(select(.workflowRun.workflow.name == "${{ inputs.workflow-name }}")) |
-                    last | .workflowRun.databaseId'
+            --jq ".data.resource.checkSuite.commit.checkSuites.nodes |
+                    map(select(.workflowRun.workflow.name == \"$WORKFLOW_NAME\")) |
+                    last | .workflowRun.databaseId"
         )"
         echo "workflow_run_id=$run_id" >> "$GITHUB_ENV"
