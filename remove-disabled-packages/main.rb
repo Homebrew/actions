@@ -3,12 +3,11 @@
 
 require "formula"
 require "cask"
+require "deprecate_disable"
 
-# The RemoveDisabledPackages class finds packages that have been disabled for over 12 months
+# The RemoveDisabledPackages class finds packages that have been disabled over the limit set in Homebrew/brew
 # and creates commits in the local repository to remove them.
 class RemoveDisabledPackages
-  ONE_YEAR_AGO = (Date.today << 12).freeze
-
   def initialize(target_tap)
     @target_tap = target_tap
   end
@@ -57,7 +56,7 @@ class RemoveDisabledPackages
       next false unless package.disabled?
       next false if package.disable_date.nil?
 
-      package.disable_date < ONE_YEAR_AGO
+      package.disable_date < DeprecateDisable::REMOVE_DISABLED_BEFORE
     end
   end
 
