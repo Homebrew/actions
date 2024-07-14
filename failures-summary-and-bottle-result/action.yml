@@ -33,13 +33,13 @@ runs:
         [[ -s "$full_result_path" ]] || exit 0
 
         {
-          printf '%s' "### $STEP_NAME\n"
-          [[ "$COLLAPSE" != true ]] || printf '%s' '\n<details><summary>Details</summary>\n<p>\n\n'
-          printf '%s' '```\n'
+          printf '%s\n\n' "### $STEP_NAME"
+          [[ "$COLLAPSE" != true ]] || printf '%s\n' '<details><summary>Details</summary>' '<p>'
+          printf '\n%s\n' '```'
           # Remove colours from the output
           sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' "$full_result_path"
-          printf '%s' '\n```\n'
-          [[ "$COLLAPSE" != true ]] || printf '%s' '\n</p>\n</details>\n'
+          printf '\n%s\n' '```'
+          [[ "$COLLAPSE" != true ]] || printf '%s\n' '</p>' '</details>'
         } | tee -a "$GITHUB_STEP_SUMMARY"
 
         rm "$full_result_path"
