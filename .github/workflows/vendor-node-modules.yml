@@ -1,7 +1,7 @@
 name: Vendor node_modules
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - labeled
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
 jobs:
   vendor-node-modules:
     if: >
-      startsWith(github.repository, 'Homebrew/') && (
+      github.repository_owner == 'Homebrew' && (
         github.event_name == 'workflow_dispatch' ||
         contains(github.event.pull_request.labels.*.name, 'update node_modules')
       )
