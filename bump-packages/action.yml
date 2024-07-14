@@ -35,6 +35,7 @@ runs:
       shell: bash
       if: inputs.formulae != ''
       env:
+        INPUT_FORMULAE: ${{ inputs.formulae }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - name: Bump casks
@@ -49,5 +50,6 @@ runs:
       shell: bash
       if: inputs.casks != ''
       env:
+        INPUT_CASKS: ${{ inputs.casks }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
