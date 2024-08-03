@@ -22,6 +22,8 @@ runs:
         core: true
         cask: false
         test-bot: true
+      env:
+        HOMEBREW_NO_UPDATE_REPORT_NEW: 1
 
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
