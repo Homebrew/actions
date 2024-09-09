@@ -1,16 +1,20 @@
 /* node:coverage disable */
+import assert from "node:assert/strict"
 import { executionAsyncId } from "node:async_hooks"
 import { createRequire } from "node:module"
-import { test, beforeEach, afterEach, describe, it } from "node:test"
+import { test, before, after, beforeEach, afterEach, describe, it } from "node:test"
 import { MockAgent, setGlobalDispatcher } from "undici"
 import core from "@actions/core"
 import "esm-reload"
 
 globalThis.test = test
+globalThis.before = before
+globalThis.after = after
 globalThis.beforeEach = beforeEach
 globalThis.afterEach = afterEach
 globalThis.describe = describe
 globalThis.it = it
+globalThis.assert = assert
 globalThis.mockInput = function(input, value) {
   process.env[`INPUT_${input.replaceAll(" ", "_").toUpperCase()}`] = value
 }

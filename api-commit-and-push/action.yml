@@ -1,0 +1,27 @@
+name: Commit and push via GitHub API
+description: Commit and push changes to GitHub repository via GitHub API
+author: Bo98
+branding:
+  icon: git-commit
+  color: blue
+inputs:
+  message:
+    description: Commit message
+    required: true
+  branch:
+    description: Branch to commit to
+    required: true
+  token:
+    description: GitHub token
+    required: true
+  directory:
+    description: Directory to the local repository clone. Changes to commit must have been staged (git add)
+    required: false
+    default: ${{ github.workspace }}
+  repository:
+    description: Repository to commit to
+    required: false
+    default: ${{ github.repository }}
+runs:
+  using: node20
+  main: main.mjs
