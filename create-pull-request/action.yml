@@ -1,0 +1,36 @@
+name: Create pull request
+description: Creates a pull request from an already pushed branch
+author: Bo98
+branding:
+  icon: git-pull-request
+  color: green
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{github.token}}
+  repository:
+    description: Repository to send the pull request to
+    required: false
+    default: ${{github.repository}}
+  head:
+    description: The head branch of the pull request
+    required: true
+  base:
+    description: The base branch of the pull request
+    required: true
+  title:
+    description: The title of the pull request
+    required: false
+  body:
+    description: The body of the pull request
+    required: false
+  labels:
+    description: Comma-separated list of labels to add to the pull request
+    required: false
+  reviewers:
+    description: Comma-separated list of reviewers to request on the pull request
+    required: false
+runs:
+  using: node20
+  main: main.mjs
