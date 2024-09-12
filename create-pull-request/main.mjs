@@ -26,6 +26,7 @@ async function main() {
 
     const response = await client.rest.pulls.create(prRequest)
     const prNumber = response.data.number
+    const prNodeId = response.data.node_id
 
     if (labels) {
       await client.rest.issues.addLabels({
@@ -46,6 +47,7 @@ async function main() {
     }
 
     core.setOutput("number", prNumber)
+    core.setOutput("node_id", prNodeId)
   } catch (error) {
     core.setFailed(error)
   }
