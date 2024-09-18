@@ -29,6 +29,9 @@ async function main() {
     const response = await client.rest.pulls.create(prRequest)
     const prNumber = response.data.number
     const prNodeId = response.data.node_id
+    const prUrl = response.data.html_url
+
+    core.info(`Created pull request ${prUrl}`)
 
     if (labels.length > 0) {
       await client.rest.issues.addLabels({
@@ -37,6 +40,8 @@ async function main() {
         issue_number: prNumber,
         labels
       })
+
+      core.info(`Added labels ${labels.join(", ")} to pull request`)
     }
 
     if (reviewers.length > 0) {
@@ -46,6 +51,8 @@ async function main() {
         pull_number: prNumber,
         reviewers
       })
+
+      core.info(`Requested review from ${reviewers.join(", ")} for pull request`)
     }
 
     core.setOutput("number", prNumber)
