@@ -11,8 +11,10 @@ async function main() {
     const title = core.getInput("title")
     const body = core.getInput("body")
 
-    const labels = core.getInput("labels").split(",")
-    const reviewers = core.getInput("reviewers").split(",")
+    const labelsInput = core.getInput("labels")
+    const labels = labelsInput ? labelsInput.split(",") : []
+    const reviewersInput = core.getInput("reviewers")
+    const reviewers = reviewersInput ? reviewersInput.split(",") : []
 
     const client = github.getOctokit(token)
 
@@ -27,23 +29,30 @@ async function main() {
     const response = await client.rest.pulls.create(prRequest)
     const prNumber = response.data.number
     const prNodeId = response.data.node_id
+    const prUrl = response.data.html_url
 
-    if (labels) {
+    core.info(`Created pull request ${prUrl}`)
+
+    if (labels.length > 0) {
       await client.rest.issues.addLabels({
         owner,
         repo,
         issue_number: prNumber,
         labels
       })
+
+      core.info(`Added labels ${labels.join(", ")} to pull request`)
     }
 
-    if (reviewers) {
+    if (reviewers.length > 0) {
       await client.rest.pulls.requestReviewers({
         owner,
         repo,
         pull_number: prNumber,
         reviewers
       })
+
+      core.info(`Requested review from ${reviewers.join(", ")} for pull request`)
     }
 
     core.setOutput("number", prNumber)
