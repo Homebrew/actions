@@ -11,8 +11,10 @@ async function main() {
     const title = core.getInput("title")
     const body = core.getInput("body")
 
-    const labels = core.getInput("labels").split(",")
-    const reviewers = core.getInput("reviewers").split(",")
+    const labelsInput = core.getInput("labels")
+    const labels = labelsInput ? labelsInput.split(",") : []
+    const reviewersInput = core.getInput("reviewers")
+    const reviewers = reviewersInput ? reviewersInput.split(",") : []
 
     const client = github.getOctokit(token)
 
@@ -28,7 +30,7 @@ async function main() {
     const prNumber = response.data.number
     const prNodeId = response.data.node_id
 
-    if (labels) {
+    if (labels.length > 0) {
       await client.rest.issues.addLabels({
         owner,
         repo,
@@ -37,7 +39,7 @@ async function main() {
       })
     }
 
-    if (reviewers) {
+    if (reviewers.length > 0) {
       await client.rest.pulls.requestReviewers({
         owner,
         repo,
