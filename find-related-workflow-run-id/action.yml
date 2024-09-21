@@ -15,43 +15,11 @@ inputs:
     description: Authentication token for `gh`
     required: false
     default: ${{ github.token }}
+outputs:
+  workflow-run-id:
+    description: >
+      ID of the related workflow run.
+      Also available as `${{ env.workflow_run_id }}`.
 runs:
-  using: "composite"
-  steps:
-    - shell: bash
-      id: result
-      env:
-        GH_TOKEN: ${{ inputs.token }}
-        WORKFLOW_NAME: ${{ inputs.workflow-name }}
-        WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ inputs.repository }}/actions/runs/${{ inputs.run-id }}
-        QUERY: >-
-          query($url: URI!) {
-            resource(url: $url) {
-              ... on WorkflowRun {
-                checkSuite {
-                  commit {
-                    checkSuites(last: 100) {
-                      nodes {
-                        workflowRun {
-                          databaseId
-                          workflow {
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-      run: |
-        run_id="$(
-          gh api graphql \
-            --field url="$WORKFLOW_RUN_URL" \
-            --raw-field query="$QUERY" \
-            --jq ".data.resource.checkSuite.commit.checkSuites.nodes |
-                    map(select(.workflowRun.workflow.name == \"$WORKFLOW_NAME\")) |
-                    last | .workflowRun.databaseId"
-        )"
-        echo "workflow_run_id=$run_id" >> "$GITHUB_ENV"
+  using: node20
+  main: main.mjs
