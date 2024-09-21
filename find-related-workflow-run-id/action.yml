@@ -19,7 +19,7 @@ outputs:
   workflow-run-id:
     description: >
       ID of the related workflow run.
-      Also available as `${{ env.workflow_run_id }}`.
+      Also available as `env.workflow_run_id`.
 runs:
   using: node20
   main: main.mjs
