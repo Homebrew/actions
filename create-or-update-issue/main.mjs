@@ -17,22 +17,27 @@ async function main() {
 
     const updateExisting = core.getBooleanInput("update-existing");
     const closeExisting = core.getBooleanInput("close-existing");
+    const closeFromAuthor = core.getInput("close-from-author");
     const closeComment = core.getInput("close-comment");
 
     const client = github.getOctokit(token);
 
     let existingIssue = undefined;
     if (updateExisting || closeExisting) {
+      const params = {
+        owner,
+        repo,
+        state: "open",
+        sort: "created",
+        direction: "desc",
+        per_page: 100,
+      };
+      if (closeFromAuthor) {
+        params.creator = closeFromAuthor;
+      }
       for await (const response of client.paginate.iterator(
         client.rest.issues.listForRepo,
-        {
-          owner,
-          repo,
-          state: "open",
-          sort: "created",
-          direction: "desc",
-          per_page: 100,
-        }
+        params
       )) {
         existingIssue = response.data.find((issue) => issue.title === title);
         if (existingIssue) {

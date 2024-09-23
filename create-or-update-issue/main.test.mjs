@@ -93,6 +93,9 @@ describe("create-issue", async () => {
     mockInput("update-existing", "false");
     mockInput("close-existing", "true");
 
+    const closeFromAuthor = "some-user";
+    mockInput("close-from-author", closeFromAuthor);
+
     const closeComment = "Deployment succeeded.\nClosing issue.";
     mockInput("close-comment", closeComment);
 
@@ -101,7 +104,13 @@ describe("create-issue", async () => {
     mockPool.intercept({
       method: "GET",
       path: `/repos/${GITHUB_REPOSITORY}/issues?` +
-        `direction=desc&per_page=100&sort=created&state=open`,
+        [
+          `creator=${closeFromAuthor}`,
+          "direction=desc",
+          "per_page=100",
+          "sort=created",
+          "state=open",
+        ].join("&"),
       headers: {
         Authorization: `token ${token}`,
       },
