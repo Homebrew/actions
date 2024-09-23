@@ -45,7 +45,7 @@ describe("create-issue", async () => {
     await loadMain();
   });
 
-  it("for advanced use case with `close-existing: true`", async () => {
+  it("updates an issue when `update-existing: true`", async () => {
     mockInput("update-existing", "true");
     mockInput("close-existing", "false");
 
@@ -89,16 +89,28 @@ describe("create-issue", async () => {
     await loadMain();
   });
 
-  it("for advanced use case with `close-existing: true`", async () => {
+  it("closes an existing issue when `close-existing: true`", async () => {
     mockInput("update-existing", "false");
     mockInput("close-existing", "true");
+
+    const closeFromAuthor = "some-user";
+    mockInput("close-from-author", closeFromAuthor);
+
+    const closeComment = "Deployment succeeded.\nClosing issue.";
+    mockInput("close-comment", closeComment);
 
     const mockPool = githubMockPool();
 
     mockPool.intercept({
       method: "GET",
       path: `/repos/${GITHUB_REPOSITORY}/issues?` +
-        `direction=desc&per_page=100&sort=created&state=open`,
+        [
+          `creator=${closeFromAuthor}`,
+          "direction=desc",
+          "per_page=100",
+          "sort=created",
+          "state=open",
+        ].join("&"),
       headers: {
         Authorization: `token ${token}`,
       },
@@ -114,6 +126,21 @@ describe("create-issue", async () => {
         number: issueNumber,
       },
     ]);
+
+    mockPool.intercept({
+      method: "POST",
+      path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}/comments`,
+      headers: {
+        Authorization: `token ${token}`,
+      },
+      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
+        body: closeComment,
+      }),
+    }).defaultReplyHeaders({
+      "Content-Type": "application/json",
+    }).reply(200, {
+      html_url: "https://github.com/owner/repo/issues/12345#issuecomment-67890",
+    });
 
     mockPool.intercept({
       method: "PATCH",
