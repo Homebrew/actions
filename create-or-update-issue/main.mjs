@@ -17,6 +17,7 @@ async function main() {
 
     const updateExisting = core.getBooleanInput("update-existing");
     const closeExisting = core.getBooleanInput("close-existing");
+    const closeComment = core.getInput("close-comment");
 
     const client = github.getOctokit(token);
 
@@ -57,6 +58,17 @@ async function main() {
         return;
       }
       if (closeExisting) {
+        if (closeComment) {
+          const response = await client.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: existingIssue.number,
+            body: closeComment,
+          });
+          const commentUrl = response.data.html_url;
+          core.info(`Posted comment under existing issue: ${commentUrl}`);
+        }
+
         const response = await client.rest.issues.update({
           owner,
           repo,
