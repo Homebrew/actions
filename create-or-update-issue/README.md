@@ -21,7 +21,8 @@ closing it based on the outcome of a previous step.
     # If true: close an existing issue with the same title as completed, if such
     # an issue is found; otherwise, do nothing.
     close-existing: ${{ steps.<step-id>.conclusion == 'success' }}
-    # If specified: only close an existing issue created by the specified user.
+    # If specified and `close-existing` is true: only close an existing issue
+    # created by the specified author.
     close-from-author: original-issue-author
     close-comment: An optional comment to post when closing an issue
 ```
