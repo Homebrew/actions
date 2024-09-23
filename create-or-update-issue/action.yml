@@ -38,6 +38,16 @@ inputs:
       NOTE: if set to `true`, no new issue will be created!
     required: false
     default: "false"
+  close-from-author:
+    description: >
+      If specified and `close-existing` is `true`, only close an existing issue
+      created by the specified author
+    required: false
+  close-comment:
+    description: >
+      If specified and `close-existing` is `true`, post this comment when
+      closing an existing issue
+    required: false
 outputs:
   outcome:
     description: >
