@@ -1,0 +1,56 @@
+name: Create or update issue
+description: Create or update an issue in a repository
+author: ZhongRuoyu
+branding:
+  icon: alert-circle
+  color: blue
+inputs:
+  token:
+    description: GitHub token
+    required: false
+    default: ${{ github.token }}
+  repository:
+    description: Repository to create or update the issue in
+    required: false
+    default: ${{ github.repository }}
+  title:
+    description: The title of the issue
+    required: true
+  body:
+    description: The body of the issue
+    required: true
+  labels:
+    description: Comma-separated list of labels to add to the issue
+    required: false
+  assignees:
+    description: Comma-separated list of users to assign the issue to
+    required: false
+  update-existing:
+    description: >
+      Whether to post `body` as a comment under the issue with the same title,
+      if such an issue is found; otherwise, create a new issue
+    required: false
+    default: "false"
+  close-existing:
+    description: >
+      Whether to close an existing issue with the same title as completed, if
+      such an issue is found; otherwise, do nothing.
+      NOTE: if set to `true`, no new issue will be created!
+    required: false
+    default: "false"
+outputs:
+  outcome:
+    description: >
+      One of `created`, `commented`, `closed`, or `none`; indicates the action
+      taken
+  issue_number:
+    description: >
+      The number of the created, updated, or closed issue; undefined if
+      `outcome` is `none`
+  node_id:
+    description: >
+      The node ID of the created or updated issue, used in GitHub GraphQL API
+      queries; undefined if `outcome` is `none`
+runs:
+  using: node20
+  main: main.mjs
