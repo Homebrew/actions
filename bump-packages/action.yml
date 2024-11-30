@@ -36,6 +36,7 @@ runs:
       if: inputs.formulae != ''
       env:
         INPUT_FORMULAE: ${{ inputs.formulae }}
+        INPUT_FORK: ${{ inputs.fork }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - name: Bump casks
@@ -51,5 +52,6 @@ runs:
       if: inputs.casks != ''
       env:
         INPUT_CASKS: ${{ inputs.casks }}
+        INPUT_FORK: ${{ inputs.fork }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
