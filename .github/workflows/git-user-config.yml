@@ -24,8 +24,11 @@ jobs:
           username: BrewTestBot
 
       - name: Test
+        env:
+          CONFIG_OUTPUT_NAME: ${{steps.config.outputs.name}}
+          CONFIG_OUTPUT_EMAIL: ${{steps.config.outputs.email}}
         run: |
-          test "${{steps.config.outputs.name}}" = "BrewTestBot"
-          test "${{steps.config.outputs.email}}" = "1589480+BrewTestBot@users.noreply.github.com"
+          test "$CONFIG_OUTPUT_NAME" = "BrewTestBot"
+          test "$CONFIG_OUTPUT_EMAIL" = "1589480+BrewTestBot@users.noreply.github.com"
           test "$(git config --global user.name)" = "BrewTestBot"
           test "$(git config --global user.email)" = "1589480+BrewTestBot@users.noreply.github.com"
