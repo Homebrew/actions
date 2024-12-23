@@ -13,7 +13,10 @@ class RemoveDisabledPackages
   end
 
   def run
-    packages_to_remove = find_disabled(packages: Formula.all + Cask::Cask.all)
+    casks = @target_tap.cask_tokens.map { |token| Cask::CaskLoader.load(token) }
+    formulae = @target_tap.formula_names.map { |name| Formula[name] }
+
+    packages_to_remove = find_disabled(packages: casks + formulae)
 
     puts "Removing old packages..."
 
