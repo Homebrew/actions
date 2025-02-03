@@ -16,7 +16,7 @@ runs:
   using: composite
   steps:
     - name: Enable SSH agent
-      if: inputs.ssh
+      if: inputs.ssh == 'true'
       run: |
         eval $(ssh-agent)
 
@@ -25,7 +25,7 @@ runs:
       shell: bash
 
     - name: Configure SSH signing
-      if: inputs.ssh
+      if: inputs.ssh == 'true'
       run: |
         # Defensively mask the signing key. It should already be masked
         # if it comes from a secret, but just in case.
@@ -37,7 +37,7 @@ runs:
         SIGNING_KEY: ${{ inputs.signing_key }}
 
     - name: Configure GPG signing (legacy)
-      if: "!inputs.ssh"
+      if: inputs.ssh == 'false'
       run: |
         "$GITHUB_ACTION_PATH/gpg-main.sh" "$SIGNING_KEY"
       shell: bash
