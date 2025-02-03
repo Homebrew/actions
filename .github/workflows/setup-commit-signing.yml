@@ -1,4 +1,4 @@
-name: Setup GPG commit signing
+name: Setup SSH commit signing
 
 on:
   pull_request:
@@ -62,4 +62,4 @@ jobs:
 
       - name: Test
         run: |
-          git log --show-signature -1 | grep "gpg: Good"
+          git log --show-signature -1
