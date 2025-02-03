@@ -37,7 +37,7 @@ jobs:
         id: generate-ssh-key
         run: |
           ssh-keygen -t ed25519 -C "Test CI key" -f /tmp/test-ssh-key -N ""
-          KEY=$(cat /tmp/test-ssh-key)
+          KEY="$(cat /tmp/test-ssh-key)"
           echo "${KEY}" | sed 's/^ */::add-mask::/'
           echo "key<<!!!
           ${KEY}
