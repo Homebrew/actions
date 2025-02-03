@@ -32,7 +32,7 @@ runs:
         echo "${SIGNING_KEY}" | sed 's/^ */::add-mask::/'
         "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
       shell: bash
-      id: setup
+      id: setup-ssh
       env:
         SIGNING_KEY: ${{ inputs.signing_key }}
 
@@ -41,6 +41,6 @@ runs:
       run: |
         "$GITHUB_ACTION_PATH/gpg-main.sh" "$SIGNING_KEY"
       shell: bash
-      id: setup
+      id: setup-gpg
       env:
         SIGNING_KEY: ${{ inputs.signing_key }}
