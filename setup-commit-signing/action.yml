@@ -1,12 +1,12 @@
 name: setup-commit-signing
-description: Set up GPG commit signing
+description: Set up SSH commit signing
 author: nandahkrishna
 branding:
   icon: user-check
   color: green
 inputs:
   signing_key:
-    description: Secret key to use for signing commits
+    description: SSH private key to use for signing commits
     required: true
 runs:
   using: composite

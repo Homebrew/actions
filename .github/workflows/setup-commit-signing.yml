@@ -32,43 +32,21 @@ jobs:
         uses: ./git-user-config/
         with:
           username: BrewTestBot
-      
-      - name: Generate GPG key
-        id: generate-gpg-key
-        env:
-          GIT_EMAIL: ${{ steps.git-config.outputs.email }}
+
+      - name: Generate SSH key
+        id: generate-ssh-key
         run: |
-          export GNUPGHOME="/tmp/test-gpg-home"
-          mkdir -p "${GNUPGHOME}"
-          chmod 700 "${GNUPGHOME}"
-          PASSPHRASE=$(gpg --batch --gen-random --armor 1 32)
-          cat <<EOS | gpg --batch --generate-key
-            Key-Type: RSA
-            Key-Length: 4096
-            Key-Usage: sign
-            Subkey-Type: RSA
-            Subkey-Length: 4096
-            Subkey-Usage: sign
-            Name-Real: Homebrew/actions Test
-            Name-Comment: Test CI key
-            Name-Email: ${GIT_EMAIL}
-            Passphrase: ${PASSPHRASE}
-            Expire-Date: seconds=900
-          EOS
-          KEY=$(echo "${PASSPHRASE}" | gpg --batch --pinentry-mode=loopback --passphrase-fd=0 --armor --export-secret-subkeys "<${GIT_EMAIL}>" | base64 --wrap=0)
-          echo "::add-mask::${KEY}"
-          echo "::add-mask::${PASSPHRASE}"
+          ssh-keygen -t ed25519 -C "Test CI key" -f /tmp/test-ssh-key -N ""
+          KEY=$(cat /tmp/test-ssh-key)
           echo "key<<!!!
           ${KEY}
           !!!" >> "${GITHUB_OUTPUT}"
-          echo "passphrase=${PASSPHRASE}" >> "${GITHUB_OUTPUT}"
-          rm -r "${GNUPGHOME}"
 
       - name: Set up commit signing
         id: set-up-commit-signing
         uses: ./setup-commit-signing/
         with:
-          signing_key: ${{ steps.generate-gpg-key.outputs.key }}
+          signing_key: ${{ steps.generate-ssh-key.outputs.key }}
 
       - name: Make changes and commit them
         run: |
@@ -80,8 +58,6 @@ jobs:
 
           git add test.txt
           git commit -m "test.txt: create and add content."
-        env:
-          HOMEBREW_GPG_PASSPHRASE: ${{ steps.generate-gpg-key.outputs.passphrase }}
 
       - name: Test
         run: |
