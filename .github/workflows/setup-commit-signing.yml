@@ -62,4 +62,4 @@ jobs:
 
       - name: Test
         run: |
-          git log --show-signature -1
+          git log --show-signature -1 | grep 'Good "git" signature'
