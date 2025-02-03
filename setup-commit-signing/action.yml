@@ -1,19 +1,46 @@
 name: setup-commit-signing
-description: Set up GPG commit signing
+description: Set up SSH commit signing
 author: nandahkrishna
 branding:
   icon: user-check
   color: green
 inputs:
   signing_key:
-    description: Secret key to use for signing commits
+    description: SSH or GPG private key to use for signing commits
     required: true
+  ssh:
+    description: Whether to do SSH or GPG signing
+    required: false
+    default: "false"
 runs:
   using: composite
   steps:
-    - run: |
+    - name: Enable SSH agent
+      if: inputs.ssh == 'true'
+      run: | # zizmor: ignore[github-env]
+        eval $(ssh-agent)
+
+        echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> ${GITHUB_ENV}
+        echo "SSH_AGENT_PID=${SSH_AGENT_PID}" >> ${GITHUB_ENV}
+      shell: bash
+
+    - name: Configure SSH signing
+      if: inputs.ssh == 'true'
+      run: |
+        # Defensively mask the signing key. It should already be masked
+        # if it comes from a secret, but just in case.
+        echo "${SIGNING_KEY}" | sed 's/^ */::add-mask::/'
         "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
       shell: bash
-      id: setup
+      id: setup-ssh
+      env:
+        SIGNING_KEY: ${{ inputs.signing_key }}
+
+    - name: Configure GPG signing (legacy)
+      if: inputs.ssh == 'false'
+      run: |
+        "$GITHUB_ACTION_PATH/gpg-main.sh" "$SIGNING_KEY"
+      shell: bash
+      id: setup-gpg
       env:
         SIGNING_KEY: ${{ inputs.signing_key }}

@@ -1,4 +1,4 @@
-name: Setup GPG commit signing
+name: Test Setup SSH/GPG commit signing
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  commit-signing:
+  ssh-commit-signing:
     strategy:
       matrix:
         container:
@@ -32,7 +32,61 @@ jobs:
         uses: ./git-user-config/
         with:
           username: BrewTestBot
-      
+
+      - name: Generate SSH key
+        id: generate-ssh-key
+        run: |
+          ssh-keygen -t ed25519 -C "Test CI key" -f /tmp/test-ssh-key -N ""
+          KEY="$(cat /tmp/test-ssh-key)"
+          # shellcheck disable=SC2001
+          echo "${KEY}" | sed 's/^ */::add-mask::/'
+          echo "key<<!!!
+          ${KEY}
+          !!!" >> "${GITHUB_OUTPUT}"
+
+      - name: Set up commit signing
+        id: set-up-commit-signing
+        uses: ./setup-commit-signing/
+        with:
+          signing_key: ${{ steps.generate-ssh-key.outputs.key }}
+          ssh: true
+
+      - name: Make changes and commit them
+        run: |
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          git checkout -b test-setup-commit-signing
+
+          touch test.txt
+          echo "Hello, Homebrew!" >> test.txt
+
+          git add test.txt
+          git commit -m "test.txt: create and add content."
+
+      - name: Test
+        run: |
+          git log --show-signature -1 | grep 'Good "git" signature'
+
+  gpg-commit-signing:
+    strategy:
+      matrix:
+        container:
+          - ''
+          - image: ghcr.io/homebrew/ubuntu22.04:master
+            options: --user=root
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Configure git user
+        id: git-config
+        uses: ./git-user-config/
+        with:
+          username: BrewTestBot
+
       - name: Generate GPG key
         id: generate-gpg-key
         env:
