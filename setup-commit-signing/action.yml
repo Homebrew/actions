@@ -6,7 +6,7 @@ branding:
   color: green
 inputs:
   signing_key:
-    description: SSH private key to use for signing commits
+    description: SSH or GPG private key to use for signing commits
     required: true
   ssh:
     description: Whether to do SSH or GPG signing
@@ -25,12 +25,21 @@ runs:
       shell: bash
 
     - name: Configure SSH signing
-      if: inputs.ssh == 'true'
+      if: inputs.ssh
       run: |
         # Defensively mask the signing key. It should already be masked
         # if it comes from a secret, but just in case.
         echo "${SIGNING_KEY}" | sed 's/^ */::add-mask::/'
         "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
+      shell: bash
+      id: setup
+      env:
+        SIGNING_KEY: ${{ inputs.signing_key }}
+
+    - name: Configure GPG signing (legacy)
+      if: "!inputs.ssh"
+      run: |
+        "$GITHUB_ACTION_PATH/gpg-main.sh" "$SIGNING_KEY"
       shell: bash
       id: setup
       env:
