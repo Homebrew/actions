@@ -1,4 +1,4 @@
-name: Setup SSH commit signing
+name: Test Setup SSH/GPG commit signing
 
 on:
   pull_request:
@@ -12,13 +12,12 @@ permissions:
   contents: read
 
 jobs:
-  commit-signing:
+  ssh-commit-signing:
     strategy:
       matrix:
         container:
           - ''
           - image: ghcr.io/homebrew/ubuntu22.04:master
-            options: --user=root
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     steps:
@@ -49,6 +48,7 @@ jobs:
         uses: ./setup-commit-signing/
         with:
           signing_key: ${{ steps.generate-ssh-key.outputs.key }}
+          ssh: true
 
       - name: Make changes and commit them
         run: |

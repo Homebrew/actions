@@ -8,10 +8,15 @@ inputs:
   signing_key:
     description: SSH private key to use for signing commits
     required: true
+  ssh:
+    description: Whether to do SSH or GPG signing
+    required: false
+    default: "false"
 runs:
   using: composite
   steps:
     - name: Enable SSH agent
+      if: inputs.ssh
       run: |
         eval $(ssh-agent)
 
@@ -20,6 +25,7 @@ runs:
       shell: bash
 
     - name: Configure SSH signing
+      if: inputs.ssh == 'true'
       run: |
         # Defensively mask the signing key. It should already be masked
         # if it comes from a secret, but just in case.
