@@ -1,8 +1,10 @@
-# Setup GPG Commit Signing GitHub Action
+# Setup GPG/SSH Commit Signing GitHub Action
 
-An action that sets up GPG commit signing.
+An action that sets up GPG or SSH commit signing.
 
 ## Usage
+
+### GPG
 
 ```yaml
 - name: Set up GPG commit signing
@@ -21,4 +23,15 @@ When committing changes, ensure that the value of the environment variable `HOME
     git commit -m "Updated file.txt"
   env:
     HOMEBREW_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+```
+
+### SSH
+
+```yaml
+- name: Set up SSH commit signing
+  id: set-up-commit-signing
+  uses: Homebrew/actions/setup-commit-signing@master
+  with:
+    ssh: true
+    signing_key: ${{ secrets.SSH_SIGNING_KEY }}
 ```
