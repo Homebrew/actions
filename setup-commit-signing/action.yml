@@ -11,7 +11,19 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
+    - name: Enable SSH agent
+      run: |
+        eval $(ssh-agent)
+
+        echo "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}" >> ${GITHUB_ENV}
+        echo "SSH_AGENT_PID=${SSH_AGENT_PID}" >> ${GITHUB_ENV}
+      shell: bash
+
+    - name: Configure SSH signing
+      run: |
+        # Defensively mask the signing key. It should already be masked
+        # if it comes from a secret, but just in case.
+        echo "${SIGNING_KEY}" | sed 's/^ */::add-mask::/'
         "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
       shell: bash
       id: setup
