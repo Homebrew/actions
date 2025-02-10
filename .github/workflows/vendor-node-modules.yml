@@ -37,7 +37,8 @@ jobs:
       - name: Set up commit signing
         uses: ./setup-commit-signing/
         with:
-          signing_key: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY }}
+          ssh: true
+          signing_key: ${{ secrets.BREWTESTBOT_SSG_SIGNING_KEY }}
       - name: Check out pull request
         id: checkout
         run: |
@@ -52,8 +53,6 @@ jobs:
         run: npm install
       - name: Commit changes
         id: commit
-        env:
-          HOMEBREW_GPG_PASSPHRASE: ${{ secrets.BREWTESTBOT_GPG_SIGNING_SUBKEY_PASSPHRASE }}
         run: |
           if ! git diff --stat --exit-code node_modules; then
             git add node_modules
