@@ -38,7 +38,7 @@ jobs:
         uses: ./setup-commit-signing/
         with:
           ssh: true
-          signing_key: ${{ secrets.BREWTESTBOT_SSG_SIGNING_KEY }}
+          signing_key: ${{ secrets.BREWTESTBOT_SSH_SIGNING_KEY }}
       - name: Check out pull request
         id: checkout
         run: |
