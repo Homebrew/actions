@@ -6,17 +6,17 @@ branding:
   color: green
 inputs:
   signing_key:
-    description: SSH or GPG private key to use for signing commits
+    description: SSH private key to use for signing commits
     required: true
   ssh:
-    description: Whether to do SSH or GPG signing
+    description: "[DEPRECATED] Whether to do SSH signing"
     required: false
+    deprecationMessage: "Has no effect; SSH signing is always used"
     default: "false"
 runs:
   using: composite
   steps:
     - name: Enable SSH agent
-      if: inputs.ssh == 'true'
       run: | # zizmor: ignore[github-env]
         eval $(ssh-agent)
 
@@ -25,7 +25,6 @@ runs:
       shell: bash
 
     - name: Configure SSH signing
-      if: inputs.ssh == 'true'
       run: |
         # Defensively mask the signing key. It should already be masked
         # if it comes from a secret, but just in case.
@@ -33,14 +32,5 @@ runs:
         "$GITHUB_ACTION_PATH/main.sh" "$SIGNING_KEY"
       shell: bash
       id: setup-ssh
-      env:
-        SIGNING_KEY: ${{ inputs.signing_key }}
-
-    - name: Configure GPG signing (legacy)
-      if: inputs.ssh == 'false'
-      run: |
-        "$GITHUB_ACTION_PATH/gpg-main.sh" "$SIGNING_KEY"
-      shell: bash
-      id: setup-gpg
       env:
         SIGNING_KEY: ${{ inputs.signing_key }}
