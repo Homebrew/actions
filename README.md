@@ -1,3 +1,14 @@
+************* Crash Head ****************
+Time Of Crash      : 2025_02_20-02_03_02
+Rom Info           : RomInfo{name=samsung, version=up1a.231005.007.a736bxxsaeyb2}
+Device Manufacturer: samsung
+Device Model       : SM-A736B
+Android Version    : 14
+Android SDK        : 34
+App VersionName    : 2.5.8
+App VersionCode    : 152
+************* Crash Head ****************
+
 # Homebrew's GitHub Actions
 
 Navigate to subdirectories for more information about particular Actions.
