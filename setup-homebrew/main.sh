@@ -72,7 +72,7 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
     if [[ -n "$(command -v setfacl)" ]]; then
         setfacl_dirs=()
         user=$(whoami)
-        for dir in "$HOME" "$RUNNER_WORKSPACE" "$RUNNER_TEMP"; do # These are mounted by the runner
+        for dir in "$HOME" "$RUNNER_WORKSPACE" "$RUNNER_TEMP" "/__w/_actions"; do # These are mounted by the runner
             if [[ ! -w "$dir" ]]; then
                 # Give the container user RW permissions, plus execute for directories.
                 sudo setfacl -Rm "d:u:$user:rwX,u:$user:rwX" "$dir"
