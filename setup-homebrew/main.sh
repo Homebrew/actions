@@ -56,10 +56,6 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
-HOMEBREW_OTHER_CASK_REPOSITORIES=(
-    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-fonts"
-    "${HOMEBREW_REPOSITORY}/Library/Taps/homebrew/homebrew-cask-versions"
-)
 HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
@@ -97,8 +93,7 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
     # Could do this for non-containers too, but we want to take care to not write into a shared $HOME.
     # For self-hosted without containers, consider pre-setting this instead.
     for repo in "$HOMEBREW_REPOSITORY" "$HOMEBREW_CORE_REPOSITORY" \
-        "$HOMEBREW_CASK_REPOSITORY" "${HOMEBREW_OTHER_CASK_REPOSITORIES[@]}" \
-        "${HOMEBREW_TAP_REPOSITORY-}"; do
+        "$HOMEBREW_CASK_REPOSITORY" "${HOMEBREW_TAP_REPOSITORY-}"; do
         if [[ -n "$repo" ]]; then
             git config --global --add safe.directory "$repo"
         fi
@@ -270,15 +265,6 @@ else
             git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
         fi
     fi
-
-    for cask_repo in "${HOMEBREW_OTHER_CASK_REPOSITORIES[@]}"; do
-        if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${cask_repo}" ]] && [[ -d "${cask_repo}" && "${UPDATE_CASK}" == "true" ]]; then
-            ohai "Fetching Homebrew/${cask_repo##*/}..."
-            git_retry -C "${cask_repo}" fetch --force origin
-            git_retry -C "${cask_repo}" remote set-head origin --auto
-            git -C "${cask_repo}" checkout --force -B master origin/HEAD
-        fi
-    done
 fi
 
 if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
