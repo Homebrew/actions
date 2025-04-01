@@ -49,7 +49,6 @@ jobs:
         uses: ./setup-commit-signing/
         with:
           signing_key: ${{ steps.generate-ssh-key.outputs.key }}
-          ssh: true
 
       - name: Make changes and commit them
         run: |
