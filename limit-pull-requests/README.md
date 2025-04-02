@@ -8,7 +8,6 @@ by a user.
 - [GitHub CLI (`gh`)](https://github.com/cli/cli) and
   [`jq`](https://jqlang.github.io/jq/) need to be installed.
 - These permissions need to be set:
-
   ```yaml
   permissions:
     contents: read
@@ -34,6 +33,3 @@ This action should be used in a `pull_request_target` workflow.
     close-limit: 50
     close: true
 ```
-
-[GitHub recommends](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions?learn=getting_started#using-third-party-actions) pinning GitHub actions to a commit SHA.
-[Dependabot automates](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/keeping-your-actions-up-to-date-with-dependabot) updating these commit SHAs.
