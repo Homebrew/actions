@@ -9,7 +9,7 @@ Runs on `ubuntu` and `macos`.
 ```yaml
 - name: Set up Homebrew
   id: set-up-homebrew
-  uses: Homebrew/actions/setup-homebrew@master
+  uses: Homebrew/actions/setup-homebrew@main
 ```
 
 This also sets up the variables necessary to cache the gems installed by Homebrew developer commands (e.g. `brew style`). To use these add:

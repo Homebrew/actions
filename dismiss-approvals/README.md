@@ -6,7 +6,7 @@ An action that dismisses all approved reviews on given pull request.
 
 ```yaml
 - name: Dismiss approvals
-  uses: Homebrew/actions/dismiss-approvals@master
+  uses: Homebrew/actions/dismiss-approvals@main
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
     pr: ${{github.event.pull_request.number}}

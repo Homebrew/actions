@@ -8,6 +8,7 @@ by a user.
 - [GitHub CLI (`gh`)](https://github.com/cli/cli) and
   [`jq`](https://jqlang.github.io/jq/) need to be installed.
 - These permissions need to be set:
+
   ```yaml
   permissions:
     contents: read
@@ -19,7 +20,7 @@ by a user.
 This action should be used in a `pull_request_target` workflow.
 
 ```yaml
-- uses: Homebrew/actions/limit-pull-requests@master
+- uses: Homebrew/actions/limit-pull-requests@main
   with:
     except-users: |
       BrewTestBot

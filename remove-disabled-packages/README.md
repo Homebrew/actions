@@ -6,5 +6,5 @@ An action that deletes packages that have a disable date of more than one year a
 
 ```yaml
 - name: Run brew script
-  uses: Homebrew/actions/remove-disabled-packages@master
+  uses: Homebrew/actions/remove-disabled-packages@main
 ```

@@ -6,7 +6,7 @@ An action that tries to make a `git push`. If it does not succeed, then wait som
 
 ```yaml
 - name: Try pushing
-  uses: Homebrew/actions/git-try-push@master
+  uses: Homebrew/actions/git-try-push@main
   with:
     token: ${{github.token}}
     directory: path/to/repo

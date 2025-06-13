@@ -13,7 +13,7 @@ If there are no outdated packages, the Action will just exit.
 
 ```yaml
 - name: Bump packages
-  uses: Homebrew/actions/bump-packages@master
+  uses: Homebrew/actions/bump-packages@main
   with:
     # Custom GitHub access token with only the 'public_repo' scope enabled
     token: ${{secrets.TOKEN}}
