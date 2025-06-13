@@ -3,6 +3,7 @@ name: Create GCloud instance
 on:
   push:
     branches:
+      - main
       - master
   pull_request:
     paths:
