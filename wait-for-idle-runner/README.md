@@ -9,7 +9,7 @@ If the runner was found, the `runner-idle` output is set to `true` or `false` ba
 
 ```yaml
 - name: Wait for idle runner
-  uses: Homebrew/actions/wait-for-idle-runner@master
+  uses: Homebrew/actions/wait-for-idle-runner@main
   with:
     github_token: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
     runner_name: linux-self-hosted-1

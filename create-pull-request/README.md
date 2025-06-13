@@ -9,7 +9,7 @@ Intended for internal use only.
 ```yaml
 - run: git commit ... && git push ...
 
-- uses: Homebrew/actions/create-pull-request@master
+- uses: Homebrew/actions/create-pull-request@main
   with:
     token: ${{ github.token }} # defaults to this
     repository: ${{ github.repository }} # defaults to this

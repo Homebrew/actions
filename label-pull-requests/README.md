@@ -10,7 +10,7 @@ Will remove labels from a pull request that no longer apply.
 
 ```yaml
 - name: Label PR
-  uses: Homebrew/actions/label-pull-requests@master
+  uses: Homebrew/actions/label-pull-requests@main
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
     def: |
@@ -59,7 +59,7 @@ Will remove labels from a pull request that no longer apply.
 
 ```yaml
 - name: Label PR
-  uses: Homebrew/actions/label-pull-requests@master
+  uses: Homebrew/actions/label-pull-requests@main
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
     def: |

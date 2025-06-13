@@ -17,7 +17,7 @@ runs:
   steps:
     - name: Set up Homebrew
       id: set-up-homebrew
-      uses: Homebrew/actions/setup-homebrew@master
+      uses: Homebrew/actions/setup-homebrew@main
       with:
         core: true
         cask: false

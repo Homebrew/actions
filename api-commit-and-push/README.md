@@ -15,7 +15,7 @@ Useful for GitHub Apps which need to use the API in order to sign commits.
 
 - run: git add some/file.txt
 
-- uses: Homebrew/actions/api-commit-and-push@master
+- uses: Homebrew/actions/api-commit-and-push@main
   with:
     message: Update generated files
     branch: some-branch

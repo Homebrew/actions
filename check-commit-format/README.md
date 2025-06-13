@@ -6,7 +6,7 @@ An action that checks that a pull request's commits follow [Homebrew's commit st
 
 ```yaml
 - name: Check commit style
-  uses: Homebrew/actions/check-commit-format@master
+  uses: Homebrew/actions/check-commit-format@main
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
 ```

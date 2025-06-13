@@ -8,7 +8,7 @@ The GITHUB_TOKEN has to have "public repo" access.
 
 ```yaml
 - name: Create a new linux self-hosted runner
-  uses: Homebrew/actions/create-gcloud-instance@master
+  uses: Homebrew/actions/create-gcloud-instance@main
   with:
     runner_name: linux-self-hosted-1
     gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
