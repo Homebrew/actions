@@ -17,20 +17,17 @@ jobs:
           - os: macos-latest
             key: macos
             stable: false
-          - os: ubuntu-20.04
-            key: ubuntu-20
-            stable: false
           - os: ubuntu-22.04
             key: ubuntu-22
             stable: false
           - os: ubuntu-22.04
             key: docker-root
             stable: false
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=root"}'
+            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=root"}'
           - os: ubuntu-22.04
             key: docker-linuxbrew
             stable: false
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:master", "options": "--user=linuxbrew"}'
+            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=linuxbrew"}'
           - os: ubuntu-22.04
             key: docker-linuxbrew-stable
             stable: true

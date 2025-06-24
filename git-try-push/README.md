@@ -11,6 +11,6 @@ An action that tries to make a `git push`. If it does not succeed, then wait som
     token: ${{github.token}}
     directory: path/to/repo
     remote: origin
-    branch: master
+    branch: main
     tries: 20
 ```
