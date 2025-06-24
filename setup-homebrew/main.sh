@@ -283,7 +283,7 @@ if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" config fetch.prune true
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
-        git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B master origin/HEAD
+        git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B main origin/HEAD
     else
         ohai "Cloning Homebrew/test-bot..."
         git_retry clone https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
