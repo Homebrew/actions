@@ -144,6 +144,8 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
 
     echo "repository-path=$HOMEBREW_REPOSITORY" >>"$GITHUB_OUTPUT"
 else
+    git_retry -C "$HOMEBREW_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+    git_retry -C "$HOMEBREW_REPOSITORY" config fetch.prune true
     git_retry -C "$HOMEBREW_REPOSITORY" fetch --force --tags origin
     git_retry -C "$HOMEBREW_REPOSITORY" remote set-head origin --auto
     branch_name="$(git -C "$HOMEBREW_REPOSITORY" symbolic-ref --short HEAD 2>/dev/null || true)"
@@ -246,6 +248,8 @@ else
             fi
 
             ohai "Fetching Homebrew/core..."
+            git_retry -C "$HOMEBREW_CORE_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+            git_retry -C "$HOMEBREW_CORE_REPOSITORY" config fetch.prune true
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
             git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
@@ -258,6 +262,8 @@ else
     if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" && "${UPDATE_CASK}" == "true" ]]; then
         if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
             ohai "Fetching Homebrew/cask..."
+            git_retry -C "$HOMEBREW_CASK_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+            git_retry -C "$HOMEBREW_CASK_REPOSITORY" config fetch.prune true
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
             git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
@@ -273,6 +279,8 @@ if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
     # Setup Homebrew/homebrew-test-bot
     if [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
         ohai "Fetching Homebrew/test-bot..."
+        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" config fetch.prune true
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
         git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
         git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B master origin/HEAD
