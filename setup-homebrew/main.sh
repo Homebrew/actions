@@ -266,7 +266,7 @@ else
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" config fetch.prune true
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" fetch --force origin
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" remote set-head origin --auto
-            git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B master origin/HEAD
+            git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B main origin/HEAD
         else
             ohai "Cloning Homebrew/cask..."
             git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
