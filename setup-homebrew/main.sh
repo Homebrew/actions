@@ -120,7 +120,7 @@ fi
 
 # Only do so if the user hasn't already explicitly set HOMEBREW_GITHUB_API_TOKEN.
 if [[ -n "${BREW_GH_API_TOKEN}" && -z "${HOMEBREW_GITHUB_API_TOKEN-}" ]]; then
-    echo "HOMEBREW_GITHUB_API_TOKEN=${BREW_GH_API_TOKEN}" >> "${GITHUB_ENV}"
+    echo "HOMEBREW_GITHUB_API_TOKEN=${BREW_GH_API_TOKEN}" >>"${GITHUB_ENV}"
 fi
 
 # Use an access token to checkout (private repositories)
@@ -139,17 +139,18 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
     git_retry fetch --tags origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git_retry remote set-head origin --auto
-    git checkout --force -B master FETCH_HEAD
+    git checkout --force -B main FETCH_HEAD
     cd -
 
     echo "repository-path=$HOMEBREW_REPOSITORY" >>"$GITHUB_OUTPUT"
 else
     git_retry -C "$HOMEBREW_REPOSITORY" fetch --force --tags origin
     git_retry -C "$HOMEBREW_REPOSITORY" remote set-head origin --auto
-    if [[ "${STABLE}" == "true" && "$(git -C "$HOMEBREW_REPOSITORY" symbolic-ref --short HEAD 2>/dev/null)" != "master" ]]; then
-      git -C "$HOMEBREW_REPOSITORY" branch --force master origin/HEAD
+    branch_name="$(git -C "$HOMEBREW_REPOSITORY" symbolic-ref --short HEAD 2>/dev/null || true)"
+    if [[ "${STABLE}" == "true" && "${branch_name}" != "main" && "${branch_name}" != "master" ]]; then
+        git -C "$HOMEBREW_REPOSITORY" branch --force main origin/HEAD
     else
-      git -C "$HOMEBREW_REPOSITORY" checkout --force -B master origin/HEAD
+        git -C "$HOMEBREW_REPOSITORY" checkout --force -B main origin/HEAD
     fi
 
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
@@ -157,9 +158,9 @@ else
     fi
 fi
 if [[ "${STABLE}" == "true" ]]; then
-  echo HOMEBREW_UPDATE_TO_TAG=1 >>"$GITHUB_ENV"
-  latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
-  git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
+    echo HOMEBREW_UPDATE_TO_TAG=1 >>"$GITHUB_ENV"
+    latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
+    git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
 fi
 
 # Skip autoupdate for formulae.brew.sh CI
@@ -268,7 +269,7 @@ else
 fi
 
 if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
-   { [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; }; then
+    { [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; }; then
     # Setup Homebrew/homebrew-test-bot
     if [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
         ohai "Fetching Homebrew/test-bot..."

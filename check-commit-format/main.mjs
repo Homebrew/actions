@@ -43,7 +43,7 @@ async function main() {
             if (commit_info.data.parents.length != 1) {
                 is_success = false
                 commit_state = "failure"
-                message = `${short_sha} has ${commit_info.data.parents.length} parents. Please rebase against origin/master.`
+                message = `${short_sha} has ${commit_info.data.parents.length} parents. Please rebase against origin/HEAD.`
                 break
             }
 
@@ -89,7 +89,7 @@ async function main() {
                 message = "Commit modifies cask."
                 target_url = "https://github.com/Homebrew/homebrew-cask/blob/HEAD/CONTRIBUTING.md#style-guide"
 
-                if(!files_touched.includes(file.filename)) {
+                if (!files_touched.includes(file.filename)) {
                     files_touched.push(file.filename)
                 }
 
