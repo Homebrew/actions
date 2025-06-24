@@ -200,7 +200,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     fi
     git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
     git_retry remote set-head origin --auto
-    git checkout --force -B master FETCH_HEAD
+    git checkout --force -B main FETCH_HEAD
     cd -
 # Setup all other taps
 else
@@ -252,7 +252,7 @@ else
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" config fetch.prune true
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" fetch --force origin
             git_retry -C "$HOMEBREW_CORE_REPOSITORY" remote set-head origin --auto
-            git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B master origin/HEAD
+            git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B main origin/HEAD
         else
             ohai "Cloning Homebrew/core..."
             git_retry clone https://github.com/Homebrew/homebrew-core "${HOMEBREW_CORE_REPOSITORY}"
