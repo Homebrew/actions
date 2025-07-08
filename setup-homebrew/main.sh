@@ -209,12 +209,12 @@ else
 
         if [[ -d "$HOMEBREW_TAP_REPOSITORY" ]]; then
             cd "$HOMEBREW_TAP_REPOSITORY"
-            git remote set-url origin "https://github.com/$GITHUB_REPOSITORY"
+            git remote set-url origin "${GITHUB_SERVER_URL}/$GITHUB_REPOSITORY"
         else
             mkdir -vp "$HOMEBREW_TAP_REPOSITORY"
             cd "$HOMEBREW_TAP_REPOSITORY"
             git init
-            git remote add origin "https://github.com/$GITHUB_REPOSITORY"
+            git remote add origin "${GITHUB_SERVER_URL}/$GITHUB_REPOSITORY"
         fi
 
         # Make repo available under `GITHUB_WORKSPACE` (default working directory), which some third-party taps may need.
