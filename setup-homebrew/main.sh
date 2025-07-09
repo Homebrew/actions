@@ -195,7 +195,7 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/(home|linux)brew-core$ ]]; then
     else
         mkdir -vp "$HOMEBREW_CORE_REPOSITORY"
         cd "$HOMEBREW_CORE_REPOSITORY"
-        git init
+        git init -c init.defaultBranch=main
         git remote add origin "https://github.com/$GITHUB_REPOSITORY"
     fi
     git_retry fetch origin "$GITHUB_SHA" '+refs/heads/*:refs/remotes/origin/*'
