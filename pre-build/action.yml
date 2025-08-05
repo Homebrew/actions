@@ -68,7 +68,7 @@ runs:
         rm -rvf "${BOTTLES_DIR:?}"
         mkdir "${BOTTLES_DIR:?}"
 
-        if [[ "${{ runner.os }}" = Linux ]]; then
+        if [[ "$RUNNER_OS" = Linux ]]; then
           bottle_specifier="{ubuntu,linux}"
         else
           bottle_specifier="{macos-${MACOS_VERSION},${MACOS_VERSION}-${ARCH}}"
