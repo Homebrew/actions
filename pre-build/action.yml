@@ -80,7 +80,6 @@ runs:
         BOTTLES_DIR: ${{ inputs.bottles-directory }}
         MACOS_VERSION: ${{ steps.setup-cache.outputs.macos_version }}
         ARCH: ${{ steps.setup-cache.outputs.arch }}
-        RUNNER_OS: ${{ runner.os }}
 
     - name: Download bottles from GitHub Actions
       if: fromJson(inputs.download-bottles)
