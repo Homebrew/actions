@@ -4,6 +4,8 @@ import github from "@actions/github"
 import fs from "node:fs/promises"
 import path from "node:path"
 
+import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
+
 async function main() {
   const commitMessage = core.getInput("message")
   const branch = core.getInput("branch")
@@ -22,7 +24,7 @@ async function main() {
   const headCommitSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD"], { silent: true })).stdout.trim()
   const headTreeSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD:"], { silent: true })).stdout.trim()
 
-  const tree = {}
+  const tree: Record<string, RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"][number]> = {}
   for (const file of files) {
     const absoluteFile = path.resolve(directory, file)
 
@@ -30,9 +32,11 @@ async function main() {
     try {
       content = await fs.readFile(absoluteFile, {encoding: "base64"})
     } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-
-      content = null;
+      if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+        content = null
+      } else {
+        throw error
+      }
     }
 
     if (content !== null) {
@@ -59,7 +63,7 @@ async function main() {
       const blobResponse = await client.rest.git.createBlob({
         owner: owner,
         repo: repo,
-        content: await fs.readFile(absoluteFile, {encoding: "base64"}),
+        content: content,
         encoding: "base64"
       })
 
