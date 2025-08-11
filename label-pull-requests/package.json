@@ -1,4 +1,4 @@
 {
   "name": "label-pull-requests",
-  "main": "main.mjs"
+  "main": "main.mts"
 }

@@ -8,5 +8,7 @@ try {
     core.getInput("debug")
   ])
 } catch (error) {
+  if (!(error instanceof Error)) throw error
+
   core.setFailed(error.message)
 }
