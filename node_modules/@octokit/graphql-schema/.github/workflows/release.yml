@@ -1,0 +1,30 @@
+name: Release
+"on":
+  push:
+    branches:
+      - main
+      - next
+      - beta
+      - v*.x
+# These are recommended by the semantic-release docs: https://github.com/semantic-release/npm#npm-provenance
+permissions:
+    contents: write # to be able to publish a GitHub release
+    issues: write # to be able to comment on released issues
+    pull-requests: write # to be able to comment on released pull requests
+    id-token: write # to enable use of OIDC for npm provenance
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.OCTOKITBOT_NPM_TOKEN }}

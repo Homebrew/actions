@@ -22,7 +22,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Run type checking
+        run: npm install && npx tsc
 
       - name: Run tests
         run: npm test -- --experimental-test-coverage --test-reporter lcov --test-reporter-destination lcov.info
