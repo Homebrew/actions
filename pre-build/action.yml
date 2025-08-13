@@ -20,7 +20,7 @@ runs:
       uses: Homebrew/actions/setup-homebrew@main
       with:
         core: true
-        cask: false
+        cask: true
         test-bot: true
       env:
         HOMEBREW_NO_UPDATE_REPORT_NEW: 1
