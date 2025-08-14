@@ -4,13 +4,15 @@ import os from "node:os"
 import path from "node:path"
 import util from "node:util"
 
+import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
+
 describe("api-commit-and-push", async () => {
   const token = "fake-token"
   const branch = "a-branch"
   const message = "Some message"
-  let directory
-  let baseCommitSha
-  let baseTreeSha
+  let directory: string
+  let baseCommitSha: string
+  let baseTreeSha: string
 
   const blobSha = "abcdef1234567890abcdef1234567890abcdef12"
   const treeSha = "abcdef1234567890abcdef1234567890abcdef13"
@@ -70,7 +72,7 @@ describe("api-commit-and-push", async () => {
       sha: blobSha,
     })
 
-    const tree = []
+    const tree: Array<RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"][number]> = []
     addedFile.split("/").slice(0, -1).reduce((parentPath, component) => {
       const treePath = path.posix.join(parentPath, component);
 
