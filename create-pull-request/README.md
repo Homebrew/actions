@@ -1,4 +1,4 @@
-# Create Pull Request
+# Create pull request GitHub Action
 
 A very simple action to create a pull request from an already pushed branch.
 

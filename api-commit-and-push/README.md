@@ -1,4 +1,4 @@
-# API Commit and Push
+# API commit and push GitHub Action
 
 An action that commits and pushes changes via the GitHub API rather than the git CLI.
 

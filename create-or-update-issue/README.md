@@ -1,4 +1,4 @@
-# Create Or Update Issue
+# Create or update issue GitHub Action
 
 An action to create or update an issue in a repository.
 It supports posting a comment under an existing issue with the same title or

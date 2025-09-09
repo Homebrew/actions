@@ -1,4 +1,4 @@
-# Limit Pull Requests GitHub Action
+# Limit pull requests GitHub Action
 
 An action that limits the number of open pull requests to the repository created
 by a user.

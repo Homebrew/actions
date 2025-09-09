@@ -1,4 +1,4 @@
-# Git user config Github Action
+# Git user config GitHub Action
 
 An action that globally configures git for specified GitHub user.
 
