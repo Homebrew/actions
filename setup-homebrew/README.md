@@ -1,4 +1,4 @@
-# Setup Homebrew Github Action
+# Setup Homebrew GitHub Action
 
 An action that sets up a Homebrew environment.
 

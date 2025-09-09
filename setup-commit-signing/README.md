@@ -1,4 +1,4 @@
-# Setup SSH Commit Signing GitHub Action
+# Setup SSH commit signing GitHub Action
 
 An action that sets up SSH commit signing.
 
