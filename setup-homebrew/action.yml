@@ -41,6 +41,6 @@ outputs:
   gems-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
 runs:
-  using: node20
-  main: main.mjs
-  post: post.mjs
+  using: node24
+  main: main.mts
+  post: post.mts
