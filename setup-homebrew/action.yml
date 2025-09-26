@@ -13,10 +13,6 @@ inputs:
     description: Update the `homebrew/cask` tap.
     required: false
     default: false
-  test-bot:
-    description: Install the `homebrew/test-bot` tap.
-    required: false
-    default: auto
   debug:
     description: Show debugging output
     required: false
