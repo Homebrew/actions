@@ -4,11 +4,10 @@ set -euo pipefail
 
 UPDATE_CORE="${1}"
 UPDATE_CASK="${2}"
-TEST_BOT="${3}"
-DEBUG="${4}"
-TOKEN="${5}"
-STABLE="${6}"
-BREW_GH_API_TOKEN="${7}"
+DEBUG="${3}"
+TOKEN="${4}"
+STABLE="${5}"
+BREW_GH_API_TOKEN="${6}"
 
 if [[ "${DEBUG}" == "true" ]]; then
     set -x
@@ -56,7 +55,6 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
-HOMEBREW_TEST_BOT_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-test-bot"
 if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
 fi
@@ -271,22 +269,6 @@ else
             ohai "Cloning Homebrew/cask..."
             git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
         fi
-    fi
-fi
-
-if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_TEST_BOT_REPOSITORY}" ]] &&
-    { [[ "${TEST_BOT}" == "true" ]] || [[ "${TEST_BOT}" == "auto" && -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; }; then
-    # Setup Homebrew/homebrew-test-bot
-    if [[ -d "$HOMEBREW_TEST_BOT_REPOSITORY" ]]; then
-        ohai "Fetching Homebrew/test-bot..."
-        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" config fetch.prune true
-        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" fetch --force origin
-        git_retry -C "$HOMEBREW_TEST_BOT_REPOSITORY" remote set-head origin --auto
-        git -C "$HOMEBREW_TEST_BOT_REPOSITORY" checkout --force -B main origin/HEAD
-    else
-        ohai "Cloning Homebrew/test-bot..."
-        git_retry clone https://github.com/Homebrew/homebrew-test-bot "$HOMEBREW_TEST_BOT_REPOSITORY"
     fi
 fi
 
