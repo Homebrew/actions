@@ -3,10 +3,12 @@ name: Git user config
 on:
   pull_request:
     paths:
-      - '**git-user-config**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'node_modules/**'
+      - "**git-user-config**"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+permissions: {}
 
 jobs:
   user-config:
