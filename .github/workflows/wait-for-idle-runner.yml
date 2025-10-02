@@ -12,6 +12,8 @@ on:
       - "package-lock.json"
       - "node_modules/**"
 
+permissions: {}
+
 jobs:
   syntax:
     runs-on: ubuntu-latest
