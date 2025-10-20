@@ -11,7 +11,7 @@ fi
 
 # Remove symlink and move files back.
 if [[ -n "${STATE_TAP_SYMLINK-}" ]]; then
-  rm "${STATE_TAP_SYMLINK}"
+  rm -rf "${STATE_TAP_SYMLINK}"
   mkdir "${STATE_TAP_SYMLINK}"
   (shopt -s dotglob; mv "${GITHUB_WORKSPACE}"/* "${STATE_TAP_SYMLINK}" )
   echo "Reset tap symlink."
