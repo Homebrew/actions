@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Run prettier
+        run: npm run format -- --check
+
       - name: Run tests
         run: npm test -- --experimental-test-coverage --test-reporter lcov --test-reporter-destination lcov.info
 
