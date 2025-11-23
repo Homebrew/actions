@@ -4,8 +4,9 @@ import github from "@actions/github";
 async function main() {
   try {
     const token = core.getInput("token", { required: true });
-    const [owner, repo] =
-      core.getInput("repository", { required: true }).split("/");
+    const [owner, repo] = core
+      .getInput("repository", { required: true })
+      .split("/");
 
     const title = core.getInput("title", { required: true });
     const body = core.getInput("body", { required: true });
@@ -37,7 +38,7 @@ async function main() {
       }
       for await (const response of client.paginate.iterator(
         client.rest.issues.listForRepo,
-        params
+        params,
       )) {
         existingIssue = response.data.find((issue) => issue.title === title);
         if (existingIssue) {

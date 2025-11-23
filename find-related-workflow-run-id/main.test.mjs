@@ -19,14 +19,16 @@ test("find-related-workflow-run-id", async () => {
   mockInput("repository", repository);
   mockInput("token", token);
 
-  mockPool.intercept({
-    method: "POST",
-    path: "/graphql",
-    headers: {
-      Authorization: `token ${token}`,
-    },
-    body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-      query: `
+  mockPool
+    .intercept({
+      method: "POST",
+      path: "/graphql",
+      headers: {
+        Authorization: `token ${token}`,
+      },
+      body: (body) =>
+        util.isDeepStrictEqual(JSON.parse(body), {
+          query: `
         query($runUrl: URI!) {
           resource(url: $runUrl) {
             ... on WorkflowRun {
@@ -48,32 +50,34 @@ test("find-related-workflow-run-id", async () => {
           }
         }
       `,
-      variables: { runUrl },
-    }),
-  }).defaultReplyHeaders({
-    "Content-Type": "application/json",
-  }).reply(200, {
-    data: {
-      resource: {
-        checkSuite: {
-          commit: {
-            checkSuites: {
-              nodes: [
-                {
-                  workflowRun: {
-                    databaseId: 123,
-                    workflow: {
-                      name: "Some workflow"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      }
-    }
-  });
+          variables: { runUrl },
+        }),
+    })
+    .defaultReplyHeaders({
+      "Content-Type": "application/json",
+    })
+    .reply(200, {
+      data: {
+        resource: {
+          checkSuite: {
+            commit: {
+              checkSuites: {
+                nodes: [
+                  {
+                    workflowRun: {
+                      databaseId: 123,
+                      workflow: {
+                        name: "Some workflow",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
 
   await loadMain();
 });

@@ -5,8 +5,10 @@ async function main() {
   try {
     const eventName = github.context.eventName;
     if (!["pull_request", "pull_request_target"].includes(eventName)) {
-      core.setFailed(`${eventName} is not a supported event. Only pull_request `
-        + `and pull_request_target are supported.`);
+      core.setFailed(
+        `${eventName} is not a supported event. Only pull_request ` +
+          `and pull_request_target are supported.`,
+      );
       return;
     }
 
@@ -14,10 +16,10 @@ async function main() {
 
     const exceptUsersInput = core.getInput("except-users");
     const exceptUsers = exceptUsersInput ? exceptUsersInput.split(",") : [];
-    const exceptAuthorAssocsInput =
-      core.getInput("except-author-associations");
-    const exceptAuthorAssocs =
-      exceptAuthorAssocsInput ? exceptAuthorAssocsInput.split(",") : [];
+    const exceptAuthorAssocsInput = core.getInput("except-author-associations");
+    const exceptAuthorAssocs = exceptAuthorAssocsInput
+      ? exceptAuthorAssocsInput.split(",")
+      : [];
 
     const commentLimit = core.getInput("comment-limit");
     const comment = core.getInput("comment");
@@ -32,8 +34,11 @@ async function main() {
       core.info(`@${github.context.actor} is exempted from the limit.`);
       return;
     }
-    if (exceptAuthorAssocs.includes(
-      github.context.payload.pull_request.author_association)) {
+    if (
+      exceptAuthorAssocs.includes(
+        github.context.payload.pull_request.author_association,
+      )
+    ) {
       core.info(`@${github.context.actor} is exempted from the limit.`);
       return;
     }
@@ -44,9 +49,9 @@ async function main() {
       state: "open",
       per_page: 100,
     });
-    const prCount = openPrs
-      .filter(pr => pr.user.login === github.context.actor)
-      .length;
+    const prCount = openPrs.filter(
+      (pr) => pr.user.login === github.context.actor,
+    ).length;
     core.info(`@${github.context.actor} has ${prCount} open PR(s).`);
 
     if (comment && prCount >= commentLimit) {

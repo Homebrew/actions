@@ -11,11 +11,11 @@ inputs:
   formulae:
     description: Formula names, space-separated
     required: false
-    default: ''
+    default: ""
   casks:
     description: Cask names, space-separated
     required: false
-    default: ''
+    default: ""
   fork:
     description: Use a fork when opening a PR
     required: false

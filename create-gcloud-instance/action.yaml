@@ -6,9 +6,9 @@ branding:
   color: purple
 inputs:
   runner_name:
-     description: Name of the self-hosted runner
-     required: true
-     default: false
+    description: Name of the self-hosted runner
+    required: true
+    default: false
   gcp_project_id:
     description: Google Cloud Platform project ID
     required: true

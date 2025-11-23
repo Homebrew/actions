@@ -23,14 +23,19 @@ describe("limit-pull-requests", async () => {
     process.env.GITHUB_ACTOR = GITHUB_ACTOR;
     process.env.GITHUB_EVENT_NAME = GITHUB_EVENT_NAME;
 
-    directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "limit-pull-requests-"));
+    directory = await fs.promises.mkdtemp(
+      path.join(os.tmpdir(), "limit-pull-requests-"),
+    );
     eventPath = path.join(directory, "event.json");
-    await fs.promises.writeFile(eventPath, JSON.stringify({
-      pull_request: {
-        number: prNumber,
-        author_association: "CONTRIBUTOR",
-      },
-    }));
+    await fs.promises.writeFile(
+      eventPath,
+      JSON.stringify({
+        pull_request: {
+          number: prNumber,
+          author_association: "CONTRIBUTOR",
+        },
+      }),
+    );
 
     process.env.GITHUB_EVENT_PATH = eventPath;
   });
@@ -52,20 +57,23 @@ describe("limit-pull-requests", async () => {
     const actor = GITHUB_ACTOR;
     const mockPool = githubMockPool();
 
-    mockPool.intercept({
-      method: "GET",
-      path: `/repos/${GITHUB_REPOSITORY}/pulls?per_page=100&state=open`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, [
-      { user: { login: actor } },
-      { user: { login: "some-other-actor-1" } },
-      { user: { login: "some-other-actor-2" } },
-      { user: { login: "some-other-actor-3" } },
-    ]);
+    mockPool
+      .intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls?per_page=100&state=open`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, [
+        { user: { login: actor } },
+        { user: { login: "some-other-actor-1" } },
+        { user: { login: "some-other-actor-2" } },
+        { user: { login: "some-other-actor-3" } },
+      ]);
 
     await loadMain();
   });
@@ -74,51 +82,62 @@ describe("limit-pull-requests", async () => {
     const actor = GITHUB_ACTOR;
     const mockPool = githubMockPool();
 
-    mockPool.intercept({
-      method: "GET",
-      path: `/repos/${GITHUB_REPOSITORY}/pulls?per_page=100&state=open`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, [
-      { user: { login: actor } },
-      { user: { login: actor } },
-      { user: { login: actor } },
-      { user: { login: actor } },
-      { user: { login: actor } },
-      { user: { login: actor } },
-      { user: { login: "some-other-actor-1" } },
-      { user: { login: "some-other-actor-2" } },
-      { user: { login: "some-other-actor-3" } },
-    ]);
+    mockPool
+      .intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls?per_page=100&state=open`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, [
+        { user: { login: actor } },
+        { user: { login: actor } },
+        { user: { login: actor } },
+        { user: { login: actor } },
+        { user: { login: actor } },
+        { user: { login: actor } },
+        { user: { login: "some-other-actor-1" } },
+        { user: { login: "some-other-actor-2" } },
+        { user: { login: "some-other-actor-3" } },
+      ]);
 
-    mockPool.intercept({
-      method: "POST",
-      path: `/repos/${GITHUB_REPOSITORY}/issues/${prNumber}/comments`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-        body: comment,
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {});
+    mockPool
+      .intercept({
+        method: "POST",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${prNumber}/comments`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) =>
+          util.isDeepStrictEqual(JSON.parse(body), {
+            body: comment,
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {});
 
-    mockPool.intercept({
-      method: "PATCH",
-      path: `/repos/${GITHUB_REPOSITORY}/pulls/${prNumber}`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-        state: "closed",
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {});
+    mockPool
+      .intercept({
+        method: "PATCH",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${prNumber}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) =>
+          util.isDeepStrictEqual(JSON.parse(body), {
+            state: "closed",
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {});
 
     await loadMain();
   });

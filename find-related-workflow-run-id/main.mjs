@@ -35,14 +35,13 @@ async function main() {
           }
         }
       `,
-      { runUrl }
+      { runUrl },
     );
 
-    const relatedRunId =
-      response.resource.checkSuite.commit.checkSuites.nodes
-        .reverse()
-        .find(node => node.workflowRun?.workflow.name === workflowName)
-        ?.workflowRun.databaseId;
+    const relatedRunId = response.resource.checkSuite.commit.checkSuites.nodes
+      .reverse()
+      .find((node) => node.workflowRun?.workflow.name === workflowName)
+      ?.workflowRun.databaseId;
 
     if (relatedRunId === undefined) {
       core.setFailed(`No related run found for workflow ${workflowName}`);

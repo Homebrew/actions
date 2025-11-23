@@ -1,47 +1,49 @@
-import core from "@actions/core"
-import github from "@actions/github"
+import core from "@actions/core";
+import github from "@actions/github";
 
 async function main() {
   try {
-    const token = core.getInput("token", { required: true })
-    const [owner, repo] = core.getInput("repository", { required: true }).split("/")
-    const head = core.getInput("head", { required: true })
-    const base = core.getInput("base", { required: true })
+    const token = core.getInput("token", { required: true });
+    const [owner, repo] = core
+      .getInput("repository", { required: true })
+      .split("/");
+    const head = core.getInput("head", { required: true });
+    const base = core.getInput("base", { required: true });
 
-    const title = core.getInput("title")
-    const body = core.getInput("body")
+    const title = core.getInput("title");
+    const body = core.getInput("body");
 
-    const labelsInput = core.getInput("labels")
-    const labels = labelsInput ? labelsInput.split(",") : []
-    const reviewersInput = core.getInput("reviewers")
-    const reviewers = reviewersInput ? reviewersInput.split(",") : []
+    const labelsInput = core.getInput("labels");
+    const labels = labelsInput ? labelsInput.split(",") : [];
+    const reviewersInput = core.getInput("reviewers");
+    const reviewers = reviewersInput ? reviewersInput.split(",") : [];
 
-    const client = github.getOctokit(token)
+    const client = github.getOctokit(token);
 
-    let prRequest = { owner, repo, head, base }
+    let prRequest = { owner, repo, head, base };
     if (title) {
-      prRequest.title = title
+      prRequest.title = title;
     }
     if (body) {
-      prRequest.body = body
+      prRequest.body = body;
     }
 
-    const response = await client.rest.pulls.create(prRequest)
-    const prNumber = response.data.number
-    const prNodeId = response.data.node_id
-    const prUrl = response.data.html_url
+    const response = await client.rest.pulls.create(prRequest);
+    const prNumber = response.data.number;
+    const prNodeId = response.data.node_id;
+    const prUrl = response.data.html_url;
 
-    core.info(`Created pull request ${prUrl}`)
+    core.info(`Created pull request ${prUrl}`);
 
     if (labels.length > 0) {
       await client.rest.issues.addLabels({
         owner,
         repo,
         issue_number: prNumber,
-        labels
-      })
+        labels,
+      });
 
-      core.info(`Added labels ${labels.join(", ")} to pull request`)
+      core.info(`Added labels ${labels.join(", ")} to pull request`);
     }
 
     if (reviewers.length > 0) {
@@ -49,17 +51,19 @@ async function main() {
         owner,
         repo,
         pull_number: prNumber,
-        reviewers
-      })
+        reviewers,
+      });
 
-      core.info(`Requested review from ${reviewers.join(", ")} for pull request`)
+      core.info(
+        `Requested review from ${reviewers.join(", ")} for pull request`,
+      );
     }
 
-    core.setOutput("number", prNumber)
-    core.setOutput("node_id", prNodeId)
+    core.setOutput("number", prNumber);
+    core.setOutput("node_id", prNodeId);
   } catch (error) {
-    core.setFailed(error)
+    core.setFailed(error);
   }
 }
 
-await main()
+await main();

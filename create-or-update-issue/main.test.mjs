@@ -24,23 +24,27 @@ describe("create-issue", async () => {
 
     const mockPool = githubMockPool();
 
-    mockPool.intercept({
-      method: "POST",
-      path: `/repos/${GITHUB_REPOSITORY}/issues`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
-        title,
-        body,
-        labels: labels.split(","),
-        assignees: assignees.split(","),
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {
-      number: issueNumber,
-    });
+    mockPool
+      .intercept({
+        method: "POST",
+        path: `/repos/${GITHUB_REPOSITORY}/issues`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (htmlBody) =>
+          util.isDeepStrictEqual(JSON.parse(htmlBody), {
+            title,
+            body,
+            labels: labels.split(","),
+            assignees: assignees.split(","),
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {
+        number: issueNumber,
+      });
 
     await loadMain();
   });
@@ -51,40 +55,49 @@ describe("create-issue", async () => {
 
     const mockPool = githubMockPool();
 
-    mockPool.intercept({
-      method: "GET",
-      path: `/repos/${GITHUB_REPOSITORY}/issues?` +
-        `direction=desc&per_page=100&sort=created&state=open`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, [
-      {
-        title: "Not the same issue",
-        number: 54321,
-      },
-      {
-        title,
-        number: issueNumber,
-      },
-    ]);
+    mockPool
+      .intercept({
+        method: "GET",
+        path:
+          `/repos/${GITHUB_REPOSITORY}/issues?` +
+          `direction=desc&per_page=100&sort=created&state=open`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, [
+        {
+          title: "Not the same issue",
+          number: 54321,
+        },
+        {
+          title,
+          number: issueNumber,
+        },
+      ]);
 
-    mockPool.intercept({
-      method: "POST",
-      path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}/comments`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
-        body,
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {
-      html_url: "https://github.com/owner/repo/issues/12345#issuecomment-67890",
-    });
+    mockPool
+      .intercept({
+        method: "POST",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}/comments`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (htmlBody) =>
+          util.isDeepStrictEqual(JSON.parse(htmlBody), {
+            body,
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {
+        html_url:
+          "https://github.com/owner/repo/issues/12345#issuecomment-67890",
+      });
 
     await loadMain();
   });
@@ -101,62 +114,76 @@ describe("create-issue", async () => {
 
     const mockPool = githubMockPool();
 
-    mockPool.intercept({
-      method: "GET",
-      path: `/repos/${GITHUB_REPOSITORY}/issues?` +
-        [
-          `creator=${closeFromAuthor}`,
-          "direction=desc",
-          "per_page=100",
-          "sort=created",
-          "state=open",
-        ].join("&"),
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, [
-      {
-        title: "Not the same issue",
-        number: 54321,
-      },
-      {
-        title,
-        number: issueNumber,
-      },
-    ]);
+    mockPool
+      .intercept({
+        method: "GET",
+        path:
+          `/repos/${GITHUB_REPOSITORY}/issues?` +
+          [
+            `creator=${closeFromAuthor}`,
+            "direction=desc",
+            "per_page=100",
+            "sort=created",
+            "state=open",
+          ].join("&"),
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, [
+        {
+          title: "Not the same issue",
+          number: 54321,
+        },
+        {
+          title,
+          number: issueNumber,
+        },
+      ]);
 
-    mockPool.intercept({
-      method: "POST",
-      path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}/comments`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
-        body: closeComment,
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {
-      html_url: "https://github.com/owner/repo/issues/12345#issuecomment-67890",
-    });
+    mockPool
+      .intercept({
+        method: "POST",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}/comments`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (htmlBody) =>
+          util.isDeepStrictEqual(JSON.parse(htmlBody), {
+            body: closeComment,
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {
+        html_url:
+          "https://github.com/owner/repo/issues/12345#issuecomment-67890",
+      });
 
-    mockPool.intercept({
-      method: "PATCH",
-      path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}`,
-      headers: {
-        Authorization: `token ${token}`,
-      },
-      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
-        state: "closed",
-        state_reason: "completed",
-      }),
-    }).defaultReplyHeaders({
-      "Content-Type": "application/json",
-    }).reply(200, {
-      html_url: "https://github.com/owner/repo/issues/12345#issuecomment-67890",
-    });
+    mockPool
+      .intercept({
+        method: "PATCH",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${issueNumber}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (htmlBody) =>
+          util.isDeepStrictEqual(JSON.parse(htmlBody), {
+            state: "closed",
+            state_reason: "completed",
+          }),
+      })
+      .defaultReplyHeaders({
+        "Content-Type": "application/json",
+      })
+      .reply(200, {
+        html_url:
+          "https://github.com/owner/repo/issues/12345#issuecomment-67890",
+      });
 
     await loadMain();
   });

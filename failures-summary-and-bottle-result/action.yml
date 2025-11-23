@@ -1,4 +1,4 @@
-name: '`brew test-bot` result summary'
+name: "`brew test-bot` result summary"
 description: Output the logs stored at the specified path
 inputs:
   workdir:
@@ -12,11 +12,11 @@ inputs:
   step_name:
     description: Heading to use in GitHub step summary
     required: true
-    default: '`brew test-bot` output'
+    default: "`brew test-bot` output"
   collapse:
     description: Whether to collapse the output
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: composite

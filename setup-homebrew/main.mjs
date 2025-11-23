@@ -1,5 +1,5 @@
-import { exec } from "@actions/exec"
-import core from "@actions/core"
+import { exec } from "@actions/exec";
+import core from "@actions/core";
 
 // GitHub Actions does not support shell `post` actions and thus requires a JS wrapper.
 try {
@@ -11,7 +11,7 @@ try {
     core.getInput("token"),
     core.getInput("stable"),
     core.getInput("brew-gh-api-token"),
-  ])
+  ]);
 } catch (error) {
-  core.setFailed(error.message)
+  core.setFailed(error.message);
 }
