@@ -46,6 +46,12 @@ async function main() {
 
         // Extend every file object with its content
         for (const file of files.data) {
+            // Only match added/removed lines
+            file.patch = (file.patch || "")
+                .split("\n")
+                .filter(line => /^[-+]/.test(line))
+                .join("\n")
+
             // File object could have this field set as 'null'
             if (!file.sha) {
                 file.content = ""
@@ -259,6 +265,18 @@ function doesConstraintApply(constraint, file) {
                 }
             }
         } else if (!file.content.match(constraint.content)) {
+            return false
+        }
+    }
+
+    if (constraint.patch_content) {
+        if (Array.isArray(constraint.patch_content)) {
+            for (const patchContent of constraint.patch_content) {
+                if (!file.patch.match(patchContent)) {
+                    return false
+                }
+            }
+        } else if (!file.patch.match(constraint.patch_content)) {
             return false
         }
     }

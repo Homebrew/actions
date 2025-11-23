@@ -49,6 +49,11 @@ Will remove labels from a pull request that no longer apply.
               "pr_body_content": "Created with `brew bump-formula-pr`"
           },
           {
+            "label": "shell-completion",
+            "path": "Formula/.+",
+            "patch_content": "generate_completions_from_executable|bash_completion|zsh_completion|fish_completion|pwsh_completion)"
+          },
+          {
             "label": "documentation",
             "path": ".*\\.md"
           }
@@ -88,6 +93,10 @@ Will remove labels from a pull request that no longer apply.
 
       - label: bump-formula-pr
         pr_body_content: Created with `brew bump-formula-pr`
+
+      - label: shell-completion
+        path: Formula/.+
+        patch_content: '(generate_completions_from_executable|bash_completion|zsh_completion|fish_completion|pwsh_completion)'
 
       - label: documentation
         path: .*\.md
