@@ -121,4 +121,145 @@ describe("label-pull-requests", async () => {
       await loadMain()
     })
   })
+
+  describe("patch content constraints", async () => {
+    it("labels when patch content matches", async () => {
+      const mockPool = githubMockPool()
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${pr}/files`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [
+        {
+          sha:      fileSha,
+          filename: "some/file.txt",
+          patch:    "@@ -1,3 +1,3 @@\n-foo\n+generate_completions_from_executable\n bar",
+        },
+      ])
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${pr}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {
+        body: "Created with `brew bump-formula-pr`.",
+      })
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/git/blobs/${fileSha}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {
+        content:  "This is the file contents.",
+        encoding: "ascii",
+      })
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}/labels`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [])
+
+      mockPool.intercept({
+        method: "PATCH",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
+          labels: [label],
+        }),
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {})
+
+      mockInput("def", `
+- label: ${label}
+  path: .+
+  patch_content: 'generate_completions_from_executable'
+      `)
+
+      await loadMain()
+    })
+
+    it("does not label when patch is null", async () => {
+      const mockPool = githubMockPool()
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${pr}/files`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [
+        {
+          sha:      fileSha,
+          filename: "some/file.txt",
+          patch:    null,
+        },
+      ])
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${pr}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {
+        body: "Created with `brew bump-formula-pr`.",
+      })
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/git/blobs/${fileSha}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {
+        content:  "This is the file contents.",
+        encoding: "ascii",
+      })
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}/labels`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [])
+
+      mockInput("def", `
+- label: ${label}
+  path: .+
+  patch_content: ['generate_completions_from_executable']
+      `)
+
+      await loadMain()
+    })
+  })
 })

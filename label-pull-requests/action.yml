@@ -19,6 +19,7 @@ inputs:
         - "path" (optional): Changed file path, regex matching
         - "except" (optional): File path to exclude (can be a list)
         - "content" (optional): Changed file contents, regex matching (can be a list)
+        - "patch_content" (optional): Changed file patch contents, regex matching (can be a list)
         - "missing_content" (optional): Missing file contents, regex matching (can be a list)
         - "pr_body_content" (optional): Regex to check against the PR body
 
