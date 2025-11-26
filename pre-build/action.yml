@@ -32,8 +32,8 @@ runs:
       id: setup-cache
       shell: /bin/bash -euo pipefail {0}
       run: |
-        cache_key_prefix="${{ runner.os }}"
-        if [[ "${{ runner.os }}" = macOS ]]
+        cache_key_prefix="${RUNNER_OS}"
+        if [[ "${RUNNER_OS}" = macOS ]]
         then
           macos_full_version="$(sw_vers -productVersion)"
           macos_version="${macos_full_version%%.*}"
