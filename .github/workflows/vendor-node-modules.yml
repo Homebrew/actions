@@ -49,7 +49,9 @@ jobs:
           PR: ${{ github.event.pull_request.number || github.event.inputs.pull_request }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
-        run: npm install
+        run: |
+          npm ci --ignore-scripts
+          rm -r ./node_modules/esm-reload/.github/
       - name: Commit changes
         id: commit
         run: |
