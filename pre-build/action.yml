@@ -17,7 +17,7 @@ runs:
   steps:
     - name: Set up Homebrew
       id: set-up-homebrew
-      uses: Homebrew/actions/setup-homebrew@main
+      uses: Homebrew/actions/setup-homebrew@ts-node24
       with:
         core: true
         cask: true
