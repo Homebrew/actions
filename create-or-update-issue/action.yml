@@ -62,5 +62,5 @@ outputs:
       The node ID of the created or updated issue, used in GitHub GraphQL API
       queries; undefined if `outcome` is `none`
 runs:
-  using: node20
-  main: main.mjs
+  using: node24
+  main: main.mts
