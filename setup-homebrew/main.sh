@@ -40,13 +40,49 @@ function git_retry {
     retry git "$@"
 }
 
+function install_homebrew {
+    local brew_executable
+
+    case "${OSTYPE}" in
+        darwin*)
+            case "${MACHTYPE}" in
+                arm64-*|aarch64-*)
+                    HOMEBREW_PREFIX="/opt/homebrew"
+                    ;;
+                *)
+                    HOMEBREW_PREFIX="/usr/local"
+                    ;;
+            esac
+            ;;
+        linux*)
+            HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+            ;;
+        *)
+            echo "Unsupported platform: ${OSTYPE}/${MACHTYPE}!"
+            exit 1
+            ;;
+    esac
+
+    ohai "Installing Homebrew to ${HOMEBREW_PREFIX}..."
+    # NONINTERACTIVE avoids prompts on CI runners.
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    brew_executable="${HOMEBREW_PREFIX}/bin/brew"
+    if [[ ! -x "${brew_executable}" ]]; then
+        echo "Homebrew installation failed: ${brew_executable} not found."
+        exit 1
+    fi
+
+    # Ensure brew is available for the rest of the script.
+    eval "$("${brew_executable}" shellenv)"
+}
+
 # Check brew's existence
 if ! which brew &>/dev/null; then
     PATH="/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
     if ! which brew &>/dev/null; then
-        echo "Could not find 'brew' command in PATH or standard locations."
-        exit 1
+        install_homebrew
     fi
 fi
 
