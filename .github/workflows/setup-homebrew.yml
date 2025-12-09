@@ -19,23 +19,33 @@ jobs:
           - os: macos-latest
             key: macos
             stable: false
+            name: macOS
           - os: ubuntu-22.04
             key: ubuntu-22
             stable: false
+            name: Ubuntu (22.04)
+          - os: ubuntu-slim
+            key: ubuntu-slim
+            stable: false
+            name: Ubuntu (slim)
           - os: ubuntu-22.04
             key: docker-root
             stable: false
             container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=root"}'
+            name: Docker (root)
           - os: ubuntu-22.04
             key: docker-linuxbrew
             stable: false
             container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=linuxbrew"}'
+            name: Docker (linuxbrew)
           - os: ubuntu-22.04
             key: docker-linuxbrew-stable
             stable: true
             container: '{"image": "ghcr.io/homebrew/ubuntu22.04:latest", "options": "--user=linuxbrew"}'
+            name: Docker (stable)
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
+    name: Setup Homebrew on ${{ matrix.name }}
     steps:
       - name: Checkout
         run: |
