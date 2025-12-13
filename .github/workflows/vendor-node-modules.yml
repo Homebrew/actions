@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Vendor node_modules
         run: |
-          npm ci --ignore-scripts
+          npm ci --omit=dev --ignore-scripts
           rm -r ./node_modules/esm-reload/.github/
       - name: Commit changes
         id: commit
