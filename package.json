@@ -4,8 +4,8 @@
     "test": "node --test --import ./spec-helper.mjs --test-reporter ./test-reporter.mjs --test-reporter-destination stdout"
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1",
+    "@actions/core": "^2.0.1",
+    "@actions/exec": "^2.0.0",
     "@actions/github": "^6.0.1",
     "esm-reload": "^1.0.1",
     "js-yaml": "^4.1.1"
