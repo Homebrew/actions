@@ -1,4 +1,4 @@
 {
   "name": "post-comment",
-  "main": "main.mjs"
+  "main": "main.mts"
 }

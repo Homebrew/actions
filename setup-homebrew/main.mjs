@@ -13,5 +13,7 @@ try {
     core.getInput("brew-gh-api-token"),
   ])
 } catch (error) {
+  if (!(error instanceof Error)) throw error
+
   core.setFailed(error.message)
 }
