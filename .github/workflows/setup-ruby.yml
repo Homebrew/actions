@@ -1,0 +1,70 @@
+name: Setup Ruby
+
+on:
+  pull_request:
+    paths:
+      - "**setup-ruby**"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+permissions: {}
+
+jobs:
+  setup:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            name: macOS (formula)
+            portable: false
+          - os: macos-latest
+            name: macOS (portable)
+            portable: true
+          - os: ubuntu-22.04
+            name: Ubuntu (22.04, formula)
+            portable: false
+          - os: ubuntu-22.04
+            name: Ubuntu (22.04, portable)
+            portable: true
+    runs-on: ${{ matrix.os }}
+    name: Setup Ruby on ${{ matrix.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: ./setup-homebrew/
+
+      - name: Set up Ruby
+        id: set-up-ruby
+        uses: ./setup-ruby/
+        with:
+          portable-ruby: ${{ matrix.portable }}
+
+      - name: Test Ruby
+        env:
+          PORTABLE_RUBY: ${{ matrix.portable }}
+          RUBY_PATH: ${{ steps.set-up-ruby.outputs.ruby-path }}
+          RUBY_PREFIX: ${{ steps.set-up-ruby.outputs.ruby-prefix }}
+          RUBY_VERSION: ${{ steps.set-up-ruby.outputs.ruby-version }}
+        run: |
+          test -x "${RUBY_PATH}"
+          ruby_bin="$(dirname "${RUBY_PATH}")"
+          test "${ruby_bin}" = "${RUBY_PREFIX}/bin"
+          case ":${PATH}:" in
+            *":${ruby_bin}:"*) ;;
+            *) echo "Expected ${ruby_bin} in PATH"; exit 1 ;;
+          esac
+          test "$("${RUBY_PATH}" -e 'print RUBY_VERSION')" = "${RUBY_VERSION}"
+
+          if [[ "${PORTABLE_RUBY}" == "true" ]]; then
+            expected="$(brew --repository)/Library/Homebrew/vendor/portable-ruby/current/bin/ruby"
+            test "${RUBY_PATH}" = "${expected}"
+          else
+            test "${RUBY_PREFIX}" = "$(brew --prefix ruby)"
+          fi

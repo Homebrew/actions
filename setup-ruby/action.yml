@@ -1,0 +1,84 @@
+name: Setup Ruby (Homebrew)
+description: Set up Homebrew Ruby or Homebrew portable Ruby
+author: Homebrew
+branding:
+  icon: box
+  color: red
+inputs:
+  portable-ruby:
+    description: Use Homebrew portable Ruby (brew ruby) instead of the Ruby formula
+    required: false
+    default: false
+  debug:
+    description: Show debugging output
+    required: false
+    default: ${{ runner.debug == '1' }}
+outputs:
+  ruby-path:
+    description: Path to the Ruby executable
+    value: ${{ steps.setup.outputs.ruby-path }}
+  ruby-prefix:
+    description: Ruby installation prefix
+    value: ${{ steps.setup.outputs.ruby-prefix }}
+  ruby-version:
+    description: Ruby version string
+    value: ${{ steps.setup.outputs.ruby-version }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Ruby
+      id: setup
+      shell: /bin/bash -euo pipefail {0}
+      env:
+        PORTABLE_RUBY: ${{ inputs.portable-ruby }}
+        DEBUG: ${{ inputs.debug }}
+      # zizmor: ignore[github-env] is safe here because we only write fixed values
+      # computed in this step (no untrusted input) to GITHUB_OUTPUT/GITHUB_PATH.
+      run: | # zizmor: ignore[github-env]
+        PORTABLE_RUBY="${PORTABLE_RUBY:-false}"
+        DEBUG="${DEBUG:-false}"
+
+        if [[ "${DEBUG}" == "true" ]]; then
+          set -x
+        fi
+
+        if ! command -v brew >/dev/null; then
+          echo "::error::Homebrew is required. Use Homebrew/actions/setup-homebrew before this action."
+          exit 1
+        fi
+
+        portable_ruby=false
+        portable_ruby_input="$(printf '%s' "${PORTABLE_RUBY}" | tr '[:upper:]' '[:lower:]')"
+        case "${portable_ruby_input}" in
+          true|1|yes|y) portable_ruby=true ;;
+        esac
+
+        if [[ "${portable_ruby}" == "true" ]]; then
+          ruby_path="$(brew --repository)/Library/Homebrew/vendor/portable-ruby/current/bin/ruby"
+          if [[ ! -r "${ruby_path}" ]]; then
+            echo "Installing Portable Ruby..."
+            brew vendor-install ruby
+          fi
+        else
+          ruby_path="$(brew --prefix ruby)/bin/ruby"
+          if [[ ! -r "${ruby_path}" ]]; then
+            echo "Installing Homebrew Ruby formula..."
+            brew install ruby
+          fi
+        fi
+
+        if [[ ! -x "${ruby_path}" ]]; then
+          echo "::error::Unable to locate executable Ruby at ${ruby_path}!"
+          exit 1
+        fi
+
+        echo "ruby-path=${ruby_path}" >> "${GITHUB_OUTPUT}"
+
+        ruby_version="$(${ruby_path} -e 'print RUBY_VERSION')"
+        echo "ruby-version=${ruby_version}" >> "${GITHUB_OUTPUT}"
+
+        ruby_bin="$(dirname "${ruby_path}")"
+        echo "${ruby_bin}" >> "${GITHUB_PATH}"
+
+        ruby_prefix="$(dirname "${ruby_bin}")"
+        echo "ruby-prefix=${ruby_prefix}" >> "${GITHUB_OUTPUT}"
