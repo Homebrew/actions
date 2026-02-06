@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
-import core from "@actions/core"
-import github from "@actions/github"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
 import fs from "fs"
 import yaml from "js-yaml"
 
@@ -21,6 +21,7 @@ type Constraint = {
 }
 
 type FileWithContent = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][number] & { content?: string }
+type IssueLabel = RestEndpointMethodTypes["issues"]["listLabelsOnIssue"]["response"]["data"][number]
 
 async function main() {
     try {
@@ -95,7 +96,7 @@ async function main() {
             ...github.context.repo,
             issue_number: pull.number
         })
-        let existingLabels = issueLabels.data.map(label => label.name)
+        let existingLabels = issueLabels.data.map((label: IssueLabel) => label.name)
 
         // Map constraint to an array of matching files objects
         const constraintToMatchingFiles = new Map()
@@ -227,7 +228,7 @@ async function main() {
         }
 
         // No constraints matched, just return
-        if (existingLabels.length == updatedLabels.length && existingLabels.every((label, i) => label == updatedLabels[i])) {
+        if (existingLabels.length == updatedLabels.length && existingLabels.every((label: string, i: number) => label == updatedLabels[i])) {
             return
         }
 

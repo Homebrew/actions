@@ -1,5 +1,9 @@
-import core from "@actions/core";
-import github from "@actions/github";
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+
+import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+
+type PullRequest = RestEndpointMethodTypes["pulls"]["list"]["response"]["data"][number];
 
 async function main() {
   try {
@@ -45,7 +49,7 @@ async function main() {
       per_page: 100,
     });
     const prCount = openPrs
-      .filter(pr => pr.user?.login === github.context.actor)
+      .filter((pr: PullRequest) => pr.user?.login === github.context.actor)
       .length;
     core.info(`@${github.context.actor} has ${prCount} open PR(s).`);
 

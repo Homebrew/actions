@@ -1,10 +1,12 @@
 import assert from "node:assert/strict"
-import core from "@actions/core"
-import github from "@actions/github"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
 import fs from "fs"
 import path from "path"
 
 import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
+
+type IssueLabel = RestEndpointMethodTypes["issues"]["listLabelsOnIssue"]["response"]["data"][number]
 
 async function main() {
     try {
@@ -134,7 +136,7 @@ async function main() {
             ...github.context.repo,
             issue_number: pull.number
         })
-        let existingLabels = issueLabels.data.map(label => label.name)
+        let existingLabels = issueLabels.data.map((label: IssueLabel) => label.name)
 
         // Copy labels into new Array
         const updatedLabels = existingLabels.slice()
@@ -168,7 +170,7 @@ async function main() {
         }
 
         // If everything is the same, we're done
-        if (existingLabels.length == updatedLabels.length && existingLabels.every((label, i) => label == updatedLabels[i])) {
+        if (existingLabels.length == updatedLabels.length && existingLabels.every((label: string, i: number) => label == updatedLabels[i])) {
             return
         }
 
