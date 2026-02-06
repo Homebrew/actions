@@ -5,7 +5,7 @@ import { createRequire } from "node:module"
 import path from "node:path"
 import { test, before, after, beforeEach, afterEach, describe, it, type TestContext } from "node:test"
 import { MockAgent, setGlobalDispatcher, type Interceptable } from "undici"
-import core from "@actions/core"
+import * as core from "@actions/core"
 import "esm-reload"
 
 type Test = typeof test

@@ -1,6 +1,6 @@
-import core from "@actions/core"
-import exec from "@actions/exec"
-import github from "@actions/github"
+import * as core from "@actions/core"
+import * as exec from "@actions/exec"
+import * as github from "@actions/github"
 import fs from "node:fs/promises"
 import path from "node:path"
 
@@ -15,7 +15,7 @@ async function main() {
 
   const files = (
     await exec.getExecOutput("git", ["-C", directory, "diff", "--no-ext-diff", "--cached", "--name-only", "-z"], { silent: true })
-  ).stdout.split("\0").filter(file => file.length !== 0)
+  ).stdout.split("\0").filter((file: string) => file.length !== 0)
   if (files.length === 0) {
     core.setFailed("No files to commit")
     return
@@ -40,7 +40,7 @@ async function main() {
     }
 
     if (content !== null) {
-      file.split("/").slice(0, -1).reduce((parentPath, component) => {
+      file.split("/").slice(0, -1).reduce((parentPath: string, component: string) => {
         const treePath = path.posix.join(parentPath, component);
 
         tree[treePath] ||= {

@@ -1,7 +1,11 @@
-import core from "@actions/core";
-import github from "@actions/github";
+import * as core from "@actions/core";
+import * as github from "@actions/github";
 
 import type { WorkflowRun } from "@octokit/graphql-schema";
+
+type CheckSuiteNode = NonNullable<
+  NonNullable<NonNullable<WorkflowRun["checkSuite"]>["commit"]["checkSuites"]>["nodes"]
+>[number];
 
 async function main() {
   try {
@@ -43,7 +47,7 @@ async function main() {
     const relatedRunId =
       response.resource.checkSuite.commit.checkSuites?.nodes
         ?.reverse()
-        .find(node => node?.workflowRun?.workflow.name === workflowName)
+        .find((node: CheckSuiteNode) => node?.workflowRun?.workflow.name === workflowName)
         ?.workflowRun?.databaseId;
 
     if (relatedRunId === undefined) {

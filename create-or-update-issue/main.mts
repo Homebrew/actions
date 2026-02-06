@@ -1,7 +1,9 @@
-import core from "@actions/core";
-import github from "@actions/github";
+import * as core from "@actions/core";
+import * as github from "@actions/github";
 
 import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+
+type Issue = RestEndpointMethodTypes["issues"]["listForRepo"]["response"]["data"][number];
 
 async function main() {
   try {
@@ -41,7 +43,7 @@ async function main() {
         client.rest.issues.listForRepo,
         params
       )) {
-        existingIssue = response.data.find((issue) => issue.title === title);
+        existingIssue = response.data.find((issue: Issue) => issue.title === title);
         if (existingIssue) {
           break;
         }
