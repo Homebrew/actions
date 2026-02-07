@@ -1,0 +1,110 @@
+name: Cache Homebrew Prefix
+description: Cache Homebrew prefix and install formulae.
+inputs:
+  install:
+    description: Arguments passed to `brew install --formula`.
+    required: true
+outputs:
+  prefix:
+    description: Homebrew prefix path.
+    value: ${{ steps.prefix.outputs.path }}
+  cache-key:
+    description: Cache key derived from formula list.
+    value: ${{ steps.cache-key.outputs.key }}
+runs:
+  using: composite
+  steps:
+    - name: Ensure Homebrew is empty
+      run: |
+        installed_formulae="$(brew list --formula 2>/dev/null || true)"
+        installed_casks="$(brew list --cask 2>/dev/null || true)"
+        installed="$(printf '%s\n%s' "${installed_formulae}" "${installed_casks}" | sed '/^$/d')"
+        if [[ -n "${installed}" ]]; then
+          echo "::error::Homebrew already has packages installed. Ensure no packages installed before this action." >&2
+          echo "${installed}" >&2
+          exit 1
+        fi
+      shell: /bin/bash -euo pipefail {0}
+
+    - name: Resolve Homebrew prefix
+      id: prefix
+      run: echo "path=$(brew --prefix)" >> "${GITHUB_OUTPUT}"
+      shell: /bin/bash -euo pipefail {0}
+
+    - name: Compute cache key prefix
+      id: cache-prefix
+      run: |
+        cache_key_prefix="${RUNNER_OS}"
+        arch="$(uname -m)"
+        if [[ "${RUNNER_OS}" = "macOS" ]]; then
+          macos_full_version="$(sw_vers -productVersion)"
+          macos_version="${macos_full_version%%.*}"
+          cache_key_prefix="macos-${macos_version}-${arch}"
+        elif [[ "${RUNNER_OS}" = "Linux" ]]; then
+          if [[ -r /etc/os-release ]]; then
+            . /etc/os-release
+            os_id="${ID:-linux}"
+            os_version="${VERSION_ID:-unknown}"
+          else
+            os_id="linux"
+            os_version="unknown"
+          fi
+          cache_key_prefix="${os_id}-${os_version}-${arch}"
+        else
+          cache_key_prefix="${RUNNER_OS}-${arch}"
+        fi
+        echo "prefix=${cache_key_prefix}" >> "${GITHUB_OUTPUT}"
+      shell: /bin/bash -euo pipefail {0}
+
+    - name: Restore Homebrew prefix cache
+      id: cache-restore
+      uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ${{ steps.prefix.outputs.path }}
+        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-restore
+        restore-keys: |
+          homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-
+
+    - name: Install Homebrew packages
+      run: |
+        read -r -a raw_args <<< "${INSTALL}"
+        args=()
+        for token in "${raw_args[@]}"; do
+          if [[ "${token}" = -* ]]; then
+            echo "Options are not allowed in install list: ${token}" >&2
+            exit 1
+          fi
+          if [[ ! "${token}" =~ ^[A-Za-z0-9._/@-]+$ ]]; then
+            echo "Invalid package name: ${token}" >&2
+            exit 1
+          fi
+          args+=("${token}")
+        done
+        if [[ "${#args[@]}" -eq 0 ]]; then
+          echo "No packages provided to brew install." >&2
+          exit 1
+        fi
+        brew install --formula "${args[@]}"
+      shell: /bin/bash -euo pipefail {0}
+      env:
+        INSTALL: ${{ inputs.install }}
+
+    - name: Compute Homebrew cache key
+      id: cache-key
+      run: |
+        brew list --formula --versions | sort > "${RUNNER_TEMP}/brew-list.txt"
+
+        if command -v shasum >/dev/null 2>&1; then
+          hash_cmd=(shasum -a 256)
+        else
+          hash_cmd=(sha256sum)
+        fi
+        key="$("${hash_cmd[@]}" "${RUNNER_TEMP}/brew-list.txt" | awk '{print $1}')"
+        echo "key=${key}" >> "${GITHUB_OUTPUT}"
+      shell: /bin/bash -euo pipefail {0}
+
+    - name: Save Homebrew prefix cache
+      uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ${{ steps.prefix.outputs.path }}
+        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
