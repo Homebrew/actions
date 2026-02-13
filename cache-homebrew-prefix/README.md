@@ -10,12 +10,26 @@ A composite action that caches the Homebrew prefix, installs formulae via
   uses: Homebrew/actions/cache-homebrew-prefix@main
   with:
     install: wget jq
+    uninstall: true
+```
+
+```yaml
+- name: Cache Homebrew prefix from Brewfile
+  uses: Homebrew/actions/cache-homebrew-prefix@main
+  with:
+    brewfile: true
+    uninstall: true
 ```
 
 ## Inputs
 
-- `install` (required): Formula names passed to `brew install --formula`.
+- `install` (optional): Formula names passed to `brew install --formula`.
   Tokens are split on whitespace and must match `^[A-Za-z0-9._/@-]+$`.
+- `brewfile` (optional): Install formulae from `./Brewfile` instead of
+  `install` using `brew bundle --file Brewfile --no-upgrade`. Default: `false`.
+- `uninstall` (optional): When `true`, existing formulae are automatically
+  removed before install. Default: `false`.
+- Validation: Either `install` or `brewfile` must be provided (but not both).
 
 ## Outputs
 
@@ -24,7 +38,11 @@ A composite action that caches the Homebrew prefix, installs formulae via
 
 ## Notes
 
-- The action fails early if any formulae or casks are already installed.
-  Ensure the runner has an empty Homebrew before running this action.
+- The action only checks existing formulae (not casks).
+- If formulae are already installed and `uninstall` is `false`, the action
+  fails early.
+- If `uninstall` is `true`, existing formulae are cleaned up with
+  `brew test-bot --only-cleanup-before` before install.
+- `brewfile` and `install` are mutually exclusive.
 - Cache keys are based on `brew list --formula --versions` and are scoped by
   OS version and architecture.
