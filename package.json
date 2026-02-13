@@ -4,18 +4,18 @@
     "test": "node --test --import ./spec-helper.mts --test-reporter ./test-reporter.mts --test-reporter-destination stdout"
   },
   "dependencies": {
-    "@actions/core": "^2.0.2",
-    "@actions/exec": "^2.0.0",
-    "@actions/github": "^7.0.0",
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/github": "^9.0.0",
     "esm-reload": "^1.0.1",
     "js-yaml": "^4.1.0",
     "@octokit/graphql-schema": "^15.26.1"
   },
   "devDependencies": {
-    "@tsconfig/node-ts": "^23.6.2",
+    "@tsconfig/node-ts": "^23.6.3",
     "@tsconfig/node24": "^24.0.4",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.10.9",
+    "@types/node": "^24.10.11",
     "typescript": "^5.9.3"
   }
 }
