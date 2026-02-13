@@ -5,8 +5,16 @@ branding:
   icon: box
   color: red
 inputs:
+  setup-homebrew:
+    description: Run `Homebrew/actions/setup-homebrew` before setting up Ruby
+    required: false
+    default: false
   portable-ruby:
     description: Use Homebrew portable Ruby (brew ruby) instead of the Ruby formula
+    required: false
+    default: false
+  bundler-cache:
+    description: Cache gems and run `bundle install` only when needed
     required: false
     default: false
   debug:
@@ -26,6 +34,12 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Set up Homebrew
+      if: inputs.setup-homebrew == 'true'
+      uses: Homebrew/actions/setup-homebrew@main
+      with:
+        debug: ${{ inputs.debug }}
+
     - name: Set up Ruby
       id: setup
       shell: /bin/bash -euo pipefail {0}
@@ -43,7 +57,7 @@ runs:
         fi
 
         if ! command -v brew >/dev/null; then
-          echo "::error::Homebrew is required. Use Homebrew/actions/setup-homebrew before this action."
+          echo "::error::Homebrew is required. Use Homebrew/actions/setup-homebrew before this action, or set setup-homebrew: true."
           exit 1
         fi
 
@@ -82,3 +96,57 @@ runs:
 
         ruby_prefix="$(dirname "${ruby_bin}")"
         echo "ruby-prefix=${ruby_prefix}" >> "${GITHUB_OUTPUT}"
+
+    - name: Configure Bundler cache
+      if: inputs.bundler-cache == 'true'
+      id: bundler-cache-config
+      shell: /bin/bash -euo pipefail {0}
+      env:
+        PORTABLE_RUBY: ${{ inputs.portable-ruby }}
+        RUBY_VERSION: ${{ steps.setup.outputs.ruby-version }}
+        RUBY_PREFIX: ${{ steps.setup.outputs.ruby-prefix }}
+      run: |
+        if [[ ! -f "Gemfile" ]]; then
+          echo "::error::bundler-cache requires a Gemfile in the current working directory."
+          exit 1
+        fi
+
+        hash_source="Gemfile"
+        if [[ -f "Gemfile.lock" ]]; then
+          hash_source="Gemfile.lock"
+        fi
+
+        if command -v sha256sum >/dev/null 2>&1; then
+          source_hash="$(sha256sum "${hash_source}" | awk '{print $1}')"
+          ruby_prefix_hash="$(printf '%s' "${RUBY_PREFIX}" | sha256sum | awk '{print $1}')"
+        else
+          source_hash="$(shasum -a 256 "${hash_source}" | awk '{print $1}')"
+          ruby_prefix_hash="$(printf '%s' "${RUBY_PREFIX}" | shasum -a 256 | awk '{print $1}')"
+        fi
+
+        bundle_path="${GITHUB_WORKSPACE}/vendor/bundle"
+        cache_prefix="setup-ruby-${RUNNER_OS}-${RUNNER_ARCH}-${RUBY_VERSION}-${PORTABLE_RUBY}-${ruby_prefix_hash}"
+
+        echo "bundle-path=${bundle_path}" >> "${GITHUB_OUTPUT}"
+        echo "cache-key=${cache_prefix}-${source_hash}" >> "${GITHUB_OUTPUT}"
+        echo "restore-key=${cache_prefix}-" >> "${GITHUB_OUTPUT}"
+
+    - name: Cache Bundler gems
+      if: inputs.bundler-cache == 'true'
+      id: bundler-cache
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: ${{ steps.bundler-cache-config.outputs.bundle-path }}
+        key: ${{ steps.bundler-cache-config.outputs.cache-key }}
+        restore-keys: ${{ steps.bundler-cache-config.outputs.restore-key }}
+
+    - name: Install Bundler gems
+      if: inputs.bundler-cache == 'true'
+      shell: /bin/bash -euo pipefail {0}
+      env:
+        BUNDLE_PATH: ${{ steps.bundler-cache-config.outputs.bundle-path }}
+      run: |
+        bundle config set --local path "${BUNDLE_PATH}"
+        if ! bundle check; then
+          bundle install --jobs 4 --retry 3
+        fi
