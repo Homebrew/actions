@@ -11,7 +11,7 @@ on:
 permissions: {}
 
 jobs:
-  cache-homebrew-prefix:
+  cache-homebrew-prefix-install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,26 +22,71 @@ jobs:
       - name: Set up Homebrew
         uses: ./setup-homebrew/
 
-      - name: Ensure empty Homebrew
+      - name: Ensure empty Homebrew formulae
         run: |
           formulae="$(brew list --formula || true)"
           if [[ -n "${formulae}" ]]; then
             brew uninstall --force --ignore-dependencies ${formulae}
           fi
-
-          casks="$(brew list --cask 2>/dev/null || true)"
-          if [[ -n "${casks}" ]]; then
-            brew uninstall --cask --force ${casks}
-          fi
         shell: /bin/bash -euo pipefail {0}
 
-      - name: Cache Homebrew prefix
+      - name: Install pre-existing formula
+        run: brew install --formula hello
+        shell: /bin/bash -euo pipefail {0}
+
+      - name: Cache Homebrew prefix with uninstall
         uses: ./cache-homebrew-prefix/
         with:
           install: wget jq
+          uninstall: true
 
       - name: Verify installs
         run: |
+          ! brew list --formula hello >/dev/null 2>&1
+          brew list --versions wget
+          brew list --versions jq
+        shell: /bin/bash -euo pipefail {0}
+
+  cache-homebrew-prefix-brewfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        uses: ./setup-homebrew/
+
+      - name: Ensure empty Homebrew formulae
+        run: |
+          formulae="$(brew list --formula || true)"
+          if [[ -n "${formulae}" ]]; then
+            brew uninstall --force --ignore-dependencies ${formulae}
+          fi
+        shell: /bin/bash -euo pipefail {0}
+
+      - name: Install pre-existing formula
+        run: brew install --formula hello
+        shell: /bin/bash -euo pipefail {0}
+
+      - name: Create Brewfile
+        run: |
+          cat > Brewfile <<'EOF'
+          brew "wget"
+          brew "jq"
+          EOF
+        shell: /bin/bash -euo pipefail {0}
+
+      - name: Cache Homebrew prefix from Brewfile with uninstall
+        uses: ./cache-homebrew-prefix/
+        with:
+          brewfile: true
+          uninstall: true
+
+      - name: Verify installs
+        run: |
+          ! brew list --formula hello >/dev/null 2>&1
           brew list --versions wget
           brew list --versions jq
         shell: /bin/bash -euo pipefail {0}

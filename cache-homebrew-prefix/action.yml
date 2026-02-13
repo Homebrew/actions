@@ -2,8 +2,17 @@ name: Cache Homebrew Prefix
 description: Cache Homebrew prefix and install formulae.
 inputs:
   install:
-    description: Arguments passed to `brew install --formula`.
-    required: true
+    description: Formula names passed to `brew install --formula`.
+    required: false
+    default: ""
+  brewfile:
+    description: Install formulae from `./Brewfile` instead of `install`.
+    required: false
+    default: "false"
+  uninstall:
+    description: Automatically uninstall existing formulae before installing.
+    required: false
+    default: "false"
 outputs:
   prefix:
     description: Homebrew prefix path.
@@ -14,17 +23,30 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Ensure Homebrew is empty
+    - name: Handle existing Homebrew formulae
       run: |
         installed_formulae="$(brew list --formula 2>/dev/null || true)"
-        installed_casks="$(brew list --cask 2>/dev/null || true)"
-        installed="$(printf '%s\n%s' "${installed_formulae}" "${installed_casks}" | sed '/^$/d')"
-        if [[ -n "${installed}" ]]; then
-          echo "::error::Homebrew already has packages installed. Ensure no packages installed before this action." >&2
-          echo "${installed}" >&2
+        if [[ -z "${installed_formulae}" ]]; then
+          exit 0
+        fi
+
+        if [[ "${UNINSTALL}" != "true" ]]; then
+          echo "::error::Homebrew already has formulae installed. Set with.uninstall=true to remove them automatically." >&2
+          echo "${installed_formulae}" >&2
+          exit 1
+        fi
+
+        brew test-bot --only-cleanup-before
+
+        remaining_formulae="$(brew list --formula 2>/dev/null || true)"
+        if [[ -n "${remaining_formulae}" ]]; then
+          echo "::error::brew test-bot cleanup did not remove all formulae." >&2
+          echo "${remaining_formulae}" >&2
           exit 1
         fi
       shell: /bin/bash -euo pipefail {0}
+      env:
+        UNINSTALL: ${{ inputs.uninstall }}
 
     - name: Resolve Homebrew prefix
       id: prefix
@@ -65,11 +87,25 @@ runs:
         restore-keys: |
           homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-
 
-    - name: Install Homebrew packages
+    - name: Install Homebrew formulae
       run: |
-        read -r -a raw_args <<< "${INSTALL}"
+        if [[ "${BREWFILE}" = "true" ]]; then
+          if [[ -n "${INSTALL//[[:space:]]/}" ]]; then
+            echo "Cannot use both brewfile=true and install input." >&2
+            exit 1
+          fi
+          if [[ ! -f Brewfile ]]; then
+            echo "Brewfile not found in current directory." >&2
+            exit 1
+          fi
+          brew bundle --file Brewfile --no-upgrade
+          exit 0
+        else
+          raw_args="${INSTALL}"
+        fi
+
         args=()
-        for token in "${raw_args[@]}"; do
+        for token in ${raw_args}; do
           if [[ "${token}" = -* ]]; then
             echo "Options are not allowed in install list: ${token}" >&2
             exit 1
@@ -88,6 +124,7 @@ runs:
       shell: /bin/bash -euo pipefail {0}
       env:
         INSTALL: ${{ inputs.install }}
+        BREWFILE: ${{ inputs.brewfile }}
 
     - name: Compute Homebrew cache key
       id: cache-key
