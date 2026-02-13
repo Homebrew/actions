@@ -22,11 +22,17 @@ jobs:
           - os: macos-latest
             name: macOS (portable)
             portable: true
-          - os: ubuntu-22.04
-            name: Ubuntu (22.04, formula)
+          - os: ubuntu-latest
+            name: Ubuntu (latest, formula)
             portable: false
-          - os: ubuntu-22.04
-            name: Ubuntu (22.04, portable)
+          - os: ubuntu-latest
+            name: Ubuntu (latest, portable)
+            portable: true
+          - os: ubuntu-slim
+            name: Ubuntu (slim, formula)
+            portable: false
+          - os: ubuntu-slim
+            name: Ubuntu (slim, portable)
             portable: true
     runs-on: ${{ matrix.os }}
     name: Setup Ruby on ${{ matrix.name }}
