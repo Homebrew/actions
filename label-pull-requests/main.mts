@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
-import core from "@actions/core"
-import github from "@actions/github"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
 import fs from "fs"
 import yaml from "js-yaml"
 

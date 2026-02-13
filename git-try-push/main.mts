@@ -1,5 +1,5 @@
-import core from "@actions/core"
-import exec from "@actions/exec"
+import * as core from "@actions/core"
+import { exec } from "@actions/exec"
 
 async function main() {
     try {
@@ -41,7 +41,7 @@ async function main() {
         if (token) {
             const credentials = Buffer.from(`x-access-token:${token}`, 'utf8').toString('base64')
             core.setSecret(credentials)
-            await exec.exec(git, ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
+            await exec(git, ["config", "--local", "http.https://github.com/.extraheader", `AUTHORIZATION: basic ${credentials}`])
         }
 
         // Exit if number of tries is zero
@@ -50,7 +50,7 @@ async function main() {
         }
 
         // Checkout the branch which should be pushed.
-        await exec.exec(git, ["checkout", branch])
+        await exec(git, ["checkout", branch])
 
         // Loop specified number of tries.
         for (let i = 0; i < tries; i++) {
@@ -61,23 +61,23 @@ async function main() {
                 // If force pushing without lease, force push the first time since we've
                 // already decided we don't care about having outdated refs.
                 if (force && ((i > 0) || no_lease))
-                    await exec.exec(git, ["push", force_flag, remote, refspec])
+                    await exec(git, ["push", force_flag, remote, refspec])
                 else
-                    await exec.exec(git, ["push", remote, refspec])
-                await exec.exec(git, ["checkout", "-"])
+                    await exec(git, ["push", remote, refspec])
+                await exec(git, ["checkout", "-"])
                 return
             } catch (error) {
                 // Push failed. Wait some time (with an exponential backoff), pull changes with rebasing
                 // and try again.
                 const delay = 2 ** i
-                await exec.exec("sleep", [delay.toString()])
+                await exec("sleep", [delay.toString()])
                 // `git pull` can also fail, so do the same retry procedure here.
                 for (let j = 0; j < tries; j++) {
                     try {
-                        await exec.exec(git, ["pull", "--rebase", "--autostash", remote, origin_branch])
+                        await exec(git, ["pull", "--rebase", "--autostash", remote, origin_branch])
                         break
                     } catch (error) {
-                        await exec.exec("sleep", [delay.toString()])
+                        await exec("sleep", [delay.toString()])
                     }
                 }
             }

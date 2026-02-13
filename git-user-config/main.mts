@@ -1,6 +1,6 @@
-import core from "@actions/core"
-import github from "@actions/github"
-import exec from "@actions/exec"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
+import { exec } from "@actions/exec"
 
 async function main() {
     try {
@@ -18,8 +18,8 @@ async function main() {
         core.setOutput("name", name)
         core.setOutput("email", email)
 
-        await exec.exec("git", ["config", "--global", "user.name", name])
-        await exec.exec("git", ["config", "--global", "user.email", email])
+        await exec("git", ["config", "--global", "user.name", name])
+        await exec("git", ["config", "--global", "user.email", email])
     } catch (error) {
         if (!Error.isError(error)) throw error
 
