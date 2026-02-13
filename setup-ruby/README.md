@@ -44,6 +44,16 @@ Enable Bundler cache:
     bundler-cache: true
 ```
 
+Run from a specific subdirectory:
+
+```yaml
+- name: Set up Ruby from subdirectory
+  uses: Homebrew/actions/setup-ruby@main
+  with:
+    setup-homebrew: true
+    working-directory: path/to/project
+```
+
 ## Outputs
 
 - `ruby-path`: Path to the Ruby executable.
@@ -61,3 +71,4 @@ Enable Bundler cache:
   - Requires `Gemfile` in the current working directory.
   - Uses `Gemfile.lock` for cache hashing when present, otherwise falls back to `Gemfile`.
   - Includes Ruby version and Ruby prefix in cache key derivation.
+- `working-directory` defaults to `.` and is used for Ruby setup, Gemfile discovery, and Bundler commands.

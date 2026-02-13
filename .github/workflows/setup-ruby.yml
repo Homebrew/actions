@@ -72,6 +72,11 @@ jobs:
             test "${RUBY_PREFIX}" = "$(brew --prefix ruby)"
           fi
 
+      - name: Set up Ruby from subdirectory
+        uses: ./setup-ruby/
+        with:
+          working-directory: setup-ruby
+
   bundler-cache:
     strategy:
       fail-fast: false

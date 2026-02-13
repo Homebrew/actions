@@ -17,6 +17,10 @@ inputs:
     description: Cache gems and run `bundle install` only when needed
     required: false
     default: false
+  working-directory:
+    description: Working directory to run this action in
+    required: false
+    default: .
   debug:
     description: Show debugging output
     required: false
@@ -43,6 +47,7 @@ runs:
     - name: Set up Ruby
       id: setup
       shell: /bin/bash -euo pipefail {0}
+      working-directory: ${{ inputs.working-directory }}
       env:
         PORTABLE_RUBY: ${{ inputs.portable-ruby }}
         DEBUG: ${{ inputs.debug }}
@@ -101,6 +106,7 @@ runs:
       if: inputs.bundler-cache == 'true'
       id: bundler-cache-config
       shell: /bin/bash -euo pipefail {0}
+      working-directory: ${{ inputs.working-directory }}
       env:
         PORTABLE_RUBY: ${{ inputs.portable-ruby }}
         RUBY_VERSION: ${{ steps.setup.outputs.ruby-version }}
@@ -124,7 +130,7 @@ runs:
           ruby_prefix_hash="$(printf '%s' "${RUBY_PREFIX}" | shasum -a 256 | awk '{print $1}')"
         fi
 
-        bundle_path="${GITHUB_WORKSPACE}/vendor/bundle"
+        bundle_path="$(pwd)/vendor/bundle"
         cache_prefix="setup-ruby-${RUNNER_OS}-${RUNNER_ARCH}-${RUBY_VERSION}-${PORTABLE_RUBY}-${ruby_prefix_hash}"
 
         echo "bundle-path=${bundle_path}" >> "${GITHUB_OUTPUT}"
@@ -143,6 +149,7 @@ runs:
     - name: Install Bundler gems
       if: inputs.bundler-cache == 'true'
       shell: /bin/bash -euo pipefail {0}
+      working-directory: ${{ inputs.working-directory }}
       env:
         BUNDLE_PATH: ${{ steps.bundler-cache-config.outputs.bundle-path }}
       run: |
