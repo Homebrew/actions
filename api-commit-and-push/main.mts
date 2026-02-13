@@ -1,6 +1,6 @@
-import core from "@actions/core"
-import exec from "@actions/exec"
-import github from "@actions/github"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
+import { getExecOutput } from "@actions/exec"
 import fs from "node:fs/promises"
 import path from "node:path"
 
@@ -14,15 +14,15 @@ async function main() {
   const [owner, repo] = core.getInput("repository").split("/")
 
   const files = (
-    await exec.getExecOutput("git", ["-C", directory, "diff", "--no-ext-diff", "--cached", "--name-only", "-z"], { silent: true })
+    await getExecOutput("git", ["-C", directory, "diff", "--no-ext-diff", "--cached", "--name-only", "-z"], { silent: true })
   ).stdout.split("\0").filter(file => file.length !== 0)
   if (files.length === 0) {
     core.setFailed("No files to commit")
     return
   }
 
-  const headCommitSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD"], { silent: true })).stdout.trim()
-  const headTreeSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD:"], { silent: true })).stdout.trim()
+  const headCommitSha = (await getExecOutput("git", ["-C", directory, "rev-parse", "HEAD"], { silent: true })).stdout.trim()
+  const headTreeSha = (await getExecOutput("git", ["-C", directory, "rev-parse", "HEAD:"], { silent: true })).stdout.trim()
 
   const tree: Record<string, RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"][number]> = {}
   for (const file of files) {

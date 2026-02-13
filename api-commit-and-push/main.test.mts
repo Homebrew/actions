@@ -1,4 +1,4 @@
-import exec from "@actions/exec"
+import { exec, getExecOutput } from "@actions/exec"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
@@ -25,20 +25,20 @@ describe("api-commit-and-push", async () => {
     console.log(directory)
 
     // Setup test repository
-    await exec.exec("git", ["-C", directory, "init"])
-    await exec.exec("git", ["-C", directory, "config", "user.name", "github-actions[bot]"])
-    await exec.exec("git", ["-C", directory, "config", "user.email", "github-actions[bot]@users.noreply.github.com"])
+    await exec("git", ["-C", directory, "init"])
+    await exec("git", ["-C", directory, "config", "user.name", "github-actions[bot]"])
+    await exec("git", ["-C", directory, "config", "user.email", "github-actions[bot]@users.noreply.github.com"])
     await fs.promises.mkdir(path.join(directory, "somedir"))
     await fs.promises.writeFile(path.join(directory, "somedir", "somefile.rb"), "test file 1")
     await fs.promises.writeFile(path.join(directory, removedFile), "test file 2")
-    await exec.exec("git", ["-C", directory, "add", "-A"])
-    await exec.exec("git", ["-C", directory, "commit", "--no-gpg-sign", "-m", "Initial commit"])
+    await exec("git", ["-C", directory, "add", "-A"])
+    await exec("git", ["-C", directory, "commit", "--no-gpg-sign", "-m", "Initial commit"])
     await fs.promises.unlink(path.join(directory, removedFile))
     await fs.promises.mkdir(path.join(directory, path.dirname(addedFile)), { recursive: true })
     await fs.promises.writeFile(path.join(directory, addedFile), "test file 3")
-    await exec.exec("git", ["-C", directory, "add", "-A"])
-    baseCommitSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD"])).stdout.trim()
-    baseTreeSha = (await exec.getExecOutput("git", ["-C", directory, "rev-parse", "HEAD:"])).stdout.trim()
+    await exec("git", ["-C", directory, "add", "-A"])
+    baseCommitSha = (await getExecOutput("git", ["-C", directory, "rev-parse", "HEAD"])).stdout.trim()
+    baseTreeSha = (await getExecOutput("git", ["-C", directory, "rev-parse", "HEAD:"])).stdout.trim()
   })
 
   after(async () => {
@@ -149,7 +149,7 @@ describe("api-commit-and-push", async () => {
   })
 
   it("aborts if no changes are found", async () => {
-    await exec.exec("git", ["-C", directory, "reset"])
+    await exec("git", ["-C", directory, "reset"])
 
     await assert.rejects(loadMain, { message: "No files to commit" })
   })

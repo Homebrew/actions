@@ -1,12 +1,33 @@
 /* node:coverage disable */
 import assert from "node:assert/strict"
-import { executionAsyncId } from "node:async_hooks"
-import { createRequire } from "node:module"
+import { registerHooks } from 'node:module';
 import path from "node:path"
 import { test, before, after, beforeEach, afterEach, describe, it, type TestContext } from "node:test"
 import { MockAgent, setGlobalDispatcher, type Interceptable } from "undici"
-import core from "@actions/core"
-import "esm-reload"
+
+// Hook imports to allow cache isolation
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    const instanceMatch = specifier.match(/^instance(\d+):\/\//)
+    const instanceID = instanceMatch ? instanceMatch[1] : null
+    const strippedSpecifier = instanceMatch ? specifier.substring(instanceMatch[0].length) : specifier
+
+    const resolved = nextResolve(strippedSpecifier, context)
+    if (!resolved.url.startsWith("file://")) {
+      return resolved
+    }
+
+    const parentKey = context.parentURL ? new URL(context.parentURL).searchParams.get("instance") : null;
+    if (!instanceID && !parentKey) {
+      return resolved
+    }
+
+    const resolvedURL = new URL(resolved.url)
+    resolvedURL.searchParams.set("instance", instanceID || parentKey!)
+    resolved.url = resolvedURL.toString()
+    return resolved
+  }
+})
 
 type Test = typeof test
 type Before = typeof before
@@ -26,6 +47,7 @@ declare global {
   var it: It
   var assert: Assert
   var mockAgent: MockAgent
+  var testID: number
 
   function mockInput(input: string, value: string): void
   function githubMockPool<TInterceptable extends Interceptable>(): TInterceptable
@@ -54,7 +76,7 @@ globalThis.loadMain = async function() {
     throw new Error("Could not detect test file.")
   }
   const mainFile = testFile.substring(0, testFile.length - 9) + path.extname(testFile)
-  await import(`${mainFile}?instance=${executionAsyncId()}`)
+  await import(`instance${globalThis.testID}://${mainFile}`)
 }
 
 // Don't inherit CI environment variables
@@ -71,23 +93,26 @@ process.env.GITHUB_REPOSITORY = GITHUB_REPOSITORY
 process.env.GITHUB_REPOSITORY_OWNER = GITHUB_REPOSITORY.split("/", 1)[0]
 
 const originalEnv = process.env
-const require = createRequire(import.meta.url)
-beforeEach((t) => {
+beforeEach(async (t) => {
   process.env = structuredClone(originalEnv)
-
-  delete require.cache[require.resolve("@actions/github")]
 
   const agent = new MockAgent()
   agent.disableNetConnect()
   setGlobalDispatcher(agent)
-  globalThis.mockAgent = agent;
+  globalThis.mockAgent = agent
+  globalThis.testID = (globalThis.testID || 0) + 1;
 
   // Make core.setFailed raise an error rather than print to stdout
-  (t as TestContext).mock.method(core, "setFailed", (error: string | Error) => {
-    if (typeof error === "string") {
-      throw new Error(error)
-    } else {
-      throw error
+  (t as TestContext).mock.module(`instance${globalThis.testID}://@actions/core`, {
+    namedExports: {
+      ...await import(`instance${globalThis.testID}://@actions/core`),
+      setFailed(error: string | Error) {
+        if (typeof error === "string") {
+          throw new Error(error)
+        } else {
+          throw error
+        }
+      }
     }
   })
 })
