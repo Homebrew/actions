@@ -1,0 +1,47 @@
+name: Cache Homebrew Prefix
+
+on:
+  pull_request:
+    paths:
+      - "**cache-homebrew-prefix**"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+permissions: {}
+
+jobs:
+  cache-homebrew-prefix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        uses: ./setup-homebrew/
+
+      - name: Ensure empty Homebrew
+        run: |
+          formulae="$(brew list --formula || true)"
+          if [[ -n "${formulae}" ]]; then
+            brew uninstall --force --ignore-dependencies ${formulae}
+          fi
+
+          casks="$(brew list --cask 2>/dev/null || true)"
+          if [[ -n "${casks}" ]]; then
+            brew uninstall --cask --force ${casks}
+          fi
+        shell: /bin/bash -euo pipefail {0}
+
+      - name: Cache Homebrew prefix
+        uses: ./cache-homebrew-prefix/
+        with:
+          install: wget jq
+
+      - name: Verify installs
+        run: |
+          brew list --versions wget
+          brew list --versions jq
+        shell: /bin/bash -euo pipefail {0}
