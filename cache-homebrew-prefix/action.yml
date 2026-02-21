@@ -83,8 +83,11 @@ runs:
       run: |
         brew_repo="$(brew --repository)"
         if [[ -d "${brew_repo}/.git" ]]; then
-          echo "sha=$(git -C "${brew_repo}" rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
-          echo "repo=${brew_repo}" >> "${GITHUB_OUTPUT}"
+          sha="$(git -C "${brew_repo}" rev-parse HEAD 2>/dev/null || true)"
+          if [[ -n "${sha}" ]]; then
+            echo "sha=${sha}" >> "${GITHUB_OUTPUT}"
+            echo "repo=${brew_repo}" >> "${GITHUB_OUTPUT}"
+          fi
         fi
       shell: /bin/bash -euo pipefail {0}
 
