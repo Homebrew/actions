@@ -100,14 +100,15 @@ runs:
     - name: Restore Homebrew repository git state
       if: steps.save-git-head.outputs.sha != ''
       run: |
-        brew_repo="${{ steps.save-git-head.outputs.repo }}"
-        saved_sha="${{ steps.save-git-head.outputs.sha }}"
-        current_sha="$(git -C "${brew_repo}" rev-parse HEAD 2>/dev/null || true)"
-        if [[ "${current_sha}" != "${saved_sha}" ]]; then
-          git -C "${brew_repo}" fetch origin "${saved_sha}"
-          git -C "${brew_repo}" checkout --force "${saved_sha}"
+        current_sha="$(git -C "${BREW_REPO}" rev-parse HEAD 2>/dev/null || true)"
+        if [[ "${current_sha}" != "${SAVED_SHA}" ]]; then
+          git -C "${BREW_REPO}" fetch origin "${SAVED_SHA}"
+          git -C "${BREW_REPO}" checkout --force "${SAVED_SHA}"
         fi
       shell: /bin/bash -euo pipefail {0}
+      env:
+        BREW_REPO: ${{ steps.save-git-head.outputs.repo }}
+        SAVED_SHA: ${{ steps.save-git-head.outputs.sha }}
 
     - name: Install Homebrew formulae
       run: |
