@@ -26,7 +26,9 @@ A composite action that caches the Homebrew prefix, installs formulae via
 - `install` (optional): Formula names passed to `brew install --formula`.
   Tokens are split on whitespace and must match `^[A-Za-z0-9._/@-]+$`.
 - `brewfile` (optional): Install formulae from `./Brewfile` instead of
-  `install` using `brew bundle --file Brewfile --no-upgrade`. Default: `false`.
+  `install`. Runs `brew bundle check --file Brewfile` first and only runs
+  `brew bundle --file Brewfile --no-upgrade` if dependencies are missing.
+  Default: `false`.
 - `uninstall` (optional): When `true`, existing formulae are automatically
   removed before install. Default: `false`.
 - Validation: Either `install` or `brewfile` must be provided (but not both).
