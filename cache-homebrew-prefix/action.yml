@@ -36,7 +36,8 @@ runs:
           exit 1
         fi
 
-        brew test-bot --only-cleanup-before
+        # Set HOMEBREW_DEVELOPER to prevent developer mode from being enabled.
+        HOMEBREW_DEVELOPER=1 brew test-bot --only-cleanup-before
 
         remaining_formulae="$(brew list --formula 2>/dev/null || true)"
         if [[ -n "${remaining_formulae}" ]]; then
