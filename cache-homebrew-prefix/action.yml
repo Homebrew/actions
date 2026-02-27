@@ -125,7 +125,11 @@ runs:
             echo "Brewfile not found in current directory." >&2
             exit 1
           fi
-          brew bundle --file Brewfile --no-upgrade
+          if brew bundle check --file Brewfile; then
+            echo "Brewfile dependencies are already installed."
+          else
+            brew bundle --file Brewfile --no-upgrade
+          fi
           exit 0
         else
           raw_args="${INSTALL}"
