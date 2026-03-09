@@ -35,10 +35,23 @@ jobs:
         shell: /bin/bash -euo pipefail {0}
 
       - name: Cache Homebrew prefix with uninstall
+        id: cache-homebrew-prefix-install
         uses: ./cache-homebrew-prefix/
         with:
           install: wget jq
           uninstall: true
+          workflow-key: test
+
+      - name: Verify cache metadata
+        run: |
+          . /etc/os-release
+          expected_prefix="${ID}-${VERSION_ID}-$(uname -m)-test"
+          test "${CACHE_PREFIX}" = "${expected_prefix}"
+          test -n "${CACHE_KEY}"
+        shell: /bin/bash -euo pipefail {0}
+        env:
+          CACHE_PREFIX: ${{ steps.cache-homebrew-prefix-install.outputs.cache-prefix }}
+          CACHE_KEY: ${{ steps.cache-homebrew-prefix-install.outputs.cache-key }}
 
       - name: Verify installs
         run: |
@@ -79,10 +92,23 @@ jobs:
         shell: /bin/bash -euo pipefail {0}
 
       - name: Cache Homebrew prefix from Brewfile with uninstall
+        id: cache-homebrew-prefix-brewfile
         uses: ./cache-homebrew-prefix/
         with:
           brewfile: true
           uninstall: true
+          workflow-key: brewfile-test
+
+      - name: Verify cache metadata
+        run: |
+          . /etc/os-release
+          expected_prefix="${ID}-${VERSION_ID}-$(uname -m)-brewfile-test"
+          test "${CACHE_PREFIX}" = "${expected_prefix}"
+          test -n "${CACHE_KEY}"
+        shell: /bin/bash -euo pipefail {0}
+        env:
+          CACHE_PREFIX: ${{ steps.cache-homebrew-prefix-brewfile.outputs.cache-prefix }}
+          CACHE_KEY: ${{ steps.cache-homebrew-prefix-brewfile.outputs.cache-key }}
 
       - name: Verify installs
         run: |
