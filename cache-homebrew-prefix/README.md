@@ -11,6 +11,7 @@ A composite action that caches the Homebrew prefix, installs formulae via
   with:
     install: wget jq
     uninstall: true
+    workflow-key: actionlint
 ```
 
 ```yaml
@@ -25,6 +26,10 @@ A composite action that caches the Homebrew prefix, installs formulae via
 
 - `install` (optional): Formula names passed to `brew install --formula`.
   Tokens are split on whitespace and must match `^[A-Za-z0-9._/@-]+$`.
+- `workflow-key` (optional): Stable namespace appended to the cache prefix so
+  multiple workflows in the same repository can keep separate caches. For
+  example, set `workflow-key: ${{ github.workflow }}` or a custom value like
+  `actionlint`. Characters outside `[A-Za-z0-9._-]` are normalized to `-`.
 - `brewfile` (optional): Install formulae from `./Brewfile` instead of
   `install`. Runs `brew bundle check --file Brewfile` first and only runs
   `brew bundle --file Brewfile --no-upgrade` if dependencies are missing.
@@ -36,6 +41,8 @@ A composite action that caches the Homebrew prefix, installs formulae via
 ## Outputs
 
 - `prefix`: Homebrew prefix path used for caching.
+- `cache-prefix`: The computed cache prefix, including OS, architecture, and
+  any `workflow-key`.
 - `cache-key`: The computed cache key hash.
 
 ## Notes
@@ -47,4 +54,6 @@ A composite action that caches the Homebrew prefix, installs formulae via
   `brew test-bot --only-cleanup-before` before install.
 - `brewfile` and `install` are mutually exclusive.
 - Cache keys are based on `brew list --formula --versions` and are scoped by
-  OS version and architecture.
+  OS version, architecture, and optional `workflow-key`.
+- The action restores the newest matching cache for the computed prefix, then
+  only saves when the final exact cache key does not already exist.

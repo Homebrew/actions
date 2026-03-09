@@ -5,6 +5,10 @@ inputs:
     description: Formula names passed to `brew install --formula`.
     required: false
     default: ""
+  workflow-key:
+    description: Stable namespace appended to the cache prefix to isolate caches between workflows.
+    required: false
+    default: ""
   brewfile:
     description: Install formulae from `./Brewfile` instead of `install`.
     required: false
@@ -17,6 +21,9 @@ outputs:
   prefix:
     description: Homebrew prefix path.
     value: ${{ steps.prefix.outputs.path }}
+  cache-prefix:
+    description: Cache key prefix derived from runner details and optional workflow key.
+    value: ${{ steps.cache-prefix.outputs.prefix }}
   cache-key:
     description: Cache key derived from formula list.
     value: ${{ steps.cache-key.outputs.key }}
@@ -76,8 +83,20 @@ runs:
         else
           cache_key_prefix="${RUNNER_OS}-${arch}"
         fi
+
+        if [[ -n "${WORKFLOW_KEY}" ]]; then
+          sanitized_workflow_key="$(printf '%s' "${WORKFLOW_KEY}" | tr '\r\n' '  ' | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//')"
+          if [[ -z "${sanitized_workflow_key}" ]]; then
+            echo "workflow-key must contain at least one letter, number, '.', '_' or '-'." >&2
+            exit 1
+          fi
+          cache_key_prefix="${cache_key_prefix}-${sanitized_workflow_key}"
+        fi
+
         echo "prefix=${cache_key_prefix}" >> "${GITHUB_OUTPUT}"
       shell: /bin/bash -euo pipefail {0}
+      env:
+        WORKFLOW_KEY: ${{ inputs.workflow-key }}
 
     - name: Save Homebrew repository git HEAD
       id: save-git-head
@@ -171,8 +190,16 @@ runs:
         echo "key=${key}" >> "${GITHUB_OUTPUT}"
       shell: /bin/bash -euo pipefail {0}
 
+    - name: Check for exact Homebrew cache
+      id: cache-lookup
+      uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ${{ steps.prefix.outputs.path }}
+        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
+        lookup-only: true
+
     - name: Save Homebrew prefix cache
-      if: steps.cache-restore.outputs.cache-matched-key != format('homebrew-prefix-{0}-{1}', steps.cache-prefix.outputs.prefix, steps.cache-key.outputs.key)
+      if: steps.cache-lookup.outputs.cache-hit != 'true'
       uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
       with:
         path: ${{ steps.prefix.outputs.path }}
