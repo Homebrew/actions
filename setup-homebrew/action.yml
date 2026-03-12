@@ -37,6 +37,7 @@ outputs:
   gems-hash:
     description: Homebrew's Ruby Gemfile.lock sha256sum
 runs:
+  # TODO: ask @Bo98 whether migration is complete before updating
   using: node20
   main: main.mjs
   post: post.mjs
