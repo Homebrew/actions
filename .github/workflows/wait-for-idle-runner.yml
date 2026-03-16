@@ -24,4 +24,4 @@ jobs:
           persist-credentials: false
 
       - name: Check scripts
-        run: node --check wait-for-idle-runner/main.js
+        run: node --check wait-for-idle-runner/main.mts

@@ -22,4 +22,4 @@ outputs:
     description: Runner is idle (true/false)
 runs:
   using: node24
-  main: main.js
+  main: main.mts
