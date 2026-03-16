@@ -1,5 +1,4 @@
 {
   "name": "wait-for-idle-runner",
-  "type": "module",
-  "main": "main.js"
+  "main": "main.mts"
 }

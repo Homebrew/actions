@@ -40,6 +40,8 @@ async function main() {
     core.setOutput("runner-idle", false)
 
   } catch (error) {
+    if (!Error.isError(error)) throw error
+
     core.setFailed(error.message)
   }
 }
