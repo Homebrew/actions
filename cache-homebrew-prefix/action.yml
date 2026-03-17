@@ -113,7 +113,7 @@ runs:
 
     - name: Restore Homebrew prefix cache
       id: cache-restore
-      uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.prefix.outputs.path }}
         key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-restore
@@ -192,7 +192,7 @@ runs:
 
     - name: Check for exact Homebrew cache
       id: cache-lookup
-      uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.prefix.outputs.path }}
         key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
@@ -200,7 +200,7 @@ runs:
 
     - name: Save Homebrew prefix cache
       if: steps.cache-lookup.outputs.cache-hit != 'true'
-      uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.prefix.outputs.path }}
         key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
