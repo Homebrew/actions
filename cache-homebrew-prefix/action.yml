@@ -25,8 +25,8 @@ outputs:
     description: Cache key prefix derived from runner details and optional workflow key.
     value: ${{ steps.cache-prefix.outputs.prefix }}
   cache-key:
-    description: Cache key derived from formula list.
-    value: ${{ steps.cache-key.outputs.key }}
+    description: Cache key derived from available formula versions.
+    value: ${{ steps.version-hash.outputs.hash }}
 runs:
   using: composite
   steps:
@@ -98,6 +98,70 @@ runs:
       env:
         WORKFLOW_KEY: ${{ inputs.workflow-key }}
 
+    - name: Compute available version hash
+      id: version-hash
+      run: |
+        packages=()
+        if [[ "${BREWFILE}" = "true" ]]; then
+          if [[ ! -f Brewfile ]]; then
+            echo "Brewfile not found in current directory." >&2
+            exit 1
+          fi
+          while read -r pkg; do
+            packages+=("${pkg}")
+          done < <(brew bundle list --brews --file Brewfile)
+        else
+          for pkg in ${INSTALL}; do
+            packages+=("${pkg}")
+          done
+        fi
+
+        if [[ "${#packages[@]}" -eq 0 ]]; then
+          echo "No packages to compute version hash." >&2
+          exit 1
+        fi
+
+        for pkg in "${packages[@]}"; do
+          if [[ "${pkg}" = */* ]]; then
+            echo "::error::Tapped formulae (${pkg}) are not supported by version hash lookup. PRs welcome." >&2
+            exit 1
+          fi
+        done
+
+        jws_file="$(brew --cache)/api/formula.jws.json"
+        if [[ ! -r "${jws_file}" ]]; then
+          echo "::error::Homebrew API cache not found at ${jws_file}. Run the setup-homebrew action before this one." >&2
+          exit 1
+        fi
+
+        pkg_json=$(printf ',"%s"' "${packages[@]}")
+        jq -r --argjson pkgs "[${pkg_json:1}]" \
+          '($pkgs | map({(.): true}) | add) as $lookup |
+          [.payload | fromjson | .[] | select($lookup[.name])] |
+          sort_by(.name) | .[] | "\(.name) \(.versions.stable) \(.revision)"' \
+          "${jws_file}" > "${RUNNER_TEMP}/brew-available-versions.txt"
+
+        found=$(wc -l < "${RUNNER_TEMP}/brew-available-versions.txt" | tr -d ' ')
+        if [[ "${found}" -ne "${#packages[@]}" ]]; then
+          echo "::error::Version hash covers ${found} of ${#packages[@]} requested packages. Missing entries would cause incorrect cache hits." >&2
+          echo "Requested: ${packages[*]}" >&2
+          echo "Found:" >&2
+          cat "${RUNNER_TEMP}/brew-available-versions.txt" >&2
+          exit 1
+        fi
+
+        if command -v shasum &>/dev/null; then
+          hash_cmd=(shasum -a 256)
+        else
+          hash_cmd=(sha256sum)
+        fi
+        hash="$("${hash_cmd[@]}" "${RUNNER_TEMP}/brew-available-versions.txt" | awk '{print $1}')"
+        echo "hash=${hash}" >> "${GITHUB_OUTPUT}"
+      shell: /bin/bash -euo pipefail {0}
+      env:
+        INSTALL: ${{ inputs.install }}
+        BREWFILE: ${{ inputs.brewfile }}
+
     - name: Save Homebrew repository git HEAD
       id: save-git-head
       run: |
@@ -116,7 +180,7 @@ runs:
       uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.prefix.outputs.path }}
-        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-restore
+        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.version-hash.outputs.hash }}
         restore-keys: |
           homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-
 
@@ -134,6 +198,7 @@ runs:
         SAVED_SHA: ${{ steps.save-git-head.outputs.sha }}
 
     - name: Install Homebrew formulae
+      id: install
       run: |
         if [[ "${BREWFILE}" = "true" ]]; then
           if [[ -n "${INSTALL//[[:space:]]/}" ]]; then
@@ -144,10 +209,10 @@ runs:
             echo "Brewfile not found in current directory." >&2
             exit 1
           fi
-          if brew bundle check --file Brewfile; then
+          if [[ "${CACHE_HIT}" = "true" ]] && brew bundle check --file Brewfile; then
             echo "Brewfile dependencies are already installed."
           else
-            brew bundle --file Brewfile --no-upgrade
+            brew bundle --file Brewfile
           fi
           exit 0
         else
@@ -171,36 +236,21 @@ runs:
           exit 1
         fi
         brew install --formula "${args[@]}"
+        if [[ "${CACHE_HIT}" != "true" ]]; then
+          if ! brew upgrade --formula "${args[@]}"; then
+            echo "::warning::brew upgrade failed; skipping cache save to avoid caching stale packages."
+            echo "upgrade-failed=true" >> "${GITHUB_OUTPUT}"
+          fi
+        fi
       shell: /bin/bash -euo pipefail {0}
       env:
         INSTALL: ${{ inputs.install }}
         BREWFILE: ${{ inputs.brewfile }}
-
-    - name: Compute Homebrew cache key
-      id: cache-key
-      run: |
-        brew list --formula --versions | sort > "${RUNNER_TEMP}/brew-list.txt"
-
-        if command -v shasum >/dev/null 2>&1; then
-          hash_cmd=(shasum -a 256)
-        else
-          hash_cmd=(sha256sum)
-        fi
-        key="$("${hash_cmd[@]}" "${RUNNER_TEMP}/brew-list.txt" | awk '{print $1}')"
-        echo "key=${key}" >> "${GITHUB_OUTPUT}"
-      shell: /bin/bash -euo pipefail {0}
-
-    - name: Check for exact Homebrew cache
-      id: cache-lookup
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-      with:
-        path: ${{ steps.prefix.outputs.path }}
-        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
-        lookup-only: true
+        CACHE_HIT: ${{ steps.cache-restore.outputs.cache-hit }}
 
     - name: Save Homebrew prefix cache
-      if: steps.cache-lookup.outputs.cache-hit != 'true'
+      if: steps.cache-restore.outputs.cache-hit != 'true' && steps.install.outputs.upgrade-failed != 'true'
       uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ${{ steps.prefix.outputs.path }}
-        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.cache-key.outputs.key }}
+        key: homebrew-prefix-${{ steps.cache-prefix.outputs.prefix }}-${{ steps.version-hash.outputs.hash }}
