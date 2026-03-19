@@ -121,41 +121,13 @@ runs:
           exit 1
         fi
 
-        for pkg in "${packages[@]}"; do
-          if [[ "${pkg}" = */* ]]; then
-            echo "::error::Tapped formulae (${pkg}) are not supported by version hash lookup. PRs welcome." >&2
-            exit 1
-          fi
-        done
-
-        jws_file="$(brew --cache)/api/formula.jws.json"
-        if [[ ! -r "${jws_file}" ]]; then
-          echo "::error::Homebrew API cache not found at ${jws_file}. Run the setup-homebrew action before this one." >&2
+        ruby="$(brew --repository)/Library/Homebrew/vendor/portable-ruby/current/bin/ruby"
+        if [[ ! -x "${ruby}" ]]; then
+          echo "::error::Homebrew portable Ruby not found at ${ruby}. Run the setup-homebrew action before this one." >&2
           exit 1
         fi
 
-        pkg_json=$(printf ',"%s"' "${packages[@]}")
-        jq -r --argjson pkgs "[${pkg_json:1}]" \
-          '($pkgs | map({(.): true}) | add) as $lookup |
-          [.payload | fromjson | .[] | select($lookup[.name])] |
-          sort_by(.name) | .[] | "\(.name) \(.versions.stable) \(.revision)"' \
-          "${jws_file}" > "${RUNNER_TEMP}/brew-available-versions.txt"
-
-        found=$(wc -l < "${RUNNER_TEMP}/brew-available-versions.txt" | tr -d ' ')
-        if [[ "${found}" -ne "${#packages[@]}" ]]; then
-          echo "::error::Version hash covers ${found} of ${#packages[@]} requested packages. Missing entries would cause incorrect cache hits." >&2
-          echo "Requested: ${packages[*]}" >&2
-          echo "Found:" >&2
-          cat "${RUNNER_TEMP}/brew-available-versions.txt" >&2
-          exit 1
-        fi
-
-        if command -v shasum &>/dev/null; then
-          hash_cmd=(shasum -a 256)
-        else
-          hash_cmd=(sha256sum)
-        fi
-        hash="$("${hash_cmd[@]}" "${RUNNER_TEMP}/brew-available-versions.txt" | awk '{print $1}')"
+        hash=$("${ruby}" "${GITHUB_ACTION_PATH}/version-hash.rb" "${packages[@]}")
         echo "hash=${hash}" >> "${GITHUB_OUTPUT}"
       shell: /bin/bash -euo pipefail {0}
       env:
