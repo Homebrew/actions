@@ -28,20 +28,20 @@ jobs:
             key: ubuntu-slim
             stable: false
             name: Ubuntu (slim)
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             key: docker-root
             stable: false
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=root"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=root"}'
             name: Docker (root)
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             key: docker-linuxbrew
             stable: false
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:main", "options": "--user=linuxbrew"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=linuxbrew"}'
             name: Docker (linuxbrew)
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             key: docker-linuxbrew-stable
             stable: true
-            container: '{"image": "ghcr.io/homebrew/ubuntu22.04:latest", "options": "--user=linuxbrew"}'
+            container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew"}'
             name: Docker (stable)
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
