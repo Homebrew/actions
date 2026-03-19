@@ -4,6 +4,8 @@ require "json"
 require "digest"
 
 pkgs = ARGV.uniq
+dupes = ARGV.size - pkgs.size
+warn "::warning::#{dupes} duplicate package name(s) ignored." if dupes.positive?
 
 pkgs.each do |p|
   abort "::error::Tapped formulae (#{p}) are not supported by version hash lookup. PRs welcome." if p.include?("/")
@@ -13,7 +15,7 @@ brew_cache = `brew --cache`.chomp
 jws_file = "#{brew_cache}/api/formula.jws.json"
 
 jws = begin
-  JSON.parse(File.read(jws_file))
+  JSON.parse(File.read(jws_file, encoding: "UTF-8"))
 rescue Errno::ENOENT, Errno::EACCES
   abort "::error::Homebrew API cache not found at #{jws_file}. Run the setup-homebrew action before this one."
 end
@@ -26,8 +28,7 @@ lines = JSON.parse(jws["payload"])
 
 if lines.size != pkgs.size
   abort <<~EOS
-    ::error::Version hash covers #{lines.size} of #{pkgs.size} requested packages. \
-    Missing entries would cause incorrect cache hits.
+    ::error::Version hash covers #{lines.size} of #{pkgs.size} requested packages. Missing entries would cause incorrect cache hits.
     Requested: #{pkgs.join(" ")}
     Found:
     #{lines.join("\n")}
