@@ -7,7 +7,7 @@ Useful for GitHub Apps which need to use the API in order to sign commits.
 ## Usage
 
 ```yaml
-- uses: actions/create-github-app-token@v1
+- uses: actions/create-github-app-token@v3
   id: app-token
   with:
     app-id: ${{ vars.APP_ID }}
