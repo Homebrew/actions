@@ -1,4 +1,4 @@
 {
   "name": "setup-homebrew",
-  "main": "main.mjs"
+  "main": "main.mts"
 }
