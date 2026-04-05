@@ -95,6 +95,15 @@ if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
     HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
 fi
 
+# Resolve stable default: use stable for non-brew, non-tap repositories.
+if [[ "${STABLE}" == "auto" ]]; then
+    if [[ -z "${HOMEBREW_TAP_REPOSITORY-}" && ! "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
+        STABLE="true"
+    else
+        STABLE="false"
+    fi
+fi
+
 # Do in container or on the runner
 if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|docker" /proc/1/cgroup); then
     # Fix permissions to give container user write access.
@@ -193,7 +202,7 @@ else
         echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >>"$GITHUB_OUTPUT"
     fi
 fi
-if [[ "${STABLE}" == "true" ]]; then
+if [[ "${STABLE}" == "true" && ! "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     echo HOMEBREW_UPDATE_TO_TAG=1 >>"$GITHUB_ENV"
     latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
