@@ -14,6 +14,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" bump-formulae
+
     - run: echo "::warning::Homebrew/actions/bump-formulae is deprecated. Please use Homebrew/actions/bump-packages instead."
       shell: sh
 

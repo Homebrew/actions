@@ -10,6 +10,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" remove-disabled-packages
+
     - run: brew ruby "$GITHUB_ACTION_PATH/main.rb"
       id: remove-packages
       shell: bash

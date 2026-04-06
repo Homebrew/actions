@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("setup-homebrew")
 import { exec } from "@actions/exec"
 import * as core from "@actions/core"
 

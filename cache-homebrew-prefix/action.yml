@@ -30,6 +30,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" cache-homebrew-prefix
+
     - name: Handle existing Homebrew formulae
       run: |
         installed_formulae="$(brew list --formula 2>/dev/null || true)"

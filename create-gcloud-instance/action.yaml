@@ -32,6 +32,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" create-gcloud-instance
+
     - run: "$GITHUB_ACTION_PATH/create-gcloud-instance.sh"
       shell: bash
       env:

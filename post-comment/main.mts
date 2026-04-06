@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("post-comment")
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 
