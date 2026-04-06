@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("create-pull-request")
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 

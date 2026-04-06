@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("git-try-push")
 import * as core from "@actions/core"
 import { exec } from "@actions/exec"
 

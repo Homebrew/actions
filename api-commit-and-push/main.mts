@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("api-commit-and-push")
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { getExecOutput } from "@actions/exec"

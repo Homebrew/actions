@@ -21,6 +21,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" post-build
+
     - name: Failures summary for brew test-bot
       if: always()
       uses: Homebrew/actions/failures-summary-and-bottle-result@main

@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("check-commit-format")
 import assert from "node:assert/strict"
 import * as core from "@actions/core"
 import * as github from "@actions/github"

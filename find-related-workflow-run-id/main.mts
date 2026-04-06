@@ -1,3 +1,5 @@
+import { deprecateMaster } from "../deprecate-master.mts"
+deprecateMaster("find-related-workflow-run-id")
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 

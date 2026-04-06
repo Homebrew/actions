@@ -38,6 +38,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" setup-ruby
+
     - name: Set up Homebrew
       if: inputs.setup-homebrew == 'true'
       uses: Homebrew/actions/setup-homebrew@main

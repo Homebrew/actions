@@ -16,6 +16,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Deprecation warning for master branch
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/../deprecate-master.sh" setup-commit-signing
+
     - name: Enable SSH agent
       run: | # zizmor: ignore[github-env]
         eval $(ssh-agent)
