@@ -26,9 +26,9 @@ inputs:
     required: false
     default: "${{ github.token }}"
   stable:
-    description: Use the latest stable `homebrew/brew` tag.
+    description: Use the latest stable `homebrew/brew` tag. Defaults to `true` for non-`brew`, non-tap repositories.
     required: false
-    default: false
+    default: auto
 outputs:
   repository-path:
     description: Path to where the repository has been checked out (if applicable)
