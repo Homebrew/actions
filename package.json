@@ -4,9 +4,9 @@
     "test": "node --test --experimental-test-module-mocks --import ./spec-helper.mts --test-reporter ./test-reporter.mts --test-reporter-destination stdout"
   },
   "dependencies": {
-    "@actions/core": "^3.0.0",
+    "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
-    "@actions/github": "^9.1.0",
+    "@actions/github": "^9.1.1",
     "@octokit/graphql-schema": "^15.26.1",
     "js-yaml": "^4.1.0"
   },
