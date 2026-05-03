@@ -12,7 +12,7 @@ ssh-add -q - <<< "${SSH_SIGNING_KEY}"
 
 # add our public key as an allowed signer
 # we treat the public key as trusted for the currently configured git email
-allowed_signer="$(git config get user.email) ${pubkey}"
+allowed_signer="$(git config --global user.email) ${pubkey}"
 mkdir -p ~/.ssh
 echo "${allowed_signer}" >> ~/.ssh/allowed_signers
 
