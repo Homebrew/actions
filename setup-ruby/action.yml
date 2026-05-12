@@ -79,11 +79,9 @@ runs:
         echo "portable-ruby=${portable_ruby}" >> "${GITHUB_OUTPUT}"
 
         if [[ "${portable_ruby}" == "true" ]]; then
+          echo "Installing/updating Portable Ruby..."
+          brew vendor-install ruby
           ruby_path="$(brew --repository)/Library/Homebrew/vendor/portable-ruby/current/bin/ruby"
-          if [[ ! -r "${ruby_path}" ]]; then
-            echo "Installing Portable Ruby..."
-            brew vendor-install ruby
-          fi
         else
           ruby_path="$(brew --prefix ruby)/bin/ruby"
           if [[ ! -r "${ruby_path}" ]]; then
