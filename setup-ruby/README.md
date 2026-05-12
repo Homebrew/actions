@@ -65,10 +65,11 @@ Run from a specific subdirectory:
 - When `portable-ruby` is `false`, this action installs Homebrew's `ruby` formula (if needed) and adds it to `PATH`.
 - When `portable-ruby` is `true`, this action uses the same Ruby Homebrew runs (`brew ruby`) and adds it to `PATH`.
 - `setup-homebrew` defaults to `false` and only runs `Homebrew/actions/setup-homebrew` when explicitly enabled.
+- When `Gemfile` is present, this action runs `bundle check` and runs `bundle install --jobs 4 --retry 3` only when needed.
 - `bundler-cache` defaults to `false`. When enabled, this action:
   - Caches `vendor/bundle` using `actions/cache`.
-  - Runs `bundle install` only when `bundle check` fails.
+  - Configures Bundler to install gems to `vendor/bundle`.
   - Requires `Gemfile` in the current working directory.
   - Uses `Gemfile.lock` for cache hashing when present, otherwise falls back to `Gemfile`.
-  - Includes Ruby version and Ruby prefix in cache key derivation.
+  - Includes Ruby version, portable Ruby mode and Ruby prefix in cache key derivation.
 - `working-directory` defaults to `.` and is used for Ruby setup, Gemfile discovery, and Bundler commands.
