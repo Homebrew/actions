@@ -91,6 +91,12 @@ jobs:
 
       - run: brew test-bot --only-cleanup-before
 
+      - name: Install bubblewrap
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends bubblewrap
+
       - run: brew test-bot --only-setup
 
       - run: brew info hello
