@@ -43,4 +43,4 @@ gcloud compute --project="${GCP_PROJECT_ID}" instances create "${GCP_RUNNER_NAME
                --shielded-integrity-monitoring \
                --reservation-affinity=any \
                --metadata-from-file startup-script="${STARTUP_SCRIPT}" \
-               --metadata RUNNER_NAME="${GCP_RUNNER_NAME}",VM_TOKEN="${VM_TOKEN}",REPOSITORY_NAME="${REPOSITORY_NAME}",GITHUB_TOKEN="${GITHUB_TOKEN}"
+               --metadata VM_TOKEN="${VM_TOKEN}",REPOSITORY_NAME="${REPOSITORY_NAME}"
