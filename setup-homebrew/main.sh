@@ -91,7 +91,8 @@ HOMEBREW_PREFIX="$(brew --prefix)"
 HOMEBREW_REPOSITORY="$(brew --repo)"
 HOMEBREW_CORE_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core"
 HOMEBREW_CASK_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-cask"
-if [[ "$GITHUB_REPOSITORY" =~ ^.+/homebrew-.+$ ]]; then
+if [[ "$GITHUB_REPOSITORY" =~ ^([^/]+)/homebrew-(.+)$ ]]; then
+    HOMEBREW_TAP_NAME="$(echo "${BASH_REMATCH[1]}/${BASH_REMATCH[2]}" | tr "[:upper:]" "[:lower:]")"
     HOMEBREW_TAP_REPOSITORY="$HOMEBREW_REPOSITORY/Library/Taps/$(echo "$GITHUB_REPOSITORY" | tr "[:upper:]" "[:lower:]")"
 fi
 
@@ -206,6 +207,10 @@ if [[ "${STABLE}" == "true" && ! "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     echo HOMEBREW_UPDATE_TO_TAG=1 >>"$GITHUB_ENV"
     latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
+fi
+if [[ "${STABLE}" != "true" && -n "${HOMEBREW_TAP_NAME-}" && ! "$HOMEBREW_TAP_NAME" =~ ^homebrew/ ]]; then
+    ohai "Trusting ${HOMEBREW_TAP_NAME} tap..."
+    brew trust "$HOMEBREW_TAP_NAME"
 fi
 
 # Skip autoupdate for formulae.brew.sh CI
