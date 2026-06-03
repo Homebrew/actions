@@ -208,7 +208,7 @@ if [[ "${STABLE}" == "true" && ! "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
     latest_git_tag="$(git -C "$HOMEBREW_REPOSITORY" tag --list --sort="-version:refname" | head -n1)"
     git -C "$HOMEBREW_REPOSITORY" checkout --force -B stable "refs/tags/${latest_git_tag}"
 fi
-if [[ "${STABLE}" != "true" && -n "${HOMEBREW_TAP_NAME-}" && ! "$HOMEBREW_TAP_NAME" =~ ^homebrew/ ]]; then
+if [[ -n "${HOMEBREW_TAP_NAME-}" && ! "$HOMEBREW_TAP_NAME" =~ ^homebrew/ ]]; then
     ohai "Trusting ${HOMEBREW_TAP_NAME} tap..."
     brew trust "$HOMEBREW_TAP_NAME"
 fi
