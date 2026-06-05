@@ -12,19 +12,56 @@ pkgs.each do |p|
 end
 
 brew_cache = `brew --cache`.chomp
-jws_file = "#{brew_cache}/api/formula.jws.json"
+api_cache = "#{brew_cache}/api"
 
-jws = begin
-  JSON.parse(File.read(jws_file, encoding: "UTF-8"))
-rescue Errno::ENOENT, Errno::EACCES
-  abort "::error::Homebrew API cache not found at #{jws_file}. Run the setup-homebrew action before this one."
-end
+api_candidates = Dir["#{api_cache}/internal/packages.*.jws.json"].sort.map { |path| [path, :internal] }
+# TODO: Remove support for the public API cache after Homebrew 6.0.1 has been released.
+formula_jws_file = "#{api_cache}/formula.jws.json"
+api_candidates << [formula_jws_file, :formula]
 
 lookup = pkgs.to_h { |p| [p, true] }
-lines = JSON.parse(jws["payload"])
-            .select { |f| lookup[f["name"]] }
-            .sort_by { |f| f["name"] }
-            .map { |f| "#{f["name"]} #{f["versions"]["stable"]} #{f["revision"]}" }
+api_errors = []
+formulae = nil
+api_candidates.each do |jws_file, api_type|
+  jws = JSON.parse(File.read(jws_file, encoding: "UTF-8"))
+  payload = JSON.parse(jws.fetch("payload"))
+  formulae = if api_type == :internal
+    formula_hashes = payload.fetch("formulae")
+    raise TypeError, "expected internal API formulae to be an object" unless formula_hashes.is_a?(Hash)
+
+    formula_hashes.each_with_object([]) do |(name, formula), array|
+      next unless lookup[name]
+
+      array << {
+        "name"           => name,
+        "stable_version" => formula["stable_version"],
+        "revision"       => formula["revision"],
+      }
+    end
+  else
+    raise TypeError, "expected formula API payload to be an array" unless payload.is_a?(Array)
+
+    payload.select { |formula| lookup[formula["name"]] }
+  end
+
+  break
+rescue Errno::ENOENT, Errno::EACCES, JSON::ParserError, KeyError, TypeError => e
+  api_errors << "#{jws_file}: #{e.class}: #{e.message}"
+end
+
+unless formulae
+  abort <<~EOS
+    ::error::Homebrew API cache not found or invalid. Run the setup-homebrew action before this one.
+    #{api_errors.join("\n")}
+  EOS
+end
+
+lines = formulae
+        .sort_by { |formula| formula["name"] }
+        .map do |formula|
+          stable_version = formula["stable_version"] || formula.dig("versions", "stable")
+          "#{formula["name"]} #{stable_version} #{formula["revision"]}"
+        end
 
 if lines.size != pkgs.size
   abort <<~EOS
