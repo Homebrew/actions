@@ -8,13 +8,13 @@
     "@actions/exec": "^3.0.0",
     "@actions/github": "^9.1.1",
     "@octokit/graphql-schema": "^15.26.1",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.2.0"
   },
   "devDependencies": {
     "@tsconfig/node-ts": "^23.6.4",
     "@tsconfig/node24": "^24.0.4",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.12.4",
+    "@types/node": "^24.13.0",
     "typescript": "^6.0.3"
   }
 }

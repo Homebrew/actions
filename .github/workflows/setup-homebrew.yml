@@ -20,10 +20,10 @@ jobs:
             key: macos
             stable: false
             name: macOS
-          - os: ubuntu-22.04
-            key: ubuntu-22
+          - os: ubuntu-24.04
+            key: ubuntu-24
             stable: false
-            name: Ubuntu (22.04)
+            name: Ubuntu (24.04)
           - os: ubuntu-slim
             key: ubuntu-slim
             stable: false
@@ -92,7 +92,7 @@ jobs:
       - run: brew test-bot --only-cleanup-before
 
       - name: Install bubblewrap
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends bubblewrap
