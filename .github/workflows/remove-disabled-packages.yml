@@ -1,0 +1,114 @@
+name: Test remove disabled packages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    paths:
+      - "**remove-disabled-packages**"
+      - "deprecate-master.sh"
+      - "package.json"
+      - "package-lock.json"
+      - "node_modules/**"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+  # Point the action at a throwaway fixture tap instead of this repository.
+  GITHUB_REPOSITORY: Homebrew/actions-test-tap
+
+jobs:
+  remove-disabled-packages:
+    if: github.repository_owner == 'Homebrew'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/homebrew/brew:main
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          core: false
+          cask: false
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Create fixture tap
+        id: fixture
+        run: |
+          git config --global user.name BrewTestBot
+          git config --global user.email no-reply@brew.sh
+
+          tap_dir="$(brew --repository "${GITHUB_REPOSITORY}")"
+          git config --global --add safe.directory "${tap_dir}"
+          mkdir -p "${tap_dir}/Formula"
+
+          # Disabled long enough ago that it should be removed.
+          cat > "${tap_dir}/Formula/removable.rb" <<'RUBY'
+          class Removable < Formula
+            desc "Disabled long enough ago to be removed"
+            homepage "https://brew.sh"
+            url "https://brew.sh/removable-1.0.tar.gz"
+            version "1.0"
+
+            disable! date: "2000-01-01", because: :unmaintained
+          end
+          RUBY
+
+          # Disabled recently enough that it should be kept.
+          recent_date="$(date -d '1 month ago' +%F)"
+          cat > "${tap_dir}/Formula/kept.rb" <<RUBY
+          class Kept < Formula
+            desc "Disabled too recently to be removed"
+            homepage "https://brew.sh"
+            url "https://brew.sh/kept-1.0.tar.gz"
+            version "1.0"
+
+            disable! date: "${recent_date}", because: :unmaintained
+          end
+          RUBY
+
+          # Not disabled at all, so it should be kept.
+          cat > "${tap_dir}/Formula/active.rb" <<'RUBY'
+          class Active < Formula
+            desc "Not disabled"
+            homepage "https://brew.sh"
+            url "https://brew.sh/active-1.0.tar.gz"
+            version "1.0"
+          end
+          RUBY
+
+          git -C "${tap_dir}" init --quiet
+          git -C "${tap_dir}" add --all
+          git -C "${tap_dir}" commit --quiet --message "Add fixture formulae"
+
+          echo "tap-dir=${tap_dir}" >> "${GITHUB_OUTPUT}"
+
+      - name: Remove disabled packages
+        id: remove
+        uses: ./remove-disabled-packages/
+
+      - name: Verify only the long-disabled formula was removed
+        env:
+          TAP_DIR: ${{ steps.fixture.outputs.tap-dir }}
+          PACKAGES_REMOVED: ${{ steps.remove.outputs.packages-removed }}
+        run: |
+          [[ "${PACKAGES_REMOVED}" = "true" ]]
+
+          [[ ! -f "${TAP_DIR}/Formula/removable.rb" ]]
+          [[ -f "${TAP_DIR}/Formula/kept.rb" ]]
+          [[ -f "${TAP_DIR}/Formula/active.rb" ]]
+
+          git_log="$(git -C "${TAP_DIR}" log --format='%s')"
+          grep --quiet "removable: remove formula" <<<"${git_log}"
