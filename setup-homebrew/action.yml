@@ -17,6 +17,10 @@ inputs:
     description: Show debugging output
     required: false
     default: ${{ runner.debug == '1' }}
+  setup-sandbox:
+    description: Setup sandboxes (if needed). Currently no-op on non-Linux.
+    required: false
+    default: false
   token:
     description: Token to be used for GitHub authentication (if using private repositories). This token will persist through other steps for the duration of the job.
     required: false
