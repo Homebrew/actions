@@ -326,11 +326,9 @@ fi
 # Setup Linux permissions
 if [[ "$RUNNER_OS" = "Linux" ]] && [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
     if [[ "${SETUP_SANDBOX}" == "true" ]]; then
-        # TODO: call `brew setup-sandbox` instead when https://github.com/Homebrew/brew/pull/22691 is merged.
-        sudo sysctl -w kernel.unprivileged_userns_clone=1
-        sudo sysctl -w user.max_user_namespaces=28633
-        # AppArmor sysctl may not exist on all Linux runner kernels.
-        sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+        # Install Bubblewrap and configure the sandbox sysctls. Pass GITHUB_ACTIONS
+        # through `sudo` so `brew setup-sandbox` installs Bubblewrap when missing.
+        sudo GITHUB_ACTIONS="${GITHUB_ACTIONS-}" "${HOMEBREW_PREFIX}/bin/brew" setup-sandbox
     fi
 
     # Workaround: Remove fontconfig incompatible fonts provided by the poppler
