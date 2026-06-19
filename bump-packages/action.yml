@@ -21,7 +21,7 @@ inputs:
     required: false
     default: ${{ github.repository_owner != 'Homebrew' }}
   full-name:
-    description: Pass fully-qualified package names to brew bump
+    description: Force fully-qualified package names to brew bump
     required: false
     default: 'false'
 runs:
@@ -34,15 +34,15 @@ runs:
 
     - name: Bump formulae
       run: |
-        args=(bump)
+        args=()
         if [[ "$INPUT_FORK" != "true" ]]; then
           args+=(--no-fork)
         fi
-        if [[ "$INPUT_FULL_NAME" == "true" ]]; then
+        IFS=" " read -r -a formulae <<<"${INPUT_FORMULAE}"
+        if [[ "$INPUT_FULL_NAME" == "true" || "${formulae[*]}" == */* ]]; then
           args+=(--full-name)
         fi
         args+=(--open-pr)
-        IFS=" " read -r -a formulae <<<"${INPUT_FORMULAE}"
         brew bump "${args[@]}" --formulae "${formulae[@]}"
       shell: bash
       if: inputs.formulae != ''
@@ -54,16 +54,16 @@ runs:
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - name: Bump casks
       run: |
-        args=(bump)
+        args=()
         if [[ "$INPUT_FORK" != "true" ]]; then
           args+=(--no-fork)
         fi
-        if [[ "$INPUT_FULL_NAME" == "true" ]]; then
+        IFS=" " read -r -a casks <<<"${INPUT_CASKS}"
+        if [[ "$INPUT_FULL_NAME" == "true" || "${casks[*]}" == */* ]]; then
           args+=(--full-name)
         fi
         args+=(--open-pr)
-        IFS=" " read -r -a casks <<<"${INPUT_CASKS}"
-        brew "${args[@]}" --casks "${casks[@]}"
+        brew bump "${args[@]}" --casks "${casks[@]}"
       shell: bash
       if: inputs.casks != ''
       env:

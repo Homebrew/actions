@@ -31,6 +31,7 @@ If there are no outdated packages, the Action will just exit.
       ...
     # Do not use a fork for opening PR's
     fork: false
-    # Package names are fully-qualified, e.g. user/tap/formula
+    # Fully-qualified names, e.g. user/tap/formula, are detected automatically.
+    # Set this to force --full-name for short names too.
     full-name: true
 ```
