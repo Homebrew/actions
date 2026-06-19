@@ -1,0 +1,23 @@
+bump-packages/action.test.mts
+  s_072ec5ed2f7fba::t_c1751199b9865e 78,92-106,118,131-143
+bump-packages/action.yml
+  s_072ec5ed2f7fba::t_a7b3481d4d8759 24,37,41-42,57,61-62,66
+bump-packages/README.md
+  s_072ec5ed2f7fba::t_a7b3481d4d8759 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "af1e99f100a2dae8854ce1ac63aec769265f0425",
+  "prompts": {},
+  "sessions": {
+    "s_072ec5ed2f7fba": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019edfd5-ebd2-7fa3-8eb7-d080bfac4d15",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Rui Chen <rui@chenrui.dev>"
+    }
+  }
+}
