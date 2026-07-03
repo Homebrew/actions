@@ -1,13 +1,15 @@
 // ------ Performance tests ------
 
+"use strict";
+
 const { performance } = require("perf_hooks");
 const { imitateJSONParseWithoutContext } = require("./helpers.cjs");
 const { JSONParse, JSONStringify } = require("../json-with-bigint.cjs");
 
 const fs = require("fs").promises;
-const https = require("https");
+const get = require("https").get;
 
-// JSON is located in a separate GitHub repo here (click Raw to see the URL below):
+// JSON is located in a separate GitHub repo here:
 // https://github.com/Ivan-Korolenko/json-with-bigint.performance.json/blob/main/performance.json
 const JSON_URL =
   "https://raw.githubusercontent.com/Ivan-Korolenko/json-with-bigint.performance.json/refs/heads/main/performance.json";
@@ -17,25 +19,23 @@ async function fetchJSON(url, maxRetries = 3, delay = 1000) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await new Promise((resolve, reject) => {
-        https
-          .get(url, (res) => {
-            if (res.statusCode >= 500 && res.statusCode < 600) {
-              reject(new Error(`Server error ${res.statusCode}: Retrying...`));
-            } else if (res.statusCode !== 200) {
-              reject(
-                new Error(
-                  `Request failed with status ${res.statusCode} ${res.statusMessage}`,
-                ),
-              );
-            }
+        get(url, (res) => {
+          if (res.statusCode >= 500 && res.statusCode < 600) {
+            reject(new Error(`Server error ${res.statusCode}: Retrying...`));
+          } else if (res.statusCode !== 200) {
+            reject(
+              new Error(
+                `Request failed with status ${res.statusCode} ${res.statusMessage}`,
+              ),
+            );
+          }
 
-            let data = "";
-            res.on("data", (chunk) => {
-              data += chunk;
-            });
-            res.on("end", () => resolve(data));
-          })
-          .on("error", reject);
+          let data = "";
+          res.on("data", (chunk) => {
+            data += chunk;
+          });
+          res.on("end", () => resolve(data));
+        }).on("error", reject);
       });
 
       return JSON.parse(response);
@@ -125,17 +125,11 @@ const measureExecTime = (fn) => {
 };
 
 const runTests = (data) => {
-  measureExecTime(() => {
-    console.log("___________");
-    console.log("Performance test. One-way");
-    JSONParse(data);
-  });
+  console.log("___________\nPerformance test. One-way");
+  measureExecTime(() => JSONParse(data));
 
-  measureExecTime(() => {
-    console.log("___________");
-    console.log("Performance test. Round-trip");
-    JSONStringify(JSONParse(data));
-  });
+  console.log("___________\nPerformance test. Round-trip");
+  measureExecTime(() => JSONStringify(JSONParse(data)));
 };
 
 async function main() {
@@ -144,9 +138,8 @@ async function main() {
   console.log("------ V2 performance tests ------");
   runTests(data);
 
-  JSON.parse = imitateJSONParseWithoutContext;
-
   console.log("\n------ V1 (without context.source) performance tests ------");
+  JSON.parse = imitateJSONParseWithoutContext;
   runTests(data);
 }
 

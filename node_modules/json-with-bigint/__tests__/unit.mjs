@@ -1,5 +1,7 @@
 // ------ Unit tests ------
 
+"use strict";
+
 import { deepStrictEqual } from "assert";
 import { imitateJSONParseWithoutContext } from "./helpers.cjs";
 import { JSONStringify, JSONParse } from "../json-with-bigint.js";
@@ -151,7 +153,6 @@ const runTests = () => {
 console.log("------ V2 unit tests ------");
 runTests();
 
-JSON.parse = imitateJSONParseWithoutContext;
-
 console.log("\n------ V1 (without context.source) unit tests ------");
+JSON.parse = imitateJSONParseWithoutContext;
 runTests();
