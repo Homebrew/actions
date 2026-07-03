@@ -4,7 +4,7 @@ import assert from "node:assert/strict"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import fs from "fs"
-import yaml from "js-yaml"
+import * as yaml from "js-yaml"
 
 import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
 
