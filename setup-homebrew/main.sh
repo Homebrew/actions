@@ -141,6 +141,13 @@ if [[ -f "/.dockerenv" ]] || ([[ -f /proc/1/cgroup ]] && grep -qE "actions_job|d
         "$HOMEBREW_CASK_REPOSITORY" "${HOMEBREW_TAP_REPOSITORY-}"; do
         if [[ -n "$repo" ]]; then
             git config --global --add safe.directory "$repo"
+            # Homebrew disables global Git config when reading origins, so root needs system scope.
+            if [[ "$EUID" -eq 0 ]]; then
+                git config --system --add safe.directory "$repo" || {
+                    echo "::error::Failed to mark $repo safe in system Git config."
+                    exit 1
+                }
+            fi
         fi
     done
 
