@@ -1,5 +1,7 @@
 // ------ Performance tests ------
 
+"use strict";
+
 import { performance } from "perf_hooks";
 import { imitateJSONParseWithoutContext } from "./helpers.cjs";
 import { JSONParse, JSONStringify } from "../json-with-bigint.js";
@@ -7,7 +9,7 @@ import { JSONParse, JSONStringify } from "../json-with-bigint.js";
 import { promises as fs } from "fs";
 import { get } from "https";
 
-// JSON is located in a separate GitHub repo here (click Raw to see the URL below):
+// JSON is located in a separate GitHub repo here:
 // https://github.com/Ivan-Korolenko/json-with-bigint.performance.json/blob/main/performance.json
 const JSON_URL =
   "https://raw.githubusercontent.com/Ivan-Korolenko/json-with-bigint.performance.json/refs/heads/main/performance.json";
@@ -123,17 +125,11 @@ const measureExecTime = (fn) => {
 };
 
 const runTests = (data) => {
-  measureExecTime(() => {
-    console.log("___________");
-    console.log("Performance test. One-way");
-    JSONParse(data);
-  });
+  console.log("___________\nPerformance test. One-way");
+  measureExecTime(() => JSONParse(data));
 
-  measureExecTime(() => {
-    console.log("___________");
-    console.log("Performance test. Round-trip");
-    JSONStringify(JSONParse(data));
-  });
+  console.log("___________\nPerformance test. Round-trip");
+  measureExecTime(() => JSONStringify(JSONParse(data)));
 };
 
 async function main() {
@@ -142,9 +138,8 @@ async function main() {
   console.log("------ V2 performance tests ------");
   runTests(data);
 
-  JSON.parse = imitateJSONParseWithoutContext;
-
   console.log("\n------ V1 (without context.source) performance tests ------");
+  JSON.parse = imitateJSONParseWithoutContext;
   runTests(data);
 }
 

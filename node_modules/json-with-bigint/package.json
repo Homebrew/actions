@@ -1,6 +1,6 @@
 {
   "name": "json-with-bigint",
-  "version": "3.5.7",
+  "version": "3.5.8",
   "description": "JS library that allows you to easily serialize and deserialize data with BigInt values",
   "type": "module",
   "types": "./json-with-bigint.d.ts",
@@ -9,6 +9,7 @@
     "require": "./json-with-bigint.cjs"
   },
   "scripts": {
+    "build:cjs": "node ./scripts/build-cjs.js",
     "test": "npm run unit:cjs && npm run unit:esm",
     "performance:cjs": "node __tests__/performance.cjs",
     "unit:cjs": "node __tests__/unit.cjs",
