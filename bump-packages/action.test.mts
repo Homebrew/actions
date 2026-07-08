@@ -89,21 +89,6 @@ describe("bump-packages action", () => {
     ]);
   });
 
-  it("forces --full-name for short formula names", () => {
-    assert.deepEqual(brewBumpArgs("Bump formulae", {
-      INPUT_FORMULAE: "foo",
-      INPUT_FORK: "false",
-      INPUT_FULL_NAME: "true",
-    }), [
-      "bump",
-      "--no-fork",
-      "--full-name",
-      "--open-pr",
-      "--formulae",
-      "foo",
-    ]);
-  });
-
   it("bumps casks with --no-fork when not using a fork", () => {
     assert.deepEqual(brewBumpArgs("Bump casks", { INPUT_CASKS: "baz qux", INPUT_FORK: "false" }), [
       "bump",
@@ -129,18 +114,4 @@ describe("bump-packages action", () => {
     ]);
   });
 
-  it("forces --full-name for short cask names", () => {
-    assert.deepEqual(brewBumpArgs("Bump casks", {
-      INPUT_CASKS: "baz",
-      INPUT_FORK: "false",
-      INPUT_FULL_NAME: "true",
-    }), [
-      "bump",
-      "--no-fork",
-      "--full-name",
-      "--open-pr",
-      "--casks",
-      "baz",
-    ]);
-  });
 });

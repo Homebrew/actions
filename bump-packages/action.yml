@@ -20,10 +20,6 @@ inputs:
     description: Use a fork when opening a PR
     required: false
     default: ${{ github.repository_owner != 'Homebrew' }}
-  full-name:
-    description: Force fully-qualified package names to brew bump
-    required: false
-    default: 'false'
 runs:
   using: composite
   steps:
@@ -39,7 +35,7 @@ runs:
           args+=(--no-fork)
         fi
         IFS=" " read -r -a formulae <<<"${INPUT_FORMULAE}"
-        if [[ "$INPUT_FULL_NAME" == "true" || "${formulae[*]}" == */* ]]; then
+        if [[ "${formulae[*]}" == */* ]]; then
           args+=(--full-name)
         fi
         args+=(--open-pr)
@@ -49,7 +45,6 @@ runs:
       env:
         INPUT_FORMULAE: ${{ inputs.formulae }}
         INPUT_FORK: ${{ inputs.fork }}
-        INPUT_FULL_NAME: ${{ inputs.full-name }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
     - name: Bump casks
@@ -59,7 +54,7 @@ runs:
           args+=(--no-fork)
         fi
         IFS=" " read -r -a casks <<<"${INPUT_CASKS}"
-        if [[ "$INPUT_FULL_NAME" == "true" || "${casks[*]}" == */* ]]; then
+        if [[ "${casks[*]}" == */* ]]; then
           args+=(--full-name)
         fi
         args+=(--open-pr)
@@ -69,6 +64,5 @@ runs:
       env:
         INPUT_CASKS: ${{ inputs.casks }}
         INPUT_FORK: ${{ inputs.fork }}
-        INPUT_FULL_NAME: ${{ inputs.full-name }}
         HOMEBREW_DEVELOPER: "1"
         HOMEBREW_GITHUB_API_TOKEN: ${{ inputs.token }}
