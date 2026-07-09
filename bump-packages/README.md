@@ -31,4 +31,5 @@ If there are no outdated packages, the Action will just exit.
       ...
     # Do not use a fork for opening PR's
     fork: false
+    # Tap-qualified names, e.g. user/tap/formula, are detected automatically.
 ```
