@@ -20,7 +20,7 @@ by a user.
 This action should be used in a `pull_request_target` workflow.
 
 ```yaml
-- uses: Homebrew/actions/limit-pull-requests@main
+- uses: Homebrew/actions/limit-pull-requests@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     except-users: |
       BrewTestBot

@@ -7,7 +7,7 @@ closing it based on the outcome of a previous step.
 ## Usage
 
 ```yaml
-- uses: Homebrew/actions/create-or-update-issue@main
+- uses: Homebrew/actions/create-or-update-issue@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     token: ${{ github.token }} # defaults to this
     repository: ${{ github.repository }} # defaults to this

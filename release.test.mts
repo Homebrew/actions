@@ -273,6 +273,7 @@ test("internal Homebrew/actions pins reference the current sub-action tree", () 
         `${sha}..HEAD`,
         "--",
         `${subAction}/`,
+        `:(exclude)${subAction}/README.md`,
       );
       if (changedFiles) {
         staleReferences.push(
