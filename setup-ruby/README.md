@@ -10,17 +10,17 @@ Set up Ruby with an existing Homebrew installation:
 
 ```yaml
 - name: Set up Homebrew
-  uses: Homebrew/actions/setup-homebrew@main
+  uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
 
 - name: Set up Ruby
-  uses: Homebrew/actions/setup-ruby@main
+  uses: Homebrew/actions/setup-ruby@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
 ```
 
 Set up Homebrew from this action when requested:
 
 ```yaml
 - name: Set up Ruby and Homebrew
-  uses: Homebrew/actions/setup-ruby@main
+  uses: Homebrew/actions/setup-ruby@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     setup-homebrew: true
 ```
@@ -29,7 +29,7 @@ To use Homebrew's portable Ruby instead of the `ruby` formula:
 
 ```yaml
 - name: Set up Homebrew portable Ruby
-  uses: Homebrew/actions/setup-ruby@main
+  uses: Homebrew/actions/setup-ruby@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     portable-ruby: true
 ```
@@ -38,7 +38,7 @@ Enable Bundler cache:
 
 ```yaml
 - name: Set up Ruby with Bundler cache
-  uses: Homebrew/actions/setup-ruby@main
+  uses: Homebrew/actions/setup-ruby@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     setup-homebrew: true
     bundler-cache: true
@@ -48,7 +48,7 @@ Run from a specific subdirectory:
 
 ```yaml
 - name: Set up Ruby from subdirectory
-  uses: Homebrew/actions/setup-ruby@main
+  uses: Homebrew/actions/setup-ruby@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     setup-homebrew: true
     working-directory: path/to/project

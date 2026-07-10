@@ -7,7 +7,7 @@ A composite action that caches the Homebrew prefix, installs formulae via
 
 ```yaml
 - name: Cache Homebrew prefix
-  uses: Homebrew/actions/cache-homebrew-prefix@main
+  uses: Homebrew/actions/cache-homebrew-prefix@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     install: wget jq
     uninstall: true
@@ -16,7 +16,7 @@ A composite action that caches the Homebrew prefix, installs formulae via
 
 ```yaml
 - name: Cache Homebrew prefix from Brewfile
-  uses: Homebrew/actions/cache-homebrew-prefix@main
+  uses: Homebrew/actions/cache-homebrew-prefix@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     brewfile: true
     uninstall: true

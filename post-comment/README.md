@@ -8,7 +8,7 @@ An action that simply posts a new comment on given issue with specified content.
 
 ```yaml
 - name: Post comment
-  uses: Homebrew/actions/post-comment@main
+  uses: Homebrew/actions/post-comment@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
     issue: 123

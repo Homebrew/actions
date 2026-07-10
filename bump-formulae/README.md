@@ -15,7 +15,7 @@ If there are no outdated formulae, the Action will just exit.
 
 ```yaml
 - name: Bump formulae
-  uses: Homebrew/actions/bump-formulae@main
+  uses: Homebrew/actions/bump-formulae@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
   with:
     # Custom GitHub access token with only the 'public_repo' scope enabled
     token: ${{secrets.TOKEN}}
