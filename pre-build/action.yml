@@ -22,7 +22,7 @@ runs:
 
     - name: Set up Homebrew
       id: set-up-homebrew
-      uses: Homebrew/actions/setup-homebrew@main
+      uses: Homebrew/actions/setup-homebrew@d74d1431a0ee36e645aa62ebebeec16da878e7e0 # main
       with:
         core: true
         cask: true

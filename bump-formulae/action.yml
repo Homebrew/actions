@@ -22,7 +22,7 @@ runs:
     - run: echo "::warning::Homebrew/actions/bump-formulae is deprecated. Please use Homebrew/actions/bump-packages instead."
       shell: sh
 
-    - uses: Homebrew/actions/bump-packages@main
+    - uses: Homebrew/actions/bump-packages@d74d1431a0ee36e645aa62ebebeec16da878e7e0 # main
       with:
         token: ${{ inputs.token }}
         formulae: ${{ inputs.formulae }}
