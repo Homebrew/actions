@@ -35,6 +35,8 @@ jobs:
       - name: Prepare release
         id: release
         env:
+          # Scheduled releases require the candidate commit to be at least 24 hours old.
+          # Manual dispatches bypass this bake-time requirement.
           RELEASE_MINIMUM_AGE_SECONDS: 86400
         run: .github/scripts/prepare-release.sh
 
