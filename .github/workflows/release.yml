@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  schedule:
+    # Every Monday at 12:00 UTC.
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release
+    if: github.repository_owner == 'Homebrew'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # for creating the release and tag
+    steps:
+      - name: Check out main
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+          ref: main
+
+      - name: Prepare release
+        id: release
+        env:
+          RELEASE_MINIMUM_AGE_SECONDS: 86400
+        run: .github/scripts/prepare-release.sh
+
+      - name: Create release
+        if: steps.release.outputs.release == 'true'
+        env:
+          CANDIDATE_SHA: ${{ steps.release.outputs.candidate_sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          if gh api "repos/${REPOSITORY}/git/ref/tags/${VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag ${VERSION} already exists; release tags are immutable."
+            exit 1
+          fi
+
+          gh release create "${VERSION}" \
+            --repo "${REPOSITORY}" \
+            --target "${CANDIDATE_SHA}" \
+            --title "${VERSION}" \
+            --generate-notes \
+            --fail-on-no-commits

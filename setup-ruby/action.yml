@@ -45,7 +45,7 @@ runs:
 
     - name: Set up Homebrew
       if: inputs.setup-homebrew == 'true'
-      uses: Homebrew/actions/setup-homebrew@main
+      uses: Homebrew/actions/setup-homebrew@24728b77430f9659b8d89068e4afe7f5fd0f973c # main
       with:
         debug: ${{ inputs.debug }}
 

@@ -4,6 +4,26 @@ Navigate to subdirectories for more information about particular Actions.
 
 Every directory (except `node_modules`) is a separate Action.
 
+## Releases
+
+All Actions in this repository are released together using bare CalVer tags in
+the form `YYYY.MM.DD.N`, where `N` starts at 1 each UTC day. Release tags point
+directly to commits on `main` and are never moved. Each tag has a published
+GitHub Release with generated release notes. CalVer identifies when a snapshot
+was cut; it does not imply semantic compatibility, a support window, or
+multiple maintained release tracks.
+
+Consumers can use an exact CalVer tag for readability. Environments that
+require immutable third-party action pins should use the tag's full commit SHA
+and retain the CalVer tag in a comment.
+
+A scheduled workflow runs every Monday at 12:00 UTC. It skips the release when
+there are no commits since the latest CalVer tag or when the latest commit has
+had less than 24 hours to bake. Maintainers can dispatch the workflow manually
+to release an urgent fix without waiting for the bake period. A recent commit
+defers the entire scheduled release, including older changes that have already
+had time to bake.
+
 ## Development
 
 In Actions' subdirectories, there are no separate `node_modules` directories or `package-lock.json` files.
