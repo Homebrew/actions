@@ -31,17 +31,17 @@ jobs:
           - os: ubuntu-latest
             key: docker-root
             stable: false
-            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=root"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=root --privileged"}'
             name: Docker (root)
           - os: ubuntu-latest
             key: docker-linuxbrew
             stable: false
-            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=linuxbrew"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=linuxbrew --privileged"}'
             name: Docker (linuxbrew)
           - os: ubuntu-latest
             key: docker-linuxbrew-stable
             stable: true
-            container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew"}'
+            container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew --privileged"}'
             name: Docker (stable)
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
@@ -96,6 +96,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends bubblewrap
+
+      - name: Disable Linux sandbox when unsupported
+        if: matrix.key == 'ubuntu-slim'
+        run: echo "HOMEBREW_NO_SANDBOX_LINUX=1" >> "$GITHUB_ENV"
 
       - run: brew test-bot --only-setup
 
