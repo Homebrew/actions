@@ -16,6 +16,7 @@ describe("check-commit-format", async () => {
     mockInput("failure_label", failureLabel)
     mockInput("autosquash_label", autosquashLabel)
     mockInput("ignore_label", ignoreLabel)
+    mockInput("check_package_commit_format", "true")
 
     const tempdir = fs.mkdtempSync(path.join(os.tmpdir(), "check-commit-format-"))
     const tempfile = `${tempdir}/event.json`
@@ -404,6 +405,155 @@ describe("check-commit-format", async () => {
       ])
 
       await loadMain()
+    })
+  })
+
+  describe("in Homebrew/brew", () => {
+    type Identity = { name: string, email: string }
+
+    async function checkCommit(
+      message: string,
+      author: Identity,
+      committer: Identity,
+      files: Array<{ filename: string }>,
+      state: "success" | "failure",
+      description: string,
+    ) {
+      const repository = "Homebrew/brew"
+      process.env.GITHUB_REPOSITORY = repository
+      mockInput("check_package_commit_format", "false")
+
+      const mockPool = githubMockPool()
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${repository}/pulls/${pr}/commits`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [{ sha: sha }])
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${repository}/commits/${sha}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {
+        sha: sha,
+        parents: [{ sha: "abcdef1234567890abcdef1234567890abcdef11" }],
+        files: files,
+        commit: {
+          message: message,
+          author: author,
+          committer: committer,
+        },
+      })
+
+      mockPool.intercept({
+        method: "POST",
+        path: `/repos/${repository}/statuses/${sha}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
+          state:       state,
+          description: description,
+          context:     "Commit style",
+          target_url:  "https://github.com/Homebrew/brew/blob/HEAD/CONTRIBUTING.md",
+        }),
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {})
+
+      await loadMain()
+    }
+
+    const contributor = { name: "Homebrew Contributor", email: "contributor@example.com" }
+    const disallowedCommits = [
+      {
+        name: "an AI author email",
+        message: "Improve checks",
+        author: { name: "Coding Assistant", email: "175728472+Copilot@users.noreply.github.com" },
+        committer: contributor,
+        description: "AI author or committer attribution is not allowed.",
+      },
+      {
+        name: "an AI committer",
+        message: "Improve checks",
+        author: contributor,
+        committer: { name: "Codex", email: "noreply@openai.com" },
+        description: "AI author or committer attribution is not allowed.",
+      },
+      {
+        name: "an AI commit trailer",
+        message: "Improve checks\n\nCo-authored-by: Coding Assistant <copilot@github.com>",
+        author: contributor,
+        committer: contributor,
+        description: "AI commit trailer attribution is not allowed.",
+      },
+      {
+        name: "a generic AI assistant trailer",
+        message: "Improve checks\n\nCo-authored-by: AI Assistant <assistant@example.com>",
+        author: contributor,
+        committer: contributor,
+        description: "AI commit trailer attribution is not allowed.",
+      },
+      {
+        name: "an AI signatory",
+        message: "Improve checks\n\nSigned-off-by: Codex <noreply@openai.com>",
+        author: contributor,
+        committer: contributor,
+        description: "AI commit trailer attribution is not allowed.",
+      },
+      {
+        name: "an assisted-by AI trailer",
+        message: "Improve checks\n\nAssisted-by: Claude Code <noreply@anthropic.com>",
+        author: contributor,
+        committer: contributor,
+        description: "AI commit trailer attribution is not allowed.",
+      },
+      {
+        name: "a co-developed-by AI trailer",
+        message: "Improve checks\n\nCo-developed-by: Gemini CLI <gemini-cli@google.com>",
+        author: contributor,
+        committer: contributor,
+        description: "AI commit trailer attribution is not allowed.",
+      },
+      {
+        name: "a conventional commit prefix",
+        message: "fix: improve checks",
+        author: contributor,
+        committer: contributor,
+        description: "Conventional commit prefixes are not allowed.",
+      },
+    ]
+
+    for (const commit of disallowedCommits) {
+      it(`rejects ${commit.name}`, async () => {
+        await checkCommit(
+          commit.message,
+          commit.author,
+          commit.committer,
+          [{ filename: "README.md" }],
+          "failure",
+          commit.description,
+        )
+      })
+    }
+
+    it("does not enforce package repository commit rules", async () => {
+      await checkCommit(
+        "Document ChatGPT support\n\nCo-authored-by: Another Contributor <another@example.com>",
+        { name: "Claude Dupont", email: "claude@example.com" },
+        contributor,
+        [{ filename: "README.md" }, { filename: "docs/FAQ.md" }],
+        "success",
+        "Commit format is correct.",
+      )
     })
   })
 })
