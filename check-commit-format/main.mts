@@ -8,12 +8,16 @@ import path from "path"
 
 import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
 
+const conventionalCommitPattern = /^(feat|fix|chore|refactor|perf|ci)(\([^)]*\))?!?:/
+const aiIdentityPattern = /chatgpt|github[ \t-]*copilot|copilot@(github\.com|users\.noreply\.github\.com)|claude[ \t-]+code|noreply@anthropic\.com|gemini([ \t-]+cli)?|codex|noreply@openai\.com|cursor([ \t-]+agent)?|devin[ \t-]+ai|coderabbit|codeium|windsurf|sourcegraph[ \t-]+cody|amazon[ \t-]+q|artificial[ \t-]+intelligence|large[ \t-]+language[ \t-]+model|(^|[^a-z0-9])(ai|llm)[ \t-]+(agent|assistant|bot|tool)([^a-z0-9]|$)/i
+
 async function main() {
     try {
         const token = core.getInput("token", { required: true })
         const failure_label = core.getInput("failure_label", { required: true })
         const autosquash_label = core.getInput("autosquash_label", { required: true })
         const ignore_label = core.getInput("ignore_label", { required: true })
+        const check_package_commit_format = core.getBooleanInput("check_package_commit_format", { required: true })
 
         const client = github.getOctokit(token)
 
@@ -34,7 +38,13 @@ async function main() {
         let commit_state: RestEndpointMethodTypes["repos"]["createCommitStatus"]["parameters"]["state"] = "success"
         let message = "Commit format is correct."
         let files_touched: Array<string> = []
-        let target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
+        let target_url = `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/blob/HEAD/CONTRIBUTING.md`
+        if (check_package_commit_format) {
+            target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
+        }
+        if (github.context.repo.repo === "homebrew-cask") {
+            target_url = "https://github.com/Homebrew/homebrew-cask/blob/HEAD/CONTRIBUTING.md#style-guide"
+        }
 
         // For each commit...
         for (const commit of commits.data) {
@@ -44,6 +54,46 @@ async function main() {
             })
 
             const short_sha = commit.sha.substring(0, 10);
+            const commit_message = commit_info.data.commit.message
+            const identities = [
+                commit_info.data.commit.author?.name,
+                commit_info.data.commit.author?.email,
+                commit_info.data.commit.committer?.name,
+                commit_info.data.commit.committer?.email,
+            ].filter(Boolean).join("\n")
+
+            if (aiIdentityPattern.test(identities)) {
+                is_success = false
+                commit_state = "failure"
+                message = "AI author or committer attribution is not allowed."
+                break
+            }
+
+            const message_lines = commit_message.trimEnd().split(/\r?\n/)
+            let trailer_start = message_lines.length
+            while (trailer_start > 0 &&
+                   (/^[A-Za-z0-9-]+:\s+\S/.test(message_lines[trailer_start - 1]) ||
+                    /^[ \t]+\S/.test(message_lines[trailer_start - 1]))) {
+                trailer_start--
+            }
+            if (trailer_start > 0 && message_lines[trailer_start - 1].trim() === "" &&
+                aiIdentityPattern.test(message_lines.slice(trailer_start).join("\n"))) {
+                is_success = false
+                commit_state = "failure"
+                message = "AI commit trailer attribution is not allowed."
+                break
+            }
+
+            if (conventionalCommitPattern.test(commit_message.split("\n")[0])) {
+                is_success = false
+                commit_state = "failure"
+                message = "Conventional commit prefixes are not allowed."
+                break
+            }
+
+            if (!check_package_commit_format) {
+                continue
+            }
 
             // Autosquash doesn't support merge commits.
             if (commit_info.data.parents.length != 1) {
@@ -86,7 +136,7 @@ async function main() {
             }
 
             const file = commit_info.data.files[0]
-            const commit_subject = commit_info.data.commit.message.split("\n")[0]
+            const commit_subject = commit_message.split("\n")[0]
 
             if (file.filename.startsWith("Formula/")) {
                 const formula = path.basename(file.filename, '.rb')
@@ -130,6 +180,10 @@ async function main() {
             context: "Commit style",
             target_url: target_url
         })
+
+        if (!check_package_commit_format) {
+            return
+        }
 
         // Get existing labels on PR
         let issueLabels = await client.rest.issues.listLabelsOnIssue({

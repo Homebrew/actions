@@ -1,6 +1,8 @@
 # Check commit format GitHub Action
 
-An action that checks that a pull request's commits follow [Homebrew's commit style guidelines](https://docs.brew.sh/Formula-Cookbook#commit).
+An action that rejects conventional commit prefixes and commits that attribute
+authorship or other credit to AI tools. By default, it also checks that package
+commits follow [Homebrew's commit style guidelines](https://docs.brew.sh/Formula-Cookbook#commit).
 
 ## Usage
 
@@ -10,3 +12,6 @@ An action that checks that a pull request's commits follow [Homebrew's commit st
   with:
     token: ${{secrets.HOMEBREW_GITHUB_API_TOKEN}}
 ```
+
+Set `check_package_commit_format: false` when using the action in a repository
+that does not contain formulae or casks.
