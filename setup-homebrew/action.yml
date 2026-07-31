@@ -36,6 +36,8 @@ inputs:
 outputs:
   repository-path:
     description: Path to where the repository has been checked out (if applicable)
+  tap-name:
+    description: Name of the tap, e.g. `user/repository` for `user/homebrew-repository` (if applicable)
   gems-path:
     description: Homebrew's Ruby gems path
   gems-hash:
