@@ -248,11 +248,13 @@ test("internal Homebrew/actions dependencies use full commit SHAs", () => {
   assert.deepEqual(invalidReferences, []);
 });
 
-test("internal Homebrew/actions pins reference the current sub-action tree", () => {
+// Pin freshness is Dependabot's job; requiring pins to match the current tree
+// would force pull requests to repin to their own yet-unmerged commits.
+test("internal Homebrew/actions pins reference reachable commits", () => {
   const actionFiles = git(REPOSITORY_ROOT, "ls-files")
     .split("\n")
     .filter((file) => file.endsWith("/action.yml"));
-  const staleReferences: string[] = [];
+  const unreachableReferences: string[] = [];
 
   for (const actionFile of actionFiles) {
     const action = yaml.load(
@@ -260,28 +262,24 @@ test("internal Homebrew/actions pins reference the current sub-action tree", () 
     ) as ActionMetadata;
 
     for (const step of action.runs?.steps ?? []) {
-      const match = step.uses?.match(
-        /^Homebrew\/actions\/([^@]+)@([0-9a-f]{40})$/,
-      );
+      const match = step.uses?.match(/^Homebrew\/actions\/[^@]+@([0-9a-f]{40})$/);
       if (!match) continue;
 
-      const [, subAction, sha] = match;
-      const changedFiles = git(
+      const ancestor = spawnSync("git", [
+        "-C",
         REPOSITORY_ROOT,
-        "diff",
-        "--name-only",
-        `${sha}..HEAD`,
-        "--",
-        `${subAction}/`,
-        `:(exclude)${subAction}/README.md`,
-      );
-      if (changedFiles) {
-        staleReferences.push(
-          `${actionFile}: ${step.uses} is behind ${subAction}/`,
+        "merge-base",
+        "--is-ancestor",
+        match[1],
+        "HEAD",
+      ]);
+      if (ancestor.status !== 0) {
+        unreachableReferences.push(
+          `${actionFile}: ${step.uses} is not an ancestor of HEAD`,
         );
       }
     }
   }
 
-  assert.deepEqual(staleReferences, []);
+  assert.deepEqual(unreachableReferences, []);
 });
