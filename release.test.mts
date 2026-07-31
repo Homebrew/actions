@@ -34,6 +34,22 @@ function git(repository: string, ...arguments_: string[]): string {
   }).trim();
 }
 
+// Pins can only reference commits that already exist on the release branch, so
+// staleness is measured against `main` rather than `HEAD`: a pull request that
+// changes a sub-action cannot pin to its own unmerged commit.
+function releaseBaseline(repository: string): string {
+  for (const branch of ["origin/main", "main"]) {
+    const mergeBase = spawnSync(
+      "git",
+      ["-C", repository, "merge-base", "HEAD", branch],
+      { encoding: "utf8" },
+    );
+    if (mergeBase.status === 0) return mergeBase.stdout.trim();
+  }
+
+  return "HEAD";
+}
+
 function repository(): string {
   const path = mkdtempSync(join(tmpdir(), "homebrew-actions-release-"));
   git(path, "init", "--initial-branch=main");
@@ -248,11 +264,12 @@ test("internal Homebrew/actions dependencies use full commit SHAs", () => {
   assert.deepEqual(invalidReferences, []);
 });
 
-test("internal Homebrew/actions pins reference the current sub-action tree", () => {
+test("internal Homebrew/actions pins reference the sub-action tree on main", () => {
   const actionFiles = git(REPOSITORY_ROOT, "ls-files")
     .split("\n")
     .filter((file) => file.endsWith("/action.yml"));
   const staleReferences: string[] = [];
+  const baseline = releaseBaseline(REPOSITORY_ROOT);
 
   for (const actionFile of actionFiles) {
     const action = yaml.load(
@@ -270,7 +287,7 @@ test("internal Homebrew/actions pins reference the current sub-action tree", () 
         REPOSITORY_ROOT,
         "diff",
         "--name-only",
-        `${sha}..HEAD`,
+        `${sha}..${baseline}`,
         "--",
         `${subAction}/`,
         `:(exclude)${subAction}/README.md`,
