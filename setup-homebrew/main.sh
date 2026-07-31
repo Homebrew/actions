@@ -209,6 +209,7 @@ else
 
     if [[ -n "${HOMEBREW_TAP_REPOSITORY-}" ]]; then
         echo "repository-path=$HOMEBREW_TAP_REPOSITORY" >>"$GITHUB_OUTPUT"
+        echo "tap-name=$HOMEBREW_TAP_NAME" >>"$GITHUB_OUTPUT"
     fi
 fi
 if [[ "${STABLE}" == "true" && ! "$GITHUB_REPOSITORY" =~ ^.+/brew$ ]]; then
