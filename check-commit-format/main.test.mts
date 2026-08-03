@@ -68,25 +68,9 @@ describe("check-commit-format", async () => {
           message: "foo: some commit",
         }
       })
-
-      mockPool.intercept({
-        method: "POST",
-        path: `/repos/${GITHUB_REPOSITORY}/statuses/${sha}`,
-        headers: {
-          Authorization: `token ${token}`,
-        },
-        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-          state:       "success",
-          description: "Commit format is correct.",
-          context:     "Commit style",
-          target_url:  "https://docs.brew.sh/Formula-Cookbook#commit"
-        }),
-      }).defaultReplyHeaders({
-        "Content-Type": "application/json",
-      }).reply(200, {})
     })
 
-    it("succeeds without updating labels", async () => {
+    it("succeeds without updating labels or creating a commit status", async () => {
       const mockPool = githubMockPool()
 
       mockPool.intercept({
@@ -172,22 +156,6 @@ describe("check-commit-format", async () => {
           message: "Merge commit",
         }
       })
-
-      mockPool.intercept({
-        method: "POST",
-        path: `/repos/${GITHUB_REPOSITORY}/statuses/${sha}`,
-        headers: {
-          Authorization: `token ${token}`,
-        },
-        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-          state:       "failure",
-          description: `${sha.substring(0, 10)} has 2 parents. Please rebase against origin/HEAD.`,
-          context:     "Commit style",
-          target_url:  "https://docs.brew.sh/Formula-Cookbook#commit"
-        }),
-      }).defaultReplyHeaders({
-        "Content-Type": "application/json",
-      }).reply(200, {})
     })
 
     it("fails and adds a failure label", async () => {
@@ -218,8 +186,48 @@ describe("check-commit-format", async () => {
         "Content-Type": "application/json",
       }).reply(200, {})
 
-      await loadMain()
+      await assert.rejects(
+        loadMain(),
+        new Error(`${sha.substring(0, 10)} has 2 parents. Please rebase against origin/HEAD.`),
+      )
     })
+
+    it("preserves the validation failure when adding its label fails", async () => {
+      const mockPool = githubMockPool()
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}/labels`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [
+        { name: "other-label" },
+      ])
+
+      mockPool.intercept({
+        method: "PATCH",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
+          labels: ["other-label", failureLabel],
+        }),
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(403, {
+        message: "Resource not accessible by integration",
+      })
+
+      await assert.rejects(
+        loadMain(),
+        new Error(`${sha.substring(0, 10)} has 2 parents. Please rebase against origin/HEAD.`),
+      )
+    })
+
   })
 
   describe("on an empty commit", async () => {
@@ -256,22 +264,6 @@ describe("check-commit-format", async () => {
           message: "Empty commit",
         }
       })
-
-      mockPool.intercept({
-        method: "POST",
-        path: `/repos/${GITHUB_REPOSITORY}/statuses/${sha}`,
-        headers: {
-          Authorization: `token ${token}`,
-        },
-        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-          state:       "failure",
-          description: `${sha.substring(0, 10)} is an empty commit.`,
-          context:     "Commit style",
-          target_url:  "https://docs.brew.sh/Formula-Cookbook#commit"
-        }),
-      }).defaultReplyHeaders({
-        "Content-Type": "application/json",
-      }).reply(200, {})
     })
 
     it("fails and adds a failure label", async () => {
@@ -302,7 +294,10 @@ describe("check-commit-format", async () => {
         "Content-Type": "application/json",
       }).reply(200, {})
 
-      await loadMain()
+      await assert.rejects(
+        loadMain(),
+        new Error(`${sha.substring(0, 10)} is an empty commit.`),
+      )
     })
   })
 
@@ -340,22 +335,6 @@ describe("check-commit-format", async () => {
           message: "Update foo.rb",
         }
       })
-
-      mockPool.intercept({
-        method: "POST",
-        path: `/repos/${GITHUB_REPOSITORY}/statuses/${sha}`,
-        headers: {
-          Authorization: `token ${token}`,
-        },
-        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-          state:       "failure",
-          description: "Please follow the commit style guidelines, or this pull request will be replaced.",
-          context:     "Commit style",
-          target_url:  "https://docs.brew.sh/Formula-Cookbook#commit"
-        }),
-      }).defaultReplyHeaders({
-        "Content-Type": "application/json",
-      }).reply(200, {})
     })
 
     it("fails and adds a autosquash label", async () => {
@@ -386,7 +365,10 @@ describe("check-commit-format", async () => {
         "Content-Type": "application/json",
       }).reply(200, {})
 
-      await loadMain()
+      await assert.rejects(
+        loadMain(),
+        new Error("Please follow the commit style guidelines, or this pull request will be replaced."),
+      )
     })
 
     it("fails while retaining existing autosquash labels", async () => {
@@ -404,7 +386,96 @@ describe("check-commit-format", async () => {
         { name: autosquashLabel },
       ])
 
-      await loadMain()
+      await assert.rejects(
+        loadMain(),
+        new Error("Please follow the commit style guidelines, or this pull request will be replaced."),
+      )
+    })
+  })
+
+  describe("on multiple package commits", () => {
+    function mockCommits(commits: Array<{ sha: string, filename: string, message: string }>) {
+      const mockPool = githubMockPool()
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/pulls/${pr}/commits`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, commits.map(commit => ({ sha: commit.sha })))
+
+      for (const commit of commits) {
+        mockPool.intercept({
+          method: "GET",
+          path: `/repos/${GITHUB_REPOSITORY}/commits/${commit.sha}`,
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        }).defaultReplyHeaders({
+          "Content-Type": "application/json",
+        }).reply(200, {
+          sha: commit.sha,
+          parents: [{ sha: "abcdef1234567890abcdef1234567890abcdef11" }],
+          files: [{ filename: commit.filename }],
+          commit: {
+            message: commit.message,
+          }
+        })
+      }
+    }
+
+    function mockLabelUpdate(labels: Array<string>) {
+      const mockPool = githubMockPool()
+
+      mockPool.intercept({
+        method: "GET",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}/labels`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, [])
+
+      mockPool.intercept({
+        method: "PATCH",
+        path: `/repos/${GITHUB_REPOSITORY}/issues/${pr}`,
+        headers: {
+          Authorization: `token ${token}`,
+        },
+        body: (body) => util.isDeepStrictEqual(JSON.parse(body), { labels }),
+      }).defaultReplyHeaders({
+        "Content-Type": "application/json",
+      }).reply(200, {})
+    }
+
+    it("preserves the first validation failure message", async () => {
+      mockCommits([
+        { sha: `${sha.slice(0, -1)}1`, filename: "Formula/foo.rb", message: "Update foo.rb" },
+        { sha: sha, filename: "Casks/bar.rb", message: "bar: update" },
+      ])
+      mockLabelUpdate([failureLabel, autosquashLabel])
+
+      await assert.rejects(
+        loadMain(),
+        new Error("Please follow the commit style guidelines, or this pull request will be replaced."),
+      )
+    })
+
+    it("fails when multiple casks are modified", async () => {
+      mockCommits([
+        { sha: `${sha.slice(0, -1)}1`, filename: "Casks/foo.rb", message: "foo: update" },
+        { sha: sha, filename: "Casks/bar.rb", message: "bar: update" },
+      ])
+      mockLabelUpdate([failureLabel])
+
+      await assert.rejects(
+        loadMain(),
+        new Error("A pull request must not modify multiple casks."),
+      )
     })
   })
 
@@ -416,8 +487,7 @@ describe("check-commit-format", async () => {
       author: Identity,
       committer: Identity,
       files: Array<{ filename: string }>,
-      state: "success" | "failure",
-      description: string,
+      failure?: string,
     ) {
       const repository = "Homebrew/brew"
       process.env.GITHUB_REPOSITORY = repository
@@ -453,23 +523,11 @@ describe("check-commit-format", async () => {
         },
       })
 
-      mockPool.intercept({
-        method: "POST",
-        path: `/repos/${repository}/statuses/${sha}`,
-        headers: {
-          Authorization: `token ${token}`,
-        },
-        body: (body) => util.isDeepStrictEqual(JSON.parse(body), {
-          state:       state,
-          description: description,
-          context:     "Commit style",
-          target_url:  "https://github.com/Homebrew/brew/blob/HEAD/CONTRIBUTING.md",
-        }),
-      }).defaultReplyHeaders({
-        "Content-Type": "application/json",
-      }).reply(200, {})
-
-      await loadMain()
+      if (failure) {
+        await assert.rejects(loadMain(), new Error(failure))
+      } else {
+        await loadMain()
+      }
     }
 
     const contributor = { name: "Homebrew Contributor", email: "contributor@example.com" }
@@ -539,7 +597,6 @@ describe("check-commit-format", async () => {
           commit.author,
           commit.committer,
           [{ filename: "README.md" }],
-          "failure",
           commit.description,
         )
       })
@@ -551,8 +608,6 @@ describe("check-commit-format", async () => {
         { name: "Claude Dupont", email: "claude@example.com" },
         contributor,
         [{ filename: "README.md" }, { filename: "docs/FAQ.md" }],
-        "success",
-        "Commit format is correct.",
       )
     })
   })
