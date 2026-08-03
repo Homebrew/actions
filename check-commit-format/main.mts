@@ -6,8 +6,6 @@ import * as github from "@actions/github"
 import fs from "fs"
 import path from "path"
 
-import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods"
-
 const conventionalCommitPattern = /^(feat|fix|chore|refactor|perf|ci)(\([^)]*\))?!?:/
 const aiIdentityPattern = /chatgpt|github[ \t-]*copilot|copilot@(github\.com|users\.noreply\.github\.com)|claude[ \t-]+code|noreply@anthropic\.com|gemini([ \t-]+cli)?|codex|noreply@openai\.com|cursor([ \t-]+agent)?|devin[ \t-]+ai|coderabbit|codeium|windsurf|sourcegraph[ \t-]+cody|amazon[ \t-]+q|artificial[ \t-]+intelligence|large[ \t-]+language[ \t-]+model|(^|[^a-z0-9])(ai|llm)[ \t-]+(agent|assistant|bot|tool)([^a-z0-9]|$)/i
 
@@ -35,16 +33,9 @@ async function main() {
 
         let is_success = true
         let autosquash = false
-        let commit_state: RestEndpointMethodTypes["repos"]["createCommitStatus"]["parameters"]["state"] = "success"
+        let failure_message: string | undefined
         let message = "Commit format is correct."
         let files_touched: Array<string> = []
-        let target_url = `https://github.com/${github.context.repo.owner}/${github.context.repo.repo}/blob/HEAD/CONTRIBUTING.md`
-        if (check_package_commit_format) {
-            target_url = "https://docs.brew.sh/Formula-Cookbook#commit"
-        }
-        if (github.context.repo.repo === "homebrew-cask") {
-            target_url = "https://github.com/Homebrew/homebrew-cask/blob/HEAD/CONTRIBUTING.md#style-guide"
-        }
 
         // For each commit...
         for (const commit of commits.data) {
@@ -64,8 +55,8 @@ async function main() {
 
             if (aiIdentityPattern.test(identities)) {
                 is_success = false
-                commit_state = "failure"
                 message = "AI author or committer attribution is not allowed."
+                failure_message ??= message
                 break
             }
 
@@ -79,15 +70,15 @@ async function main() {
             if (trailer_start > 0 && message_lines[trailer_start - 1].trim() === "" &&
                 aiIdentityPattern.test(message_lines.slice(trailer_start).join("\n"))) {
                 is_success = false
-                commit_state = "failure"
                 message = "AI commit trailer attribution is not allowed."
+                failure_message ??= message
                 break
             }
 
             if (conventionalCommitPattern.test(commit_message.split("\n")[0])) {
                 is_success = false
-                commit_state = "failure"
                 message = "Conventional commit prefixes are not allowed."
+                failure_message ??= message
                 break
             }
 
@@ -98,16 +89,16 @@ async function main() {
             // Autosquash doesn't support merge commits.
             if (commit_info.data.parents.length != 1) {
                 is_success = false
-                commit_state = "failure"
                 message = `${short_sha} has ${commit_info.data.parents.length} parents. Please rebase against origin/HEAD.`
+                failure_message ??= message
                 break
             }
 
             // Empty commits that are not merge commits are usually a mistake or a bad rebase.
             if (!commit_info.data.files || commit_info.data.files.length === 0) {
                 is_success = false
-                commit_state = "failure"
                 message = `${short_sha} is an empty commit.`
+                failure_message ??= message
                 break
             }
 
@@ -126,8 +117,8 @@ async function main() {
                 }
 
                 if (number_of_formulae_touched > 1) {
-                    commit_state = "failure"
                     message = `${short_sha} modifies ${number_of_formulae_touched} formulae. Please split your commits according to Homebrew style.`
+                    failure_message ??= message
                 } else if (non_formula_modified) {
                     message = `${short_sha} modifies non-formula files (maintainers must merge manually)`
                 }
@@ -145,13 +136,12 @@ async function main() {
                 // We've already modified this file, or the commit subject doesn't start with the formula name.
                 if (files_touched.includes(file.filename) || !commit_subject.startsWith(formula)) {
                     autosquash = true
-                    commit_state = "failure"
                     message = "Please follow the commit style guidelines, or this pull request will be replaced."
+                    failure_message ??= message
                 }
                 files_touched.push(file.filename)
             } else if (file.filename.startsWith("Casks/")) {
                 message = "Commit modifies cask."
-                target_url = "https://github.com/Homebrew/homebrew-cask/blob/HEAD/CONTRIBUTING.md#style-guide"
 
                 if (!files_touched.includes(file.filename)) {
                     files_touched.push(file.filename)
@@ -160,6 +150,7 @@ async function main() {
                 if (files_touched.length > 1) {
                     is_success = false
                     message = "A pull request must not modify multiple casks."
+                    failure_message ??= message
                 }
             } else {
                 // Autosquash isn't great at modifying commits that don't modify formulae or casks.
@@ -169,19 +160,8 @@ async function main() {
             }
         }
 
-        const head_sha = commits.data[commits.data.length - 1].sha
-        core.debug(`Writing to sha ${head_sha}`)
-
-        await client.rest.repos.createCommitStatus({
-            ...github.context.repo,
-            sha: head_sha,
-            state: commit_state,
-            description: message,
-            context: "Commit style",
-            target_url: target_url
-        })
-
         if (!check_package_commit_format) {
+            if (failure_message) core.setFailed(failure_message)
             return
         }
 
@@ -223,17 +203,21 @@ async function main() {
             updatedLabels.push(autosquash_label);
         }
 
-        // If everything is the same, we're done
-        if (existingLabels.length == updatedLabels.length && existingLabels.every((label, i) => label == updatedLabels[i])) {
-            return
+        // Update PR labels if they changed
+        if (existingLabels.length != updatedLabels.length || !existingLabels.every((label, i) => label == updatedLabels[i])) {
+            try {
+                await client.rest.issues.update({
+                    ...github.context.repo,
+                    issue_number: pull.number,
+                    labels: updatedLabels
+                })
+            } catch (error) {
+                if (!failure_message || !Error.isError(error)) throw error
+                core.warning(error)
+            }
         }
 
-        // Update PR labels
-        await client.rest.issues.update({
-            ...github.context.repo,
-            issue_number: pull.number,
-            labels: updatedLabels
-        })
+        if (failure_message) core.setFailed(failure_message)
     } catch (error) {
         if (!Error.isError(error)) throw error
 
