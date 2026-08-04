@@ -13,7 +13,6 @@ try {
     core.getInput("token"),
     core.getInput("stable"),
     core.getInput("brew-gh-api-token"),
-    core.getInput("setup-sandbox"),
   ])
 } catch (error) {
   if (!Error.isError(error)) throw error
