@@ -31,16 +31,18 @@ jobs:
           - os: ubuntu-latest
             key: docker-root
             stable: false
-            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=root --privileged"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=root"}'
             name: Docker (root)
           - os: ubuntu-latest
             key: docker-linuxbrew
             stable: false
-            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=linuxbrew --privileged"}'
+            container: '{"image": "ghcr.io/homebrew/brew:main", "options": "--user=linuxbrew"}'
             name: Docker (linuxbrew)
           - os: ubuntu-latest
             key: docker-linuxbrew-stable
             stable: true
+            # Stable `brew` still sandboxes with Bubblewrap, which needs
+            # `--privileged` for its user namespaces.
             container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew --privileged"}'
             name: Docker (stable)
     runs-on: ${{ matrix.os }}
@@ -90,12 +92,6 @@ jobs:
         run: brew install-bundler-gems
 
       - run: brew test-bot --only-cleanup-before
-
-      - name: Install bubblewrap
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends bubblewrap
 
       - name: Disable Linux sandbox when unsupported
         if: matrix.key == 'ubuntu-slim'

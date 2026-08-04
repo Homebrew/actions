@@ -8,7 +8,6 @@ DEBUG="${3}"
 TOKEN="${4}"
 STABLE="${5}"
 BREW_GH_API_TOKEN="${6}"
-SETUP_SANDBOX="${7}"
 
 if [[ "${DEBUG}" == "true" ]]; then
     set -x
@@ -333,12 +332,6 @@ fi
 
 # Setup Linux permissions
 if [[ "$RUNNER_OS" = "Linux" ]] && [[ -z "${HOMEBREW_IN_CONTAINER-}" ]] && [[ -z "${GITHUB_ACTIONS_HOMEBREW_SELF_HOSTED-}" ]]; then
-    if [[ "${SETUP_SANDBOX}" == "true" ]]; then
-        # Install Bubblewrap and configure the sandbox sysctls. Pass GITHUB_ACTIONS
-        # through `sudo` so `brew setup-sandbox` installs Bubblewrap when missing.
-        sudo GITHUB_ACTIONS="${GITHUB_ACTIONS-}" "${HOMEBREW_PREFIX}/bin/brew" setup-sandbox
-    fi
-
     # Workaround: Remove fontconfig incompatible fonts provided by the poppler
     # installation in GitHub Actions image
     sudo rm -rf /usr/share/fonts/cmap
