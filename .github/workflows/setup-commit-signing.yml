@@ -29,7 +29,7 @@ jobs:
 
       - name: Configure git user
         id: git-config
-        uses: ./git-user-config/
+        uses: $/git-user-config
         with:
           username: BrewTestBot
 
@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up commit signing
         id: set-up-commit-signing
-        uses: ./setup-commit-signing/
+        uses: $/setup-commit-signing
         with:
           signing_key: ${{ steps.generate-ssh-key.outputs.key }}
 

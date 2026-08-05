@@ -31,11 +31,11 @@ jobs:
         with:
           node-version: '24'
       - name: Configure Git user
-        uses: ./git-user-config/
+        uses: $/git-user-config
         with:
           username: BrewTestBot
       - name: Set up commit signing
-        uses: ./setup-commit-signing/
+        uses: $/setup-commit-signing
         with:
           signing_key: ${{ secrets.BREWTESTBOT_SSH_SIGNING_KEY }}
       - name: Check out pull request
@@ -60,7 +60,7 @@ jobs:
           fi
       - name: Push to pull request
         if: steps.commit.outputs.committed == 'true'
-        uses: ./git-try-push/
+        uses: $/git-try-push
         with:
           token: ${{ secrets.HOMEBREW_GITHUB_PUBLIC_REPO_TOKEN }}
           branch: ${{ steps.checkout.outputs.branch }}

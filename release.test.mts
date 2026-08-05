@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   appendFileSync,
+  existsSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -21,6 +22,10 @@ type ActionMetadata = {
   runs?: {
     steps?: ActionStep[];
   };
+};
+
+type WorkflowMetadata = {
+  jobs?: Record<string, { steps?: ActionStep[] }>;
 };
 
 const REPOSITORY_ROOT = fileURLToPath(new URL(".", import.meta.url));
@@ -224,7 +229,7 @@ test("clamps a future-dated candidate age to zero", (t) => {
   assert.equal(output.release, "true");
 });
 
-test("internal Homebrew/actions dependencies use full commit SHAs", () => {
+test("internal action references use self-repository syntax", () => {
   const actionFiles = git(REPOSITORY_ROOT, "ls-files")
     .split("\n")
     .filter((file) => file.endsWith("/action.yml"));
@@ -237,8 +242,8 @@ test("internal Homebrew/actions dependencies use full commit SHAs", () => {
 
     for (const step of action.runs?.steps ?? []) {
       if (
-        step.uses?.startsWith("Homebrew/actions/") &&
-        !/^Homebrew\/actions\/[^@]+@[0-9a-f]{40}$/.test(step.uses)
+        step.uses?.startsWith("Homebrew/actions/") ||
+        step.uses?.startsWith("./")
       ) {
         invalidReferences.push(`${actionFile}: ${step.uses}`);
       }
@@ -248,38 +253,36 @@ test("internal Homebrew/actions dependencies use full commit SHAs", () => {
   assert.deepEqual(invalidReferences, []);
 });
 
-// Pin freshness is Dependabot's job; requiring pins to match the current tree
-// would force pull requests to repin to their own yet-unmerged commits.
-test("internal Homebrew/actions pins reference reachable commits", () => {
-  const actionFiles = git(REPOSITORY_ROOT, "ls-files")
+test("self-repository references target existing actions", () => {
+  const files = git(REPOSITORY_ROOT, "ls-files")
     .split("\n")
-    .filter((file) => file.endsWith("/action.yml"));
-  const unreachableReferences: string[] = [];
+    .filter(
+      (file) =>
+        file.endsWith("/action.yml") ||
+        (file.startsWith(".github/workflows/") && file.endsWith(".yml")),
+    );
+  const brokenReferences: string[] = [];
 
-  for (const actionFile of actionFiles) {
-    const action = yaml.load(
-      readFileSync(join(REPOSITORY_ROOT, actionFile), "utf8"),
-    ) as ActionMetadata;
-
-    for (const step of action.runs?.steps ?? []) {
-      const match = step.uses?.match(/^Homebrew\/actions\/[^@]+@([0-9a-f]{40})$/);
-      if (!match) continue;
-
-      const ancestor = spawnSync("git", [
-        "-C",
-        REPOSITORY_ROOT,
-        "merge-base",
-        "--is-ancestor",
-        match[1],
-        "HEAD",
-      ]);
-      if (ancestor.status !== 0) {
-        unreachableReferences.push(
-          `${actionFile}: ${step.uses} is not an ancestor of HEAD`,
+  for (const file of files) {
+    const parsed = yaml.load(readFileSync(join(REPOSITORY_ROOT, file), "utf8"));
+    const steps = file.endsWith("/action.yml")
+      ? ((parsed as ActionMetadata).runs?.steps ?? [])
+      : Object.values((parsed as WorkflowMetadata).jobs ?? {}).flatMap(
+          (job) => job.steps ?? [],
         );
+
+    for (const step of steps) {
+      if (!step.uses?.startsWith("$/")) continue;
+
+      const subAction = step.uses.slice("$/".length);
+      if (
+        !/^[a-z][a-z-]*$/.test(subAction) ||
+        !existsSync(join(REPOSITORY_ROOT, subAction, "action.yml"))
+      ) {
+        brokenReferences.push(`${file}: ${step.uses}`);
       }
     }
   }
 
-  assert.deepEqual(unreachableReferences, []);
+  assert.deepEqual(brokenReferences, []);
 });

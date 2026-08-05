@@ -5,3 +5,9 @@ self-hosted-runner:
 # organization. `null` means disabling configuration variables check.
 # Empty array means no configuration variable is allowed.
 config-variables: []
+paths:
+  .github/workflows/**/*.yml:
+    ignore:
+      # actionlint does not yet understand the self-repository (`$/`) syntax:
+      # https://github.blog/changelog/2026-07-30-reference-same-repository-actions-with-self-repository-syntax/
+      - 'specifying action "\$/[^"]+" in invalid format because ref is missing'
