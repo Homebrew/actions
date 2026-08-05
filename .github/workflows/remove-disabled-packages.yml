@@ -34,7 +34,7 @@ jobs:
       image: ghcr.io/homebrew/brew:main
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
+        uses: $/setup-homebrew
         with:
           core: false
           cask: false
@@ -97,7 +97,7 @@ jobs:
 
       - name: Remove disabled packages
         id: remove
-        uses: ./remove-disabled-packages/
+        uses: $/remove-disabled-packages
 
       - name: Verify only the long-disabled formula was removed
         env:

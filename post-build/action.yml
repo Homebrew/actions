@@ -28,7 +28,7 @@ runs:
 
     - name: Failures summary for brew test-bot
       if: always()
-      uses: Homebrew/actions/failures-summary-and-bottle-result@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
+      uses: $/failures-summary-and-bottle-result
       with:
         workdir: ${{ inputs.bottles-directory }}
         result_path: steps_output.txt
@@ -36,7 +36,7 @@ runs:
 
     - name: Output brew linkage result
       if: always()
-      uses: Homebrew/actions/failures-summary-and-bottle-result@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
+      uses: $/failures-summary-and-bottle-result
       with:
         workdir: ${{ inputs.bottles-directory }}
         result_path: linkage_output.txt
@@ -45,7 +45,7 @@ runs:
 
     - name: Output brew bottle result
       if: always()
-      uses: Homebrew/actions/failures-summary-and-bottle-result@fd832223f9f99ebf0244dd20658680e5d4aca049 # 2026.08.03.2
+      uses: $/failures-summary-and-bottle-result
       with:
         workdir: ${{ inputs.bottles-directory }}
         result_path: bottle_output.txt

@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Homebrew
-        uses: ./setup-homebrew/
+        uses: $/setup-homebrew
 
       - name: Ensure empty Homebrew formulae
         run: |
@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache Homebrew prefix with uninstall
         id: cache-homebrew-prefix-install
-        uses: ./cache-homebrew-prefix/
+        uses: $/cache-homebrew-prefix
         with:
           install: wget jq
           uninstall: true
@@ -69,7 +69,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Homebrew
-        uses: ./setup-homebrew/
+        uses: $/setup-homebrew
 
       - name: Ensure empty Homebrew formulae
         run: |
@@ -93,7 +93,7 @@ jobs:
 
       - name: Cache Homebrew prefix from Brewfile with uninstall
         id: cache-homebrew-prefix-brewfile
-        uses: ./cache-homebrew-prefix/
+        uses: $/cache-homebrew-prefix
         with:
           brewfile: true
           uninstall: true

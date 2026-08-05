@@ -44,7 +44,7 @@ jobs:
 
       - name: Set up Ruby
         id: set-up-ruby
-        uses: ./setup-ruby/
+        uses: $/setup-ruby
         with:
           setup-homebrew: true
           portable-ruby: ${{ matrix.portable }}
@@ -73,7 +73,7 @@ jobs:
           fi
 
       - name: Set up Ruby from subdirectory
-        uses: ./setup-ruby/
+        uses: $/setup-ruby
         with:
           working-directory: setup-ruby
 
@@ -103,7 +103,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Ruby for bundler-cache test prep
-        uses: ./setup-ruby/
+        uses: $/setup-ruby
         with:
           setup-homebrew: true
           portable-ruby: ${{ matrix.portable }}
@@ -120,14 +120,14 @@ jobs:
         run: bundle lock
 
       - name: Set up Ruby with Bundler cache
-        uses: ./setup-ruby/
+        uses: $/setup-ruby
         with:
           setup-homebrew: true
           portable-ruby: ${{ matrix.portable }}
           bundler-cache: true
 
       - name: Run setup-ruby again with Bundler cache
-        uses: ./setup-ruby/
+        uses: $/setup-ruby
         with:
           setup-homebrew: true
           portable-ruby: ${{ matrix.portable }}

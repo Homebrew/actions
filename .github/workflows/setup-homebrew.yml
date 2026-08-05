@@ -75,7 +75,7 @@ jobs:
 
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: ./setup-homebrew/
+        uses: $/setup-homebrew
         with:
           stable: ${{ matrix.stable }}
 

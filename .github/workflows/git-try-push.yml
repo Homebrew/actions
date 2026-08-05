@@ -34,7 +34,7 @@ jobs:
           git checkout -
 
       - name: Push
-        uses: ./git-try-push/
+        uses: $/git-try-push
         with:
           remote: local-remote
           branch: test-try-push
