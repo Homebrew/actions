@@ -140,19 +140,7 @@ async function main() {
                     failure_message ??= message
                 }
                 files_touched.push(file.filename)
-            } else if (file.filename.startsWith("Casks/")) {
-                message = "Commit modifies cask."
-
-                if (!files_touched.includes(file.filename)) {
-                    files_touched.push(file.filename)
-                }
-
-                if (files_touched.length > 1) {
-                    is_success = false
-                    message = "A pull request must not modify multiple casks."
-                    failure_message ??= message
-                }
-            } else {
+            } else if (!file.filename.startsWith("Casks/")) {
                 // Autosquash isn't great at modifying commits that don't modify formulae or casks.
                 is_success = false
                 message = `${short_sha} modifies non-formulae or non-cask files (maintainers must merge manually)`

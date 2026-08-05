@@ -455,26 +455,13 @@ describe("check-commit-format", async () => {
     it("preserves the first validation failure message", async () => {
       mockCommits([
         { sha: `${sha.slice(0, -1)}1`, filename: "Formula/foo.rb", message: "Update foo.rb" },
-        { sha: sha, filename: "Casks/bar.rb", message: "bar: update" },
+        { sha: sha, filename: "docs/foo.md", message: "Update docs" },
       ])
       mockLabelUpdate([failureLabel, autosquashLabel])
 
       await assert.rejects(
         loadMain(),
         new Error("Please follow the commit style guidelines, or this pull request will be replaced."),
-      )
-    })
-
-    it("fails when multiple casks are modified", async () => {
-      mockCommits([
-        { sha: `${sha.slice(0, -1)}1`, filename: "Casks/foo.rb", message: "foo: update" },
-        { sha: sha, filename: "Casks/bar.rb", message: "bar: update" },
-      ])
-      mockLabelUpdate([failureLabel])
-
-      await assert.rejects(
-        loadMain(),
-        new Error("A pull request must not modify multiple casks."),
       )
     })
   })
