@@ -41,9 +41,7 @@ jobs:
           - os: ubuntu-latest
             key: docker-linuxbrew-stable
             stable: true
-            # Stable `brew` still sandboxes with Bubblewrap, which needs
-            # `--privileged` for its user namespaces.
-            container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew --privileged"}'
+            container: '{"image": "ghcr.io/homebrew/brew:latest", "options": "--user=linuxbrew"}'
             name: Docker (stable)
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container && fromJSON(matrix.container) || '' }}
