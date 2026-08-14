@@ -46,31 +46,17 @@ async function main() {
 
             const short_sha = commit.sha.substring(0, 10);
             const commit_message = commit_info.data.commit.message
-            const identities = [
-                commit_info.data.commit.author?.name,
-                commit_info.data.commit.author?.email,
-                commit_info.data.commit.committer?.name,
-                commit_info.data.commit.committer?.email,
-            ].filter(Boolean).join("\n")
+            const attributions = [
+                [
+                    commit_info.data.commit.author?.name,
+                    commit_info.data.commit.author?.email,
+                ].filter(Boolean).join(" "),
+                ...(commit_message.match(/^Co-authored-by:.*$/gim) ?? []),
+            ].filter(Boolean)
 
-            if (aiIdentityPattern.test(identities)) {
+            if (attributions.every(attribution => aiIdentityPattern.test(attribution))) {
                 is_success = false
-                message = "AI author or committer attribution is not allowed."
-                failure_message ??= message
-                break
-            }
-
-            const message_lines = commit_message.trimEnd().split(/\r?\n/)
-            let trailer_start = message_lines.length
-            while (trailer_start > 0 &&
-                   (/^[A-Za-z0-9-]+:\s+\S/.test(message_lines[trailer_start - 1]) ||
-                    /^[ \t]+\S/.test(message_lines[trailer_start - 1]))) {
-                trailer_start--
-            }
-            if (trailer_start > 0 && message_lines[trailer_start - 1].trim() === "" &&
-                aiIdentityPattern.test(message_lines.slice(trailer_start).join("\n"))) {
-                is_success = false
-                message = "AI commit trailer attribution is not allowed."
+                message = "Commits must have a human author or co-author."
                 failure_message ??= message
                 break
             }

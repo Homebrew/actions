@@ -10,6 +10,7 @@ describe("check-commit-format", async () => {
   const failureLabel = "failure-label"
   const autosquashLabel = "autosquash-label"
   const ignoreLabel = "ignore-label"
+  const contributor = { name: "Homebrew Contributor", email: "contributor@example.com" }
 
   beforeEach(() => {
     mockInput("token", token)
@@ -66,6 +67,7 @@ describe("check-commit-format", async () => {
         files: [{ filename: "Formula/foo.rb" }],
         commit: {
           message: "foo: some commit",
+          author: contributor,
         }
       })
     })
@@ -154,6 +156,7 @@ describe("check-commit-format", async () => {
         files: [],
         commit: {
           message: "Merge commit",
+          author: contributor,
         }
       })
     })
@@ -262,6 +265,7 @@ describe("check-commit-format", async () => {
         files: [],
         commit: {
           message: "Empty commit",
+          author: contributor,
         }
       })
     })
@@ -333,6 +337,7 @@ describe("check-commit-format", async () => {
         files: [{ filename: "Formula/foo.rb" }],
         commit: {
           message: "Update foo.rb",
+          author: contributor,
         }
       })
     })
@@ -422,6 +427,7 @@ describe("check-commit-format", async () => {
           files: [{ filename: commit.filename }],
           commit: {
             message: commit.message,
+            author: contributor,
           }
         })
       }
@@ -517,56 +523,28 @@ describe("check-commit-format", async () => {
       }
     }
 
-    const contributor = { name: "Homebrew Contributor", email: "contributor@example.com" }
+    const copilot = { name: "Coding Assistant", email: "175728472+Copilot@users.noreply.github.com" }
     const disallowedCommits = [
       {
-        name: "an AI author email",
+        name: "an AI author without a co-author",
         message: "Improve checks",
-        author: { name: "Coding Assistant", email: "175728472+Copilot@users.noreply.github.com" },
+        author: copilot,
         committer: contributor,
-        description: "AI author or committer attribution is not allowed.",
+        description: "Commits must have a human author or co-author.",
       },
       {
-        name: "an AI committer",
+        name: "an AI author with only AI co-authors",
+        message: "Improve checks\n\nCo-authored-by: Claude Code <noreply@anthropic.com>",
+        author: { name: "Codex", email: "noreply@openai.com" },
+        committer: contributor,
+        description: "Commits must have a human author or co-author.",
+      },
+      {
+        name: "a missing author without a co-author",
         message: "Improve checks",
-        author: contributor,
-        committer: { name: "Codex", email: "noreply@openai.com" },
-        description: "AI author or committer attribution is not allowed.",
-      },
-      {
-        name: "an AI commit trailer",
-        message: "Improve checks\n\nCo-authored-by: Coding Assistant <copilot@github.com>",
-        author: contributor,
+        author: { name: "", email: "" },
         committer: contributor,
-        description: "AI commit trailer attribution is not allowed.",
-      },
-      {
-        name: "a generic AI assistant trailer",
-        message: "Improve checks\n\nCo-authored-by: AI Assistant <assistant@example.com>",
-        author: contributor,
-        committer: contributor,
-        description: "AI commit trailer attribution is not allowed.",
-      },
-      {
-        name: "an AI signatory",
-        message: "Improve checks\n\nSigned-off-by: Codex <noreply@openai.com>",
-        author: contributor,
-        committer: contributor,
-        description: "AI commit trailer attribution is not allowed.",
-      },
-      {
-        name: "an assisted-by AI trailer",
-        message: "Improve checks\n\nAssisted-by: Claude Code <noreply@anthropic.com>",
-        author: contributor,
-        committer: contributor,
-        description: "AI commit trailer attribution is not allowed.",
-      },
-      {
-        name: "a co-developed-by AI trailer",
-        message: "Improve checks\n\nCo-developed-by: Gemini CLI <gemini-cli@google.com>",
-        author: contributor,
-        committer: contributor,
-        description: "AI commit trailer attribution is not allowed.",
+        description: "Commits must have a human author or co-author.",
       },
       {
         name: "a conventional commit prefix",
@@ -585,6 +563,38 @@ describe("check-commit-format", async () => {
           commit.committer,
           [{ filename: "README.md" }],
           commit.description,
+        )
+      })
+    }
+
+    const allowedCommits = [
+      {
+        name: "an AI co-author of a human author",
+        message: "Improve checks\n\nCo-authored-by: Claude Code <noreply@anthropic.com>",
+        author: contributor,
+        committer: contributor,
+      },
+      {
+        name: "a human co-author of an AI author",
+        message: `Improve checks\n\nCo-authored-by: ${contributor.name} <${contributor.email}>`,
+        author: copilot,
+        committer: contributor,
+      },
+      {
+        name: "an AI committer of a human author",
+        message: "Improve checks",
+        author: contributor,
+        committer: { name: "Codex", email: "noreply@openai.com" },
+      },
+    ]
+
+    for (const commit of allowedCommits) {
+      it(`allows ${commit.name}`, async () => {
+        await checkCommit(
+          commit.message,
+          commit.author,
+          commit.committer,
+          [{ filename: "README.md" }],
         )
       })
     }
