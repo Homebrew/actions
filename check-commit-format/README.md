@@ -1,8 +1,9 @@
 # Check commit format GitHub Action
 
-An action that rejects conventional commit prefixes and commits that attribute
-authorship or other credit to AI tools. By default, it also checks that package
-commits follow [Homebrew's commit style guidelines](https://docs.brew.sh/Formula-Cookbook#commit).
+An action that rejects conventional commit prefixes and commits that are
+attributed only to AI tools. AI attribution is allowed alongside a human author
+or `Co-authored-by:` co-author. By default, it also checks that package commits
+follow [Homebrew's commit style guidelines](https://docs.brew.sh/Formula-Cookbook#commit).
 
 ## Usage
 
