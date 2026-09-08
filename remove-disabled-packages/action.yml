@@ -15,8 +15,14 @@ runs:
       run: |
         "$GITHUB_ACTION_PATH/../deprecate-master.sh" remove-disabled-packages
 
-    - run: brew ruby "$GITHUB_ACTION_PATH/main.rb"
+    - name: Set up Ruby
+      uses: $/setup-ruby
+      with:
+        portable-ruby: true
+
+    - run: ruby "$GITHUB_ACTION_PATH/main.rb"
       id: remove-packages
       shell: bash
       env:
+        HOMEBREW_NO_INSTALL_FROM_API: 1
         HOMEBREW_NO_AUTO_UPDATE: 1
