@@ -6,6 +6,7 @@ require "English"
 require "fileutils"
 require "json"
 require "open3"
+require "pathname"
 
 # The RemoveDisabledPackages class finds packages that have been disabled over the limit set in Homebrew/brew
 # and creates commits in the local repository to remove them.
