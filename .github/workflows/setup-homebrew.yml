@@ -91,11 +91,9 @@ jobs:
 
       - run: brew test-bot --only-cleanup-before
 
-      - name: Disable Linux sandbox when unsupported
-        if: matrix.key == 'ubuntu-slim'
-        run: echo "HOMEBREW_NO_SANDBOX_LINUX=1" >> "$GITHUB_ENV"
-
       - run: brew test-bot --only-setup
+        env:
+          HOMEBREW_TEST_BOT_IGNORE_DOCTOR_FAILURE: ${{ matrix.key == 'ubuntu-slim' && '1' || null }}
 
       - run: brew info hello
 
