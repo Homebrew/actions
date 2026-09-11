@@ -15,6 +15,7 @@ closing it based on the outcome of a previous step.
     body: Issue body
     labels: label1,label2 # optional
     assignees: user1,user2 # optional
+    type: Bug # optional
     # If true: post `body` as a comment under the issue with the same title, if
     # such an issue is found; otherwise, create a new issue.
     update-existing: ${{ steps.<step-id>.conclusion == 'failure' }}
