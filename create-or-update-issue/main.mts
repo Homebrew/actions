@@ -18,6 +18,7 @@ async function main() {
     const labels = labelsInput ? labelsInput.split(",") : [];
     const assigneesInput = core.getInput("assignees");
     const assignees = assigneesInput ? assigneesInput.split(",") : [];
+    const type = core.getInput("type") || null;
 
     const updateExisting = core.getBooleanInput("update-existing");
     const closeExisting = core.getBooleanInput("close-existing");
@@ -109,6 +110,7 @@ async function main() {
       body,
       labels,
       assignees,
+      type,
     });
     const issueNumber = response.data.number;
     const issueNodeId = response.data.node_id;

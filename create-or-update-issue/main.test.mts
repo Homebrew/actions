@@ -6,6 +6,7 @@ describe("create-issue", async () => {
   const body = "Issue body.\nLorem ipsum dolor sit amet.";
   const labels = "label1,label2";
   const assignees = "assignee1,assignee2";
+  const type = "Bug";
 
   const issueNumber = 12345;
 
@@ -16,6 +17,7 @@ describe("create-issue", async () => {
     mockInput("body", body);
     mockInput("labels", labels);
     mockInput("assignees", assignees);
+    mockInput("type", type);
   });
 
   it("creates an issue", async () => {
@@ -35,6 +37,7 @@ describe("create-issue", async () => {
         body,
         labels: labels.split(","),
         assignees: assignees.split(","),
+        type,
       }),
     }).defaultReplyHeaders({
       "Content-Type": "application/json",

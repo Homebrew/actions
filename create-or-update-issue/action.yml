@@ -25,6 +25,9 @@ inputs:
   assignees:
     description: Comma-separated list of users to assign the issue to
     required: false
+  type:
+    description: The name of the issue type to associate with this issue
+    required: false
   update-existing:
     description: >
       Whether to post `body` as a comment under the issue with the same title,
