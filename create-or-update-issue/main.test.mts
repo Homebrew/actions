@@ -15,12 +15,12 @@ describe("create-issue", async () => {
     mockInput("repository", GITHUB_REPOSITORY);
     mockInput("title", title);
     mockInput("body", body);
+  });
+
+  it("creates an issue with optional inputs", async () => {
     mockInput("labels", labels);
     mockInput("assignees", assignees);
     mockInput("type", type);
-  });
-
-  it("creates an issue", async () => {
     mockInput("update-existing", "false");
     mockInput("close-existing", "false");
 
@@ -38,6 +38,34 @@ describe("create-issue", async () => {
         labels: labels.split(","),
         assignees: assignees.split(","),
         type,
+      }),
+    }).defaultReplyHeaders({
+      "Content-Type": "application/json",
+    }).reply(200, {
+      number: issueNumber,
+    });
+
+    await loadMain();
+  });
+
+  it("creates an issue without optional inputs", async () => {
+    mockInput("update-existing", "false");
+    mockInput("close-existing", "false");
+
+    const mockPool = githubMockPool();
+
+    mockPool.intercept({
+      method: "POST",
+      path: `/repos/${GITHUB_REPOSITORY}/issues`,
+      headers: {
+        Authorization: `token ${token}`,
+      },
+      body: (htmlBody) => util.isDeepStrictEqual(JSON.parse(htmlBody), {
+        title,
+        body,
+        labels: [],
+        assignees: [],
+        type: null,
       }),
     }).defaultReplyHeaders({
       "Content-Type": "application/json",
