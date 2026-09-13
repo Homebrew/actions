@@ -25,8 +25,11 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Check vendored dependencies
+        run: bash .github/scripts/check-node-modules.sh
+
       - name: Run type checking
-        run: npm install && npx tsc
+        run: npm ci --ignore-scripts && npx tsc
 
       - name: Run tests
         run: npm test -- --experimental-test-coverage --test-reporter lcov --test-reporter-destination lcov.info

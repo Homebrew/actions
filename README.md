@@ -31,6 +31,10 @@ That's because we try to maintain one top-level dependency stack for all Actions
 To add a new dependency (because some Action requires it), run `npm install` in root directory of this repository.
 To update dependencies for all Actions at once, one needs to simply run `npm upgrade`, while being in root directory of this repository too.
 
+Production dependencies are committed in `node_modules`. After changing the lockfile,
+run `npm ci --ignore-scripts --omit=dev` and commit the resulting dependency changes.
+The required Node test checks that these files match the lockfile before installing development dependencies.
+
 Workflow names match Actions' directory names, for consistency.
 Particular workflow to test an Action is run only when this Action's directory contents or workflow file are changed.
 In addition to that, all test workflows will run if `package.json` or `package-lock.json` files or `node_modules` directory are changed.
