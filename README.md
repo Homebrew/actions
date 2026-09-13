@@ -34,6 +34,9 @@ To update dependencies for all Actions at once, one needs to simply run `npm upg
 Production dependencies are committed in `node_modules`. After changing the lockfile,
 run `npm ci --ignore-scripts --omit=dev` and commit the resulting dependency changes.
 The required Node test checks that these files match the lockfile before installing development dependencies.
+Dependabot npm PRs receive a vendor update automatically after the Node test completes.
+For other PRs from this repository, dispatch the `Vendor node_modules` workflow with the PR number.
+The updater accepts dependencies from the npm registry only.
 
 Workflow names match Actions' directory names, for consistency.
 Particular workflow to test an Action is run only when this Action's directory contents or workflow file are changed.

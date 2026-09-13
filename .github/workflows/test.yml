@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Test dependency automation
+        run: python3 -B -m unittest discover -s .github/scripts -p 'test_*.py'
+
       - name: Check vendored dependencies
         run: bash .github/scripts/check-node-modules.sh
 
