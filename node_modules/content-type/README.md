@@ -60,8 +60,10 @@ Throws a `TypeError` if the object contains an invalid type or parameter names.
 
 This package exposes the validation functions used by `format`:
 
-- `isTypeValid` Validates the MIME type against RFC 9110.
-- `isTokenValid` Validates a token against RFC 9110 (used for the parameter name).
+- `isTypeValid(str, start?, end?)` Validates the MIME type against RFC 9110.
+- `isTokenValid(str, start?, end?)` Validates a token against RFC 9110 (used for the parameter name).
+
+Passing `start` and `end` allows for validating a subset of a string, instead of using `str#slice`.
 
 ## License
 
