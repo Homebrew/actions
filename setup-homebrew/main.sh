@@ -64,8 +64,14 @@ function install_homebrew {
     esac
 
     ohai "Installing Homebrew to ${HOMEBREW_PREFIX}..."
+    # Pinned and checked before it runs so an installer change cannot reach CI
+    # unreviewed. Update the commit and checksum together.
+    curl -fsSL --output /tmp/homebrew-install.sh \
+        https://raw.githubusercontent.com/Homebrew/install/04dfcac13ead62adfc864260c5d5f9404d145d50/install.sh
+    echo "fa4ed743b4ca38316c8f32fd6623baa5bbb928fd4a47ad9f49c2be78ea833449  /tmp/homebrew-install.sh" | shasum -a 256 -c -
     # NONINTERACTIVE avoids prompts on CI runners.
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 /bin/bash /tmp/homebrew-install.sh
+    rm -f /tmp/homebrew-install.sh
 
     brew_executable="${HOMEBREW_PREFIX}/bin/brew"
     if [[ ! -x "${brew_executable}" ]]; then
