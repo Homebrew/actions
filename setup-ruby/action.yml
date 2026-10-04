@@ -10,7 +10,7 @@ inputs:
     required: false
     default: false
   portable-ruby:
-    description: Use Homebrew portable Ruby (brew ruby) instead of the Ruby formula
+    description: Use Homebrew portable Ruby instead of the Ruby formula
     required: false
     default: false
   bundler-cache:
