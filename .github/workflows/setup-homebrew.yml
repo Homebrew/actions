@@ -88,11 +88,16 @@ jobs:
       - name: Install Homebrew Bundler RubyGems
         if: steps.cache.outputs.cache-hit != 'true'
         run: brew install-bundler-gems
+        env:
+          HOMEBREW_DEVELOPER: 1
 
       - run: brew test-bot --only-cleanup-before
+        env:
+          HOMEBREW_DEVELOPER: 1
 
       - run: brew test-bot --only-setup
         env:
+          HOMEBREW_DEVELOPER: 1
           HOMEBREW_TEST_BOT_IGNORE_DOCTOR_FAILURE: ${{ matrix.key == 'ubuntu-slim' && '1' || null }}
 
       - run: brew info hello

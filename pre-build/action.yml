@@ -32,6 +32,8 @@ runs:
     - run: brew test-bot --only-cleanup-before
       if: fromJson(inputs.cleanup)
       shell: /bin/bash -euo pipefail {0}
+      env:
+        HOMEBREW_DEVELOPER: 1
 
     - name: Set up RubyGems cache
       id: setup-cache
@@ -65,6 +67,8 @@ runs:
         printf '```\n' >> "${GITHUB_STEP_SUMMARY}"
         printf '\n</p>\n</details>\n' >> "$GITHUB_STEP_SUMMARY"
       shell: /bin/bash -euo pipefail {0}
+      env:
+        HOMEBREW_DEVELOPER: 1
 
     - name: Set up bottles directory
       id: setup-bottles
