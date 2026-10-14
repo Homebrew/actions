@@ -1,7 +1,9 @@
 import { deprecateMaster } from "../deprecate-master.mts"
 deprecateMaster("git-try-push")
 import * as core from "@actions/core"
-import { exec } from "@actions/exec"
+import { exec, getExecOutput } from "@actions/exec"
+import { existsSync } from "node:fs"
+import { join } from "node:path"
 
 async function main() {
     try {
@@ -54,15 +56,17 @@ async function main() {
         // Checkout the branch which should be pushed.
         await exec(git, ["checkout", branch])
 
+        let pulled = false
+
         // Loop specified number of tries.
         for (let i = 0; i < tries; i++) {
             try {
                 // Try to push, if successful, then checkout previous branch and just exit.
-                // If force pushing with lease, don't try to force push the first time
-                // in case it's not necessary.
+                // Only force push with lease after a successful pull. A failed
+                // pull can refresh the lease without rebasing our commits.
                 // If force pushing without lease, force push the first time since we've
                 // already decided we don't care about having outdated refs.
-                if (force && ((i > 0) || no_lease))
+                if (force && (pulled || no_lease))
                     await exec(git, ["push", force_flag, remote, refspec])
                 else
                     await exec(git, ["push", remote, refspec])
@@ -74,11 +78,20 @@ async function main() {
                 const delay = 2 ** i
                 await exec("sleep", [delay.toString()])
                 // `git pull` can also fail, so do the same retry procedure here.
+                pulled = false
                 for (let j = 0; j < tries; j++) {
                     try {
                         await exec(git, ["pull", "--rebase", "--autostash", remote, origin_branch])
+                        pulled = true
                         break
                     } catch (error) {
+                        const { stdout } = await getExecOutput(git, ["rev-parse", "--absolute-git-dir"], { silent: true })
+                        if (["rebase-merge", "rebase-apply"].some(state => existsSync(join(stdout.trim(), state)))) {
+                            // A stopped rebase needs intervention. Restore local
+                            // changes and fail instead of retrying from this state.
+                            await exec(git, ["rebase", "--abort"])
+                            throw error
+                        }
                         await exec("sleep", [delay.toString()])
                     }
                 }
