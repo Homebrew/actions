@@ -71,8 +71,8 @@ class TextWrapper {
      *      Append to the last line of truncated text.
      */
 
-    constructor(options = {}) {
-        let {
+    constructor (options = {}) {
+        const {
             width = 70,
             initial_indent = '',
             subsequent_indent = '',
@@ -84,7 +84,7 @@ class TextWrapper {
             break_on_hyphens = true,
             tabsize = 8,
             max_lines = undefined,
-            placeholder=' [...]'
+            placeholder = ' [...]'
         } = options
 
         this.width = width
@@ -105,7 +105,7 @@ class TextWrapper {
     // -- Private methods -----------------------------------------------
     // (possibly useful for subclasses to override)
 
-    _munge_whitespace(text) {
+    _munge_whitespace (text) {
         /*
          *  _munge_whitespace(text : string) -> string
          *
@@ -122,7 +122,7 @@ class TextWrapper {
         return text
     }
 
-    _split(text) {
+    _split (text) {
         /*
          *  _split(text : string) -> [string]
          *
@@ -143,7 +143,7 @@ class TextWrapper {
         return chunks
     }
 
-    _handle_long_word(reversed_chunks, cur_line, cur_len, width) {
+    _handle_long_word (reversed_chunks, cur_line, cur_len, width) {
         /*
          *  _handle_long_word(chunks : [string],
          *                    cur_line : [string],
@@ -181,7 +181,7 @@ class TextWrapper {
         // devoted to the long word that we can't handle right now.
     }
 
-    _wrap_chunks(chunks) {
+    _wrap_chunks (chunks) {
         /*
          *  _wrap_chunks(chunks : [string]) -> [string]
          *
@@ -195,7 +195,7 @@ class TextWrapper {
          *  Whitespace chunks will be removed from the beginning and end of
          *  lines, but apart from that whitespace is preserved.
          */
-        let lines = []
+        const lines = []
         let indent
         if (this.width <= 0) {
             throw Error(`invalid width ${this.width} (must be > 0)`)
@@ -219,7 +219,7 @@ class TextWrapper {
 
             // Start the list of chunks that will make up the current line.
             // cur_len is just the length of all the chunks in cur_line.
-            let cur_line = []
+            const cur_line = []
             let cur_len = 0
 
             // Figure out which static string will prefix this line.
@@ -231,7 +231,7 @@ class TextWrapper {
             }
 
             // Maximum width for this line.
-            let width = this.width - indent.length
+            const width = this.width - indent.length
 
             // First chunk on line is whitespace -- drop it, unless this
             // is the very beginning of the text (ie. no lines started yet).
@@ -240,7 +240,7 @@ class TextWrapper {
             }
 
             while (chunks.length > 0) {
-                let l = chunks[chunks.length - 1].length
+                const l = chunks[chunks.length - 1].length
 
                 // Can at least squeeze this chunk onto the current line.
                 if (cur_len + l <= width) {
@@ -291,7 +291,7 @@ class TextWrapper {
                     }
                     if (!had_break) {
                         if (lines) {
-                            let prev_line = lines[lines.length - 1].trimEnd()
+                            const prev_line = lines[lines.length - 1].trimEnd()
                             if (prev_line.length + this.placeholder.length <=
                                     this.width) {
                                 lines[lines.length - 1] = prev_line + this.placeholder
@@ -308,14 +308,14 @@ class TextWrapper {
         return lines
     }
 
-    _split_chunks(text) {
+    _split_chunks (text) {
         text = this._munge_whitespace(text)
         return this._split(text)
     }
 
     // -- Public interface ----------------------------------------------
 
-    wrap(text) {
+    wrap (text) {
         /*
          *  wrap(text : string) -> [string]
          *
@@ -325,15 +325,15 @@ class TextWrapper {
          *  and all other whitespace characters (including newline) are
          *  converted to space.
          */
-        let chunks = this._split_chunks(text)
+        const chunks = this._split_chunks(text)
         // not implemented in js
-        //if (this.fix_sentence_endings) {
+        // if (this.fix_sentence_endings) {
         //    this._fix_sentence_endings(chunks)
-        //}
+        // }
         return this._wrap_chunks(chunks)
     }
 
-    fill(text) {
+    fill (text) {
         /*
          *  fill(text : string) -> string
          *
@@ -348,7 +348,7 @@ class TextWrapper {
 
 // -- Convenience interface ---------------------------------------------
 
-function wrap(text, options = {}) {
+function wrap (text, options = {}) {
     /*
      *  Wrap a single paragraph of text, returning a list of wrapped lines.
      *
@@ -359,12 +359,12 @@ function wrap(text, options = {}) {
      *  space.  See TextWrapper class for available keyword args to customize
      *  wrapping behaviour.
      */
-    let { width = 70, ...kwargs } = options
-    let w = new TextWrapper(Object.assign({ width }, kwargs))
+    const { width = 70, ...kwargs } = options
+    const w = new TextWrapper(Object.assign({ width }, kwargs))
     return w.wrap(text)
 }
 
-function fill(text, options = {}) {
+function fill (text, options = {}) {
     /*
      *  Fill a single paragraph of text, returning a new string.
      *
@@ -374,17 +374,17 @@ function fill(text, options = {}) {
      *  whitespace characters converted to space.  See TextWrapper class for
      *  available keyword args to customize wrapping behaviour.
      */
-    let { width = 70, ...kwargs } = options
-    let w = new TextWrapper(Object.assign({ width }, kwargs))
+    const { width = 70, ...kwargs } = options
+    const w = new TextWrapper(Object.assign({ width }, kwargs))
     return w.fill(text)
 }
 
 // -- Loosely related functionality -------------------------------------
 
-let _whitespace_only_re = /^[ \t]+$/mg
-let _leading_whitespace_re = /(^[ \t]*)(?:[^ \t\n])/mg
+const _whitespace_only_re = /^[ \t]+$/mg
+const _leading_whitespace_re = /(^[ \t]*)(?:[^ \t\n])/mg
 
-function dedent(text) {
+function dedent (text) {
     /*
      *  Remove any common leading whitespace from every line in `text`.
      *
@@ -402,7 +402,7 @@ function dedent(text) {
     // all lines.
     let margin = undefined
     text = text.replace(_whitespace_only_re, '')
-    let indents = text.match(_leading_whitespace_re) || []
+    const indents = text.match(_leading_whitespace_re) || []
     for (let indent of indents) {
         indent = indent.slice(0, -1)
 
