@@ -41,20 +41,6 @@ async function main() {
       }
     }
 
-    if (content !== null) {
-      file.split("/").slice(0, -1).reduce((parentPath, component) => {
-        const treePath = path.posix.join(parentPath, component);
-
-        tree[treePath] ||= {
-          path: treePath,
-          mode: "040000",
-          type: "tree"
-        }
-
-        return treePath;
-      }, "")
-    }
-
     tree[file] = {
       path: file,
       mode: "100644",
