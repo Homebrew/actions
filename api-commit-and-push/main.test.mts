@@ -72,19 +72,7 @@ describe("api-commit-and-push", async () => {
       sha: blobSha,
     })
 
-    const tree: Array<RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"][number]> = []
-    addedFile.split("/").slice(0, -1).reduce((parentPath, component) => {
-      const treePath = path.posix.join(parentPath, component);
-
-      tree.push({
-        path: treePath,
-        mode: "040000",
-        type: "tree",
-      })
-
-      return treePath;
-    }, "")
-    tree.push(
+    const tree: Array<RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"][number]> = [
       {
         path: addedFile,
         mode: "100644",
@@ -97,7 +85,7 @@ describe("api-commit-and-push", async () => {
         type: "blob",
         sha: null,
       }
-    )
+    ]
 
     mockPool.intercept({
       method: "POST",
