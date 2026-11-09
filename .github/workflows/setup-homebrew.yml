@@ -20,6 +20,12 @@ jobs:
             key: macos
             stable: false
             name: macOS
+          - os: macos-latest
+            key: macos-taps
+            stable: false
+            core: true
+            cask: true
+            name: macOS (core and cask)
           - os: ubuntu-24.04
             key: ubuntu-24
             stable: false
@@ -76,6 +82,15 @@ jobs:
         uses: $/setup-homebrew
         with:
           stable: ${{ matrix.stable }}
+          core: ${{ matrix.core || false }}
+          cask: ${{ matrix.cask || false }}
+
+      - name: Check homebrew/core and homebrew/cask are not shallow
+        if: matrix.core && matrix.cask
+        run: |
+          for tap in homebrew/core homebrew/cask; do
+            test "$(git -C "$(brew --repository "$tap")" rev-parse --is-shallow-repository)" = false
+          done
 
       - name: Cache Homebrew Bundler RubyGems
         id: cache

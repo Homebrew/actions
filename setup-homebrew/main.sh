@@ -311,7 +311,8 @@ else
             git -C "$HOMEBREW_CORE_REPOSITORY" checkout --force -B main origin/HEAD
         else
             ohai "Cloning Homebrew/core..."
-            git_retry clone https://github.com/Homebrew/homebrew-core "${HOMEBREW_CORE_REPOSITORY}"
+            # Blobless rather than shallow: `brew update` refuses shallow clones of homebrew/core and homebrew/cask.
+            git_retry clone --filter=blob:none --single-branch https://github.com/Homebrew/homebrew-core "${HOMEBREW_CORE_REPOSITORY}"
         fi
     fi
 
@@ -325,7 +326,7 @@ else
             git -C "$HOMEBREW_CASK_REPOSITORY" checkout --force -B main origin/HEAD
         else
             ohai "Cloning Homebrew/cask..."
-            git_retry clone https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
+            git_retry clone --filter=blob:none --single-branch https://github.com/Homebrew/homebrew-cask "${HOMEBREW_CASK_REPOSITORY}"
         fi
     fi
 fi
