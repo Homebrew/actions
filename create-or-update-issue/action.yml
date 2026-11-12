@@ -63,10 +63,10 @@ outputs:
     description: >
       One of `created`, `commented`, `unchanged`, `closed`, or `none`;
       indicates the action taken
-  issue_number:
+  number:
     description: >
-      The number of the created, updated, or closed issue; undefined if
-      `outcome` is `none`
+      The number of the created, updated, unchanged, or closed issue;
+      undefined if `outcome` is `none`
   node_id:
     description: >
       The node ID of the created or updated issue, used in GitHub GraphQL API
