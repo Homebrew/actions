@@ -6,11 +6,11 @@ branding:
   color: yellow
 inputs:
   core:
-    description: Update the `homebrew/core` tap.
+    description: Update the `homebrew/core` tap. Use `auto` to update only if already tapped.
     required: false
     default: false
   cask:
-    description: Update the `homebrew/cask` tap.
+    description: Update the `homebrew/cask` tap. Use `auto` to update only if already tapped.
     required: false
     default: false
   debug:

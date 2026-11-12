@@ -30,4 +30,6 @@ This also sets up the variables necessary to cache the gems installed by Homebre
 
 Note you do not need to use the `actions/setup-ruby` or `actions/checkout` steps because this action will install the necessary Ruby for Homebrew and checkout the repository being tested.
 
+The `core` and `cask` inputs default to `false`, skipping updates to `homebrew/core` and `homebrew/cask`. Set either input to `true` to update or clone the tap, or `auto` to update it only if already tapped. A tap being tested is always checked out, regardless of these inputs. The `pre-build` action sets both inputs to `auto`.
+
 By default, `homebrew/brew` is checked out at the latest stable tag for non-`brew`, non-tap repositories, matching standard Homebrew installations. For `brew` and tap repositories, `homebrew/brew` stays on `main` unless `stable: true` is set explicitly.

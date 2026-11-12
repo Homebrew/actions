@@ -7,6 +7,7 @@ import * as yaml from "js-yaml";
 type Step = {
   name?: string;
   run?: string;
+  with?: Record<string, string>;
 };
 
 type Action = {
@@ -59,6 +60,13 @@ function runStep(name: string, env: Record<string, string>, stubs: Record<string
 }
 
 describe("pre-build action", () => {
+  it("uses automatic tap selection in setup-homebrew", () => {
+    assert.deepEqual(actionStep("Set up Homebrew").with, {
+      core: "auto",
+      cask: "auto",
+    });
+  });
+
   it("keys the RubyGems cache by OS on Linux", () => {
     assert.deepEqual(runStep("Set up RubyGems cache", { RUNNER_OS: "Linux" }), {
       cache_key_prefix: "Linux",
