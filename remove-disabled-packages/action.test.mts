@@ -24,6 +24,7 @@ type RunOptions = {
   env?: Record<string, string>;
   files?: string[];
   formulae?: PackageData[];
+  plainFiles?: string[];
 };
 
 type RunResult = {
@@ -31,10 +32,12 @@ type RunResult = {
   fileExists: Record<string, boolean>;
   output: Record<string, string>;
   subjects: string[];
+  summary: string | undefined;
 };
 
 const repository = "Homebrew/homebrew-actions-test-tap";
 const tap = "homebrew/actions-test-tap";
+const serverUrl = "https://github.com";
 
 const action = yaml.load(
   fs.readFileSync(new URL("action.yml", import.meta.url), "utf8"),
@@ -70,12 +73,30 @@ function daysAfter(date: string, days: number): string {
   return formatDate(target);
 }
 
+function parseOutput(contents: string): Record<string, string> {
+  const output: Record<string, string> = {};
+  const lines = contents.split("\n");
+  for (let index = 0; index < lines.length; index++) {
+    const heredoc = lines[index].match(/^([^=]+?)<<(.+)$/);
+    if (heredoc) {
+      const end = lines.indexOf(heredoc[2], index + 1);
+      output[heredoc[1]] = lines.slice(index + 1, end).join("\n");
+      index = end;
+    } else if (lines[index]) {
+      const [name, value] = lines[index].split("=", 2);
+      output[name] = value;
+    }
+  }
+  return output;
+}
+
 function runAction({
   casks = [],
   directories = ["Formula"],
   env = {},
   files = [],
   formulae = [],
+  plainFiles = [],
 }: RunOptions = {}): RunResult {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "remove-disabled-packages-"));
 
@@ -86,6 +107,7 @@ function runAction({
     const caskJson = path.join(directory, "casks.json");
     const formulaJson = path.join(directory, "formulae.json");
     const githubOutput = path.join(directory, "github-output");
+    const stepSummary = path.join(directory, "step-summary");
     const tapDirectory = path.join(directory, "tap");
     const gitEnv = {
       ...process.env,
@@ -103,10 +125,11 @@ function runAction({
     for (const subdirectory of directories) {
       fs.mkdirSync(path.join(tapDirectory, subdirectory), { recursive: true });
     }
-    for (const file of files) {
+    for (const file of [...files, ...plainFiles]) {
       const absolutePath = path.join(tapDirectory, file);
       fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
-      fs.writeFileSync(absolutePath, `${file}\n`);
+      const disable = files.includes(file) ? '  disable! date: "2000-01-01", because: :unmaintained\n' : "";
+      fs.writeFileSync(absolutePath, `# ${file}\n${disable}`);
     }
 
     fs.writeFileSync(formulaJson, JSON.stringify({ formulae }));
@@ -152,6 +175,7 @@ function runAction({
         GITHUB_ACTION_PATH: actionPath,
         GITHUB_OUTPUT: githubOutput,
         GITHUB_REPOSITORY: repository,
+        GITHUB_STEP_SUMMARY: stepSummary,
         PATH: `${bin}:${process.env.PATH}`,
         TAP_DIRECTORY: tapDirectory,
       },
@@ -161,11 +185,8 @@ function runAction({
     const brewCalls = fs.readFileSync(brewLog, "utf8").trimEnd().split("\n")
       .filter(Boolean)
       .map((line) => line.split("\t"));
-    const output = Object.fromEntries(
-      fs.readFileSync(githubOutput, "utf8").trimEnd().split("\n")
-        .filter(Boolean)
-        .map((line) => line.split("=", 2)),
-    );
+    const output = parseOutput(fs.readFileSync(githubOutput, "utf8"));
+    const summary = fs.existsSync(stepSummary) ? fs.readFileSync(stepSummary, "utf8") : undefined;
     const subjects = execFileSync("git", ["-C", tapDirectory, "log", "--format=%s"], {
       encoding: "utf8",
       env: gitEnv,
@@ -174,7 +195,7 @@ function runAction({
       files.map((file) => [file, fs.existsSync(path.join(tapDirectory, file))]),
     );
 
-    return { brewCalls, fileExists, output, subjects };
+    return { brewCalls, fileExists, output, subjects, summary };
   } finally {
     fs.rmSync(directory, { force: true, recursive: true });
   }
@@ -235,9 +256,11 @@ describe("remove-disabled-packages action", () => {
     assert.equal(result.fileExists[recentPath], true);
     assert.equal(result.output["packages-removed"], "true");
     assert.deepEqual(result.subjects, ["old2: remove formula", "old: remove formula", "Add fixtures"]);
+    assert.equal(result.output["partially-disabled-packages"], "");
+    assert.equal(result.summary, undefined);
     assert.deepEqual(result.brewCalls, [
       ["--repository", repository],
-      ["info", "--json=v2", "--formula"],
+      ["info", "--json=v2", "--variations", "--formula", ...["active", "cutoff", "old", "old2", "recent"].map((name) => `${tap}/${name}`)],
     ]);
   });
 
@@ -260,7 +283,7 @@ describe("remove-disabled-packages action", () => {
     assert.deepEqual(result.subjects, ["old-cask: remove cask", "Add fixtures"]);
     assert.deepEqual(result.brewCalls, [
       ["--repository", repository],
-      ["info", "--json=v2", "--cask"],
+      ["info", "--json=v2", "--variations", "--cask", `${tap}/old-cask`],
     ]);
   });
 
@@ -295,6 +318,7 @@ describe("remove-disabled-packages action", () => {
   ] as const) {
     it(`rejects ${description} ruby_source_path`, () => {
       assert.throws(() => runAction({
+        files: ["Formula/unsafe.rb"],
         formulae: [{
           name: "unsafe",
           tap,
@@ -309,6 +333,7 @@ describe("remove-disabled-packages action", () => {
   it("parses non-ASCII brew info under the C locale", () => {
     const result = runAction({
       env: { LC_ALL: "C" },
+      files: ["Formula/café.rb"],
       formulae: [{
         name: "café",
         tap,
@@ -318,5 +343,135 @@ describe("remove-disabled-packages action", () => {
     });
 
     assert.equal(result.output["packages-removed"], "false");
+    assert.deepEqual(result.brewCalls[1], ["info", "--json=v2", "--variations", "--formula", `${tap}/café`]);
+  });
+
+  it("only asks brew about packages that call disable!", () => {
+    const result = runAction({
+      directories: ["Formula", "Casks"],
+      files: ["Formula/b/disabled.rb"],
+      plainFiles: ["Formula/a/plain.rb", "Casks/p/plain-cask.rb"],
+    });
+
+    assert.equal(result.output["packages-removed"], "false");
+    assert.deepEqual(result.brewCalls, [
+      ["--repository", repository],
+      ["info", "--json=v2", "--variations", "--formula", `${tap}/disabled`],
+    ]);
+  });
+
+  it("reports casks disabled on only some supported platforms instead of removing them", () => {
+    const intelPath = "Casks/intel-disabled.rb";
+    const macosPath = "Casks/macos-disabled.rb";
+    const result = runAction({
+      directories: ["Casks"],
+      files: [intelPath, macosPath],
+      casks: [
+        {
+          token: "intel-disabled",
+          tap,
+          disabled: false,
+          disable_date: null,
+          ruby_source_path: intelPath,
+          supported_platforms: ["arm64_tahoe", "tahoe", "x86_64_linux"],
+          variations: {
+            tahoe: { disabled: true, disable_date: monthsAgo(14) },
+            x86_64_linux: { disabled: true, disable_date: monthsAgo(14) },
+          },
+        },
+        {
+          token: "macos-disabled",
+          tap,
+          disabled: true,
+          disable_date: monthsAgo(13),
+          ruby_source_path: macosPath,
+          supported_platforms: ["arm64_tahoe", "tahoe", "arm64_linux", "x86_64_linux"],
+          variations: {
+            arm64_linux: { disabled: false, disable_date: null },
+            x86_64_linux: { disabled: false, disable_date: null },
+          },
+        },
+      ],
+    });
+    const report = [
+      `- \`intel-disabled\` (cask, disabled ${monthsAgo(14)}): [${intelPath}](${serverUrl}/${repository}/blob/HEAD/${intelPath})`,
+      `- \`macos-disabled\` (cask, disabled ${monthsAgo(13)}): [${macosPath}](${serverUrl}/${repository}/blob/HEAD/${macosPath})`,
+    ].join("\n");
+
+    assert.equal(result.fileExists[intelPath], true);
+    assert.equal(result.fileExists[macosPath], true);
+    assert.equal(result.output["packages-removed"], "false");
+    assert.equal(result.output["partially-disabled-packages"], report);
+    assert.equal(result.summary, `### Partially disabled packages\n\n${report}\n`);
+  });
+
+  it("ignores variations for platforms a cask does not support", () => {
+    const caskPath = "Casks/macos-only.rb";
+    const result = runAction({
+      directories: ["Casks"],
+      files: [caskPath],
+      casks: [{
+        token: "macos-only",
+        tap,
+        disabled: true,
+        disable_date: monthsAgo(13),
+        ruby_source_path: caskPath,
+        supported_platforms: ["arm64_tahoe", "tahoe"],
+        variations: {
+          x86_64_linux: { disabled: false, disable_date: null },
+        },
+      }],
+    });
+
+    assert.equal(result.fileExists[caskPath], false);
+    assert.equal(result.output["partially-disabled-packages"], "");
+    assert.deepEqual(result.subjects, ["macos-only: remove cask", "Add fixtures"]);
+  });
+
+  it("keeps packages until every platform has been disabled for long enough", () => {
+    const formulaPath = "Formula/staggered.rb";
+    const result = runAction({
+      files: [formulaPath],
+      formulae: [{
+        name: "staggered",
+        tap,
+        disabled: true,
+        disable_date: monthsAgo(13),
+        ruby_source_path: formulaPath,
+        variations: {
+          sequoia: { disabled: true, disable_date: monthsAgo(15) },
+          x86_64_linux: { disabled: true, disable_date: monthsAgo(2) },
+        },
+      }],
+    });
+
+    assert.equal(result.fileExists[formulaPath], true);
+    assert.equal(
+      result.output["partially-disabled-packages"],
+      `- \`staggered\` (formula, disabled ${monthsAgo(15)}, ${monthsAgo(13)}): ` +
+        `[${formulaPath}](${serverUrl}/${repository}/blob/HEAD/${formulaPath})`,
+    );
+  });
+
+  it("reports formulae disabled only on platforms brew did not run on", () => {
+    const formulaPath = "Formula/macos-disabled.rb";
+    const result = runAction({
+      files: [formulaPath],
+      formulae: [{
+        name: "macos-disabled",
+        tap,
+        disabled: false,
+        disable_date: null,
+        ruby_source_path: formulaPath,
+        variations: {
+          sequoia: { disabled: true, disable_date: monthsAgo(13) },
+          arm64_sequoia: { disabled: true, disable_date: monthsAgo(13) },
+        },
+      }],
+    });
+
+    assert.equal(result.fileExists[formulaPath], true);
+    assert.equal(result.output["packages-removed"], "false");
+    assert.match(result.output["partially-disabled-packages"], /^- `macos-disabled` \(formula, /);
   });
 });

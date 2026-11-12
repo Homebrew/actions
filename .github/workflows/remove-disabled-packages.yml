@@ -88,6 +88,22 @@ jobs:
           end
           RUBY
 
+          # Disabled long enough ago on only one OS, so they should be kept and reported.
+          for os in linux macos; do
+            cat > "${tap_dir}/Formula/disabled-on-${os}.rb" <<RUBY
+          class DisabledOn${os^} < Formula
+            desc "Disabled long enough ago, but only on ${os}"
+            homepage "https://brew.sh"
+            url "https://brew.sh/disabled-on-${os}-1.0.tar.gz"
+            version "1.0"
+
+            on_${os} do
+              disable! date: "2000-01-01", because: :unmaintained
+            end
+          end
+          RUBY
+          done
+
           git -C "${tap_dir}" init --quiet
           git -C "${tap_dir}" add --all
           git -C "${tap_dir}" commit --quiet --message "Add fixture formulae"
@@ -102,12 +118,19 @@ jobs:
         env:
           TAP_DIR: ${{ steps.fixture.outputs.tap-dir }}
           PACKAGES_REMOVED: ${{ steps.remove.outputs.packages-removed }}
+          PARTIALLY_DISABLED: ${{ steps.remove.outputs.partially-disabled-packages }}
         run: |
           [[ "${PACKAGES_REMOVED}" = "true" ]]
 
           [[ ! -f "${TAP_DIR}/Formula/removable.rb" ]]
           [[ -f "${TAP_DIR}/Formula/kept.rb" ]]
           [[ -f "${TAP_DIR}/Formula/active.rb" ]]
+          [[ -f "${TAP_DIR}/Formula/disabled-on-linux.rb" ]]
+          [[ -f "${TAP_DIR}/Formula/disabled-on-macos.rb" ]]
+
+          [[ "$(wc -l <<<"${PARTIALLY_DISABLED}")" -eq 2 ]]
+          grep --quiet --fixed-strings "\`disabled-on-linux\` (formula, disabled 2000-01-01)" <<<"${PARTIALLY_DISABLED}"
+          grep --quiet --fixed-strings "\`disabled-on-macos\` (formula, disabled 2000-01-01)" <<<"${PARTIALLY_DISABLED}"
 
           git_log="$(git -C "${TAP_DIR}" log --format='%s')"
           grep --quiet "removable: remove formula" <<<"${git_log}"
