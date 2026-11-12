@@ -5,6 +5,24 @@ import * as github from "@actions/github";
 
 import type { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
 
+type Client = ReturnType<typeof github.getOctokit>;
+type Issue = RestEndpointMethodTypes["issues"]["listForRepo"]["response"]["data"][number];
+
+const normalize = (text: string) => text.replaceAll("\r\n", "\n").trim();
+
+// The latest text posted by the issue's author: their last comment, or the issue body.
+async function latestPost(client: Client, owner: string, repo: string, issue: Issue) {
+  const author = issue.user?.login;
+  const comments = await client.paginate(client.rest.issues.listComments, {
+    owner,
+    repo,
+    issue_number: issue.number,
+    per_page: 100,
+  });
+  const comment = author ? comments.findLast((comment) => comment.user?.login === author) : undefined;
+  return (comment ? comment.body : issue.body) ?? "";
+}
+
 async function main() {
   try {
     const token = core.getInput("token", { required: true });
@@ -21,6 +39,7 @@ async function main() {
     const type = core.getInput("type") || null;
 
     const updateExisting = core.getBooleanInput("update-existing");
+    const skipIfUnchanged = core.getBooleanInput("skip-if-unchanged");
     const closeExisting = core.getBooleanInput("close-existing");
     const closeFromAuthor = core.getInput("close-from-author");
     const closeComment = core.getInput("close-comment");
@@ -52,6 +71,16 @@ async function main() {
     }
     if (existingIssue) {
       if (updateExisting) {
+        if (skipIfUnchanged &&
+            normalize(await latestPost(client, owner, repo, existingIssue)) === normalize(body)) {
+          core.info(`Existing issue already matches body: ${existingIssue.html_url}`);
+
+          core.setOutput("outcome", "unchanged");
+          core.setOutput("number", existingIssue.number);
+          core.setOutput("node_id", existingIssue.node_id);
+          return;
+        }
+
         const response = await client.rest.issues.createComment({
           owner,
           repo,

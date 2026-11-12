@@ -34,6 +34,13 @@ inputs:
       if such an issue is found; otherwise, create a new issue
     required: false
     default: "false"
+  skip-if-unchanged:
+    description: >
+      If `update-existing` is `true`, don't comment when `body` matches the
+      latest comment by the existing issue's author, or the issue's own body
+      if that author hasn't commented
+    required: false
+    default: "false"
   close-existing:
     description: >
       Whether to close an existing issue with the same title as completed, if
@@ -54,8 +61,8 @@ inputs:
 outputs:
   outcome:
     description: >
-      One of `created`, `commented`, `closed`, or `none`; indicates the action
-      taken
+      One of `created`, `commented`, `unchanged`, `closed`, or `none`;
+      indicates the action taken
   issue_number:
     description: >
       The number of the created, updated, or closed issue; undefined if

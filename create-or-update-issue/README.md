@@ -19,6 +19,9 @@ closing it based on the outcome of a previous step.
     # If true: post `body` as a comment under the issue with the same title, if
     # such an issue is found; otherwise, create a new issue.
     update-existing: ${{ steps.<step-id>.conclusion == 'failure' }}
+    # If true and `update-existing` is true: don't comment if `body` matches the
+    # latest comment by the issue's author (or the issue body if there is none).
+    skip-if-unchanged: false
     # If true: close an existing issue with the same title as completed, if such
     # an issue is found; otherwise, do nothing.
     close-existing: ${{ steps.<step-id>.conclusion == 'success' }}
