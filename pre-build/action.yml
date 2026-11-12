@@ -24,8 +24,8 @@ runs:
       id: set-up-homebrew
       uses: $/setup-homebrew
       with:
-        core: true
-        cask: true
+        core: auto
+        cask: auto
       env:
         HOMEBREW_NO_UPDATE_REPORT_NEW: 1
 

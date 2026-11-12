@@ -295,7 +295,8 @@ else
         cd -
     fi
 
-    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CORE_REPOSITORY}" && "${UPDATE_CORE}" == "true" ]]; then
+    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CORE_REPOSITORY}" &&
+          ( "${UPDATE_CORE}" == "true" || ( "${UPDATE_CORE}" == "auto" && -d "${HOMEBREW_CORE_REPOSITORY}" ) ) ]]; then
         if [[ -d "${HOMEBREW_CORE_REPOSITORY}" ]]; then
             # Migrate linuxbrew-core to homebrew-core
             HOMEBREW_CORE_REPOSITORY_ORIGIN="$(git -C "$HOMEBREW_CORE_REPOSITORY" remote get-url origin 2>/dev/null)"
@@ -315,7 +316,8 @@ else
         fi
     fi
 
-    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" && "${UPDATE_CASK}" == "true" ]]; then
+    if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" &&
+          ( "${UPDATE_CASK}" == "true" || ( "${UPDATE_CASK}" == "auto" && -d "${HOMEBREW_CASK_REPOSITORY}" ) ) ]]; then
         if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
             ohai "Fetching Homebrew/cask..."
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
