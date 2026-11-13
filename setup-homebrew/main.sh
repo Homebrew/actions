@@ -40,6 +40,22 @@ function git_retry {
     retry git "$@"
 }
 
+function setup_shallow_tap {
+    local repository="$HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-${1}"
+
+    if [[ -d "${repository}" ]]; then
+        ohai "Fetching Homebrew/${1}..."
+        git_retry -C "${repository}" -c protocol.allow=always fetch --depth=1 --no-tags origin
+        git -C "${repository}" checkout --force -B main origin/HEAD
+    else
+        ohai "Cloning Homebrew/${1}..."
+        git_retry clone --depth=1 --no-tags "https://github.com/Homebrew/homebrew-${1}" "${repository}"
+    fi
+
+    # Fail immediately if a later command tries to fetch or unshallow this tap.
+    git -C "${repository}" config protocol.allow never
+}
+
 function install_homebrew {
     local brew_executable
 
@@ -296,8 +312,11 @@ else
     fi
 
     if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CORE_REPOSITORY}" &&
-          ( "${UPDATE_CORE}" == "true" || ( "${UPDATE_CORE}" == "auto" && -d "${HOMEBREW_CORE_REPOSITORY}" ) ) ]]; then
-        if [[ -d "${HOMEBREW_CORE_REPOSITORY}" ]]; then
+          ( "${UPDATE_CORE}" == "true" || "${UPDATE_CORE}" == "shallow" ||
+            ( "${UPDATE_CORE}" == "auto" && -d "${HOMEBREW_CORE_REPOSITORY}" ) ) ]]; then
+        if [[ "${UPDATE_CORE}" == "shallow" ]]; then
+            setup_shallow_tap core
+        elif [[ -d "${HOMEBREW_CORE_REPOSITORY}" ]]; then
             # Migrate linuxbrew-core to homebrew-core
             HOMEBREW_CORE_REPOSITORY_ORIGIN="$(git -C "$HOMEBREW_CORE_REPOSITORY" remote get-url origin 2>/dev/null)"
             if [[ "$HOMEBREW_CORE_REPOSITORY_ORIGIN" == "https://github.com/Homebrew/linuxbrew-core" ]]; then
@@ -317,8 +336,11 @@ else
     fi
 
     if [[ "${HOMEBREW_TAP_REPOSITORY-}" != "${HOMEBREW_CASK_REPOSITORY}" &&
-          ( "${UPDATE_CASK}" == "true" || ( "${UPDATE_CASK}" == "auto" && -d "${HOMEBREW_CASK_REPOSITORY}" ) ) ]]; then
-        if [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
+          ( "${UPDATE_CASK}" == "true" || "${UPDATE_CASK}" == "shallow" ||
+            ( "${UPDATE_CASK}" == "auto" && -d "${HOMEBREW_CASK_REPOSITORY}" ) ) ]]; then
+        if [[ "${UPDATE_CASK}" == "shallow" ]]; then
+            setup_shallow_tap cask
+        elif [[ -d "${HOMEBREW_CASK_REPOSITORY}" ]]; then
             ohai "Fetching Homebrew/cask..."
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
             git_retry -C "$HOMEBREW_CASK_REPOSITORY" config fetch.prune true
