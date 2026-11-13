@@ -7,6 +7,12 @@ outputs:
   packages-removed:
     description: Whether any packages were removed or not
     value: ${{steps.remove-packages.outputs.packages-removed}}
+  partially-disabled-packages:
+    description: >
+      Markdown list of packages disabled for more than one year on some
+      platforms but not all; these are not removed and need editing by hand.
+      Empty if there are none.
+    value: ${{steps.remove-packages.outputs.partially-disabled-packages}}
 runs:
   using: composite
   steps:
