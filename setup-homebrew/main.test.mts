@@ -107,10 +107,14 @@ describe("setup-homebrew tap overrides", () => {
       });
     }
 
-    it(`checks out the tested ${tap} tap even with explicit false`, () => {
-      const calls = setupHomebrew("false", "false", [], `Homebrew/homebrew-${tap}`);
-      assert.ok(calls.includes(`remote add origin https://github.com/Homebrew/homebrew-${tap}`));
-      assert.ok(calls.includes("checkout --force -B main FETCH_HEAD"));
-    });
+    for (const mode of ["false", "shallow"]) {
+      it(`checks out the tested ${tap} tap even with explicit ${mode}`, () => {
+        const calls = setupHomebrew(mode, mode, [], `Homebrew/homebrew-${tap}`);
+        assert.ok(calls.includes(`remote add origin https://github.com/Homebrew/homebrew-${tap}`));
+        assert.ok(calls.includes("fetch origin test-sha +refs/heads/*:refs/remotes/origin/*"));
+        assert.ok(calls.includes("checkout --force -B main FETCH_HEAD"));
+        assert.ok(!calls.includes(`-C /Library/Taps/homebrew/homebrew-${tap} config protocol.allow never`));
+      });
+    }
   }
 });
