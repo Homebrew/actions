@@ -1,0 +1,66 @@
+name: Get or create a pull request
+description: Find an open pull request for a pushed branch in the same repository, or open one
+inputs:
+  head:
+    description: Pushed branch in the target repository
+    required: true
+  base:
+    description: Target branch. Omit to find a PR to any base and let gh choose the base on creation.
+    required: false
+  repository:
+    description: Target repository (owner/name)
+    default: ${{ github.repository }}
+    required: false
+  working-directory:
+    description: Local checkout used by gh to fill the PR from commits
+    default: ${{ github.workspace }}
+    required: false
+  read-token:
+    description: GitHub token used to look up the PR
+    default: ${{ github.token }}
+    required: false
+  token:
+    description: GitHub token used to open the PR
+    default: ${{ github.token }}
+    required: false
+  create-if-missing:
+    description: Set to false to look up the PR without opening one
+    default: 'true'
+    required: false
+  title:
+    description: PR title. Omit to fill from commits.
+    required: false
+  body:
+    description: PR body
+    required: false
+  body-file:
+    description: Read the PR body from this file
+    required: false
+  labels:
+    description: Comma-separated labels to apply when opening a PR
+    required: false
+outputs:
+  number:
+    description: Open PR number, or empty when a lookup finds no PR
+    value: ${{ steps.pr.outputs.number }}
+  created:
+    description: Whether this run opened the PR
+    value: ${{ steps.pr.outputs.created }}
+runs:
+  using: composite
+  steps:
+    - id: pr
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GH_REPO: ${{ inputs.repository }}
+        READ_TOKEN: ${{ inputs.read-token }}
+        GH_TOKEN: ${{ inputs.token }}
+        PR_HEAD: ${{ inputs.head }}
+        PR_BASE: ${{ inputs.base }}
+        CREATE_IF_MISSING: ${{ inputs.create-if-missing }}
+        PR_TITLE: ${{ inputs.title }}
+        PR_BODY: ${{ inputs.body }}
+        PR_BODY_FILE: ${{ inputs.body-file }}
+        PR_LABELS: ${{ inputs.labels }}
+      run: bash "$GITHUB_ACTION_PATH/main.sh"
